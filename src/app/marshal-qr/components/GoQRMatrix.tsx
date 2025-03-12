@@ -38,25 +38,12 @@ export default function GoQRMatrix({ phases, initialPhase = 0 }: GoQRMatrixProps
         <p className="text-gray-300">{currentPhase.description}</p>
       </div>
       
-      {/* QR Matrix Grid - Responsive but not too small on desktop */}
-      <div className="bg-white p-4 sm:p-6 md:p-8 rounded-lg shadow-lg">
+      {/* QR Matrix Grid - Significantly larger size */}
+      <div className="bg-white p-4 sm:p-6 md:p-8 rounded-lg shadow-lg w-full max-w-[400px] mx-auto">
         <div 
-          className="grid grid-cols-25 gap-0"
+          className="grid gap-0 aspect-square bg-white p-2 w-full"
           style={{ 
-            gridTemplateColumns: 'repeat(25, minmax(0, 1fr))',
-            width: '100%',
-            maxWidth: '300px',
-            minWidth: '250px',
-            height: 'auto',
-            aspectRatio: '1/1',
-            backgroundColor: 'white',
-            padding: '8px',
-            '@media (min-width: 640px)': {
-              maxWidth: '400px'
-            },
-            '@media (min-width: 768px)': {
-              maxWidth: '500px'
-            }
+            gridTemplateColumns: 'repeat(25, minmax(0, 1fr))'
           }}
         >
           {currentPhase.matrixData.map((row, rowIndex) => 
