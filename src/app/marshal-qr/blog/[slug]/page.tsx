@@ -48,7 +48,13 @@ npx tailwindcss init -p</code></pre>
   }
 };
 
-export default function BlogPostPage({ params }: { params: { slug: string } }) {
+type Props = {
+  params: {
+    slug: string;
+  };
+};
+
+export default function BlogPostPage({ params }: Props) {
   const post = blogPosts[params.slug];
   
   if (!post) {
