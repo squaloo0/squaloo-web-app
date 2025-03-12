@@ -412,7 +412,7 @@ async function debugWithLibrary(text: string): Promise<boolean[][]> {
         errorCorrectionLevel: 'M',
         version: 2,
         maskPattern: 3
-      }, (err, url) => {
+      }, (err) => {
         if (err) {
           console.error('Error generating QR code with library:', err);
           reject(err);
@@ -557,7 +557,7 @@ function printMatrix(matrix: boolean[][]): void {
   
   // Print column numbers
   console.log("   " + Array.from({length: matrix.length}, (_, i) => i % 10).join(" "));
-  console.log("   " + Array.from({length: matrix.length}, (_, i) => "-").join(" "));
+  console.log("   " + Array.from({length: matrix.length}, () => "-").join(" "));
   
   // Print each row with row number
   for (let i = 0; i < matrix.length; i++) {
