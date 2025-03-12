@@ -48,18 +48,17 @@ npx tailwindcss init -p</code></pre>
   }
 };
 
-// Define the params type for generateStaticParams
-type Params = {
-  slug: string;
-};
-
 // Generate static params for all blog posts
-export function generateStaticParams(): Params[] {
+export async function generateStaticParams() {
   return Object.keys(blogPosts).map(slug => ({ slug }));
 }
 
-// Use the correct type for the page component
-export default function BlogPostPage({ params }: { params: Params }) {
+// Use a simpler approach for the page component
+export default function BlogPostPage({ 
+  params 
+}: { 
+  params: { slug: string } 
+}) {
   const post = blogPosts[params.slug];
   
   if (!post) {
