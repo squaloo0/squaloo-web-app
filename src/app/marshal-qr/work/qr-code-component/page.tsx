@@ -1,6 +1,7 @@
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
 import { getQREncodingPhases } from '../../db/qrData';
+import { QREncodingPhase } from '../../db/schema';
 import CodeBlock from '../../components/CodeBlock';
 import Link from 'next/link';
 import GoQRMatrix from '../../components/GoQRMatrix';
@@ -13,20 +14,20 @@ const createMockPhases = () => {
       id: 1,
       name: "Finder Patterns",
       description: "The three finder patterns in the corners help QR readers locate and orient the code.",
-      matrix_data: Array(25).fill(null).map(() => Array(25).fill(false)),
+      matrixData: Array(25).fill(null).map(() => Array(25).fill(false)),
       order: 1
     },
     {
       id: 2,
       name: "Alignment Patterns",
       description: "Alignment patterns help QR readers maintain orientation on larger codes.",
-      matrix_data: Array(25).fill(null).map(() => Array(25).fill(false)),
+      matrixData: Array(25).fill(null).map(() => Array(25).fill(false)),
       order: 2
     }
   ];
   
   // Add finder patterns to the first phase
-  const finderPatternMatrix = [...mockPhases[0].matrix_data];
+  const finderPatternMatrix = [...mockPhases[0].matrixData];
   
   // Top-left finder pattern
   for (let i = 0; i < 7; i++) {
@@ -55,7 +56,7 @@ const createMockPhases = () => {
     }
   }
   
-  mockPhases[0].matrix_data = finderPatternMatrix;
+  mockPhases[0].matrixData = finderPatternMatrix;
   
   // Add alignment pattern to the second phase
   const alignmentPatternMatrix = JSON.parse(JSON.stringify(finderPatternMatrix)); // Deep copy
@@ -69,7 +70,7 @@ const createMockPhases = () => {
     }
   }
   
-  mockPhases[1].matrix_data = alignmentPatternMatrix;
+  mockPhases[1].matrixData = alignmentPatternMatrix;
   
   return mockPhases;
 };
@@ -126,7 +127,7 @@ export default async function QRCodeComponentPage() {
               <Suspense fallback={<div className="flex items-center justify-center h-96">
                 <p className="text-gray-300">Loading encoding phases...</p>
               </div>}>
-                <GoQRMatrix phases={phases} />
+                <GoQRMatrix phases={phases as QREncodingPhase[]} />
               </Suspense>
             </div>
           </div>

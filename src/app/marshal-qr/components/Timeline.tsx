@@ -13,7 +13,7 @@ import 'prismjs/components/prism-json';
 import 'prismjs/components/prism-bash';
 import 'prismjs/components/prism-sql';
 
-type TimelineEvent = {
+export type TimelineEvent = {
   title: string;
   description: string;
   links?: Array<{

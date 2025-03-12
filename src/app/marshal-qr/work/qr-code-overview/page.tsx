@@ -5,6 +5,7 @@ import { Suspense } from 'react';
 import GoQRMatrix from '../../components/GoQRMatrix';
 import Timeline from '../../components/Timeline';
 import { getQREncodingPhases } from '../../db/qrData';
+import { TimelineEvent } from '../../components/Timeline';
 
 // Define a local type for the phases to avoid importing from DB schema
 type Phase = {
@@ -137,8 +138,8 @@ function createMockPhases(): Phase[] {
   return mockPhases;
 }
 
-// Timeline events for the Process section
-const timelineEvents = [
+// Then use the imported type for your data
+const timelineEvents: TimelineEvent[] = [
   {
     title: "Inspiration",
     description: "Watching the Veritasium video featuring Masahiro Hara, the inventor of the QR code. A video discussing the creation of the QR code, the inventor himself and his philosophy inspired my project.",
@@ -404,7 +405,10 @@ export default async function QRCodeOverviewPage() {
   try {
     const fetchedPhases = await getQREncodingPhases();
     if (fetchedPhases && fetchedPhases.length > 0) {
-      phases = fetchedPhases;
+      phases = fetchedPhases.map(phase => ({
+        ...phase,
+        matrixData: phase.matrixData as boolean[][]
+      }));
     } else {
       console.log("No phases found in database, using fallback data");
       phases = createMockPhases();
@@ -486,7 +490,7 @@ export default async function QRCodeOverviewPage() {
             </p>
             
             <h3 className="text-xl font-medium mb-4">Timeline:</h3>
-            <Timeline events={timelineEvents} />
+            <Timeline events={timelineEvents as TimelineEvent[]} />
           </div>
           
           {/* The Why - Updated with image in original alignment but no border */}
