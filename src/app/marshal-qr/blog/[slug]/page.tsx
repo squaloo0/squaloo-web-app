@@ -53,13 +53,13 @@ export async function generateStaticParams() {
   return Object.keys(blogPosts).map(slug => ({ slug }));
 }
 
-// Use a simpler approach for the page component
-export default function BlogPostPage({ 
-  params 
-}: { 
-  params: { slug: string } 
+// Following the solution from Stack Overflow
+export default async function BlogPostPage(props: {
+  params: Promise<{ slug: string }>
 }) {
-  const post = blogPosts[params.slug];
+  const params = await props.params;
+  const slug = params.slug;
+  const post = blogPosts[slug];
   
   if (!post) {
     notFound();
