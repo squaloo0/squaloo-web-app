@@ -39,14 +39,7 @@ export default function PortfolioPage() {
     <>
       <Header />
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-        <HeroSection 
-          title="Think. Create. Design."
-          subtitle="Exploring the intersection of technology, design, and creativity"
-          buttons={[
-            { text: "View My Work", href: "./work" },
-            { text: "Get In Touch", href: "./contact" }
-          ]}
-        />
+        <HeroSection />
         
         {/* Projects section */}
         <section id="projects" className="py-12">
