@@ -1,0 +1,127 @@
+/ / ".../marshal-qr" Route Edit Request Sheet As of 3/9/25 4:00 PM PST
+
+/ / ./ Home Page
+    1. Maintain Heading sections as they are (Featured Projects, Skills & Expertise, About Me, and Get in Touch)
+    2. Update links in hero image to point to ./work and ./contact respectively. 
+    3. Update Featured Projects, replacing portfolio website dummy card w/ .../qr-code-overview route 
+    4. Update Home Page Copy: 
+
+        Hero Image
+            Headline: "Transforming Ideas into Innovative Web Experiences"
+            Button: "View My Work"
+            Button: "Get In Touch"
+
+        Featured Projects
+            Title: Marshal QR Code: A Visual Journey (.../qr-code-component)
+            Description: Explore the intricacies of QR code generation with this interactive visualization, built with Next.js and Drizzle ORM.
+            
+            Title: Marshal QR Code: Project Overview (.../qr-code-overview)
+            Description: Journey with me to better understand computing and design concepts by creating a physical version 2 QR code using a custom made go board and pieces as bits to encode.
+            
+            [Maintain "Mobile App" & "API Service Card] for now
+
+        Skills & Expertise
+            - Full-stack Development (Self Taught) (3/5)
+            - Adobe Experience Manager (5/5)
+            - Salesforce Marketing Cloud (2/5)
+            - SEO (5/5)
+            - MarTech & Automation (4/5)
+            
+		[New Section, same formatting as 'Skills..."] Coding Languages
+			-Python (3/5)
+			-JS (3/5)
+			-Typescript (3/5)
+			-SQL (3/5)
+			-HTML (4/5)
+			-Tailwind CSS (3/5)
+			
+        About Me
+            Headline: Marshal: Curious, Steadfast, and Adaptable 
+            Bio: I'm a self-taught web developer, marketing technology professional, and entrepreneur with a passion for systems and application design, artificial intelligence, and product design. My background in marketing and business development provides me with a unique perspective on how to leverage technology to achieve business goals. I'm excited to continue my journey as a new developer and spearhead/contribute to projects that make a positive impact.
+            - Co-founded and led a boutique digital marketing agency, The Greenrose Agency, specializing in providing comprehensive solutions for SMBs.
+            - Developed and launched "Digital Jumpstart," a program offering bundled digital marketing services tailored to address common SMB needs and drive revenue growth.
+            - Managed omni-channel digital marketing campaigns for clients, including organic and paid search, social media marketing, email marketing, and content marketing.
+            - Currently a MarTech and Automation professional at Pacific Life, starting as a catalyst of our SEO and value-add content strategy. I now focus on leading the automation of key marketing processes, including web data integration and social media lead capture.
+            - I'm currently pursuing my Master's in Integrated Design, Business, and Technology at the USC Iovine and Young Academy to further enhance my skills and knowledge.
+
+        Get in Touch
+            Headline: Let's Connect
+            Description: I'm always eager to collaborate on exciting projects and explore new opportunities. Feel free to reach out to me via email or connect with me on LinkedIn or GitHub
+            Email: marshal.aldophjr@gmail.com
+            LinkedIn: linkedin.com/in/marshalaldoph/
+            GitHub: https://github.com/marshal2093
+            
+/ / ./ .../qr-code-overview
+    1. Maintain the following headings and their subsequent sections: (Project Overview, Implementation Details, and Challenges and Learnings)
+    2. Update "The QR Encoding Process" to reflect the 11 phases featured in .../qrCodeGenerator.ts. Maintain current card formatting.
+    3. The order of headings should be as follows: Main Heading, Project Overview, [Changes Listed Below], Implementation Details, Challenges and Learnings
+    4. Remove "Physical Implementation" section
+    5. Update QR Code Overview Page Copy to include the following headings along side the already established sections that we are keeping: 
+
+        Main Heading Update
+            Headline: Marshal QR Code: Project Overview
+            Headline: A Physical QR Code Built on a Go Board
+            Description: Journey with me to better understand computing and design concepts by creating a physical version 2 QR code using a custom-made go board and pieces as bits to encode.
+           
+      [Insert Project Overview]
+
+        Intro - Why This project?
+            Headline: Design for the People
+            Description: I believe that at the heart of design is creating for people and the world at large. Building with unselfish intent produces the best designs. This project is a testament to that philosophy, using the QR code as a symbol of this idea.
+
+        The Project
+            Headline: The Project
+            Description: This project is a physical representation of a QR code built on a custom-made go board. The board is 27"x27" to provide a border for the "quiet zone" and was built using a CNC router. The QR code is a version 2 code, which means it is 25x25 modules. The QR code encodes the URL "http://squalo.com/marshal-qrcode" using byte encoding with a medium error correction level.
+
+        The Process
+            Headline: The Process
+            Description: The process of creating this QR code was a journey of learning and discovery. I started by learning about the basics of QR codes and how they work. I then used Python to generate the QR code data sequence and error correction codewords. Next, I designed the physical board and had it made by Mahesh, a local business owner with a CNC router. Finally, I encoded the data onto the board using black and white go pieces with the help of visualizations from a Next.js component that uses Drizzle and Neon to house data.
+            Timeline:
+## Timeline Events for React Timeline
+
+1. **Inspiration:**
+    * **Event:** Watching the Veritasium video featuring Masahiro Hara, the inventor of the QR code.
+    * **Description:** A video discussing the creation of the QR code, the inventor himself and his philosophy inspired my project.
+    * **Media:** Include a thumbnail of the video with a link to it.
+
+2. **Learning & Planning:**
+    * **Event:** Researching QR code structure and encoding process.
+    * **Description:** Using a thonky.com tutorial as the foundation, I followed along w/ the guide and researched concepts I needed to learn along the way.
+    * **Media:** Thumbnail + link to thonky.com tutorial.
+
+3. **Data Encoding:**
+    * **Event:** Generating the QR code data sequence and error correction codewords using Python.
+    * **Description:** First utilized python to develop functions to understand data encoding, then refined them once I better understood the theory.
+    * **Media:** <Codeblock> and link /python-utilities route.
+
+4. **Board Design & Fabrication:**
+    * **Event:** Designing the physical board and collaborating with Mahesh for CNC routing.
+    * **Description:** Purchased an actual go board, discovered it was too small. Sought to get a board engraved until I was pointed to Mahesh a small business owner with a 								CNC router and other machinery. We plotted and cut a 25x25 matrix necessary for a v2 QR code.
+    * **Media:**  <Gallery> of images and video.
+
+5. **Physical Implementation:**
+    * **Event:** Encoding the data onto the board using black and white Go pieces.
+    * **Description:** Utilized the qrComponentGenerator.ts file to print the output of the final matrix in the console log. I utilized a screenshot that I marked up in my iPad to 									successfully placing the bits after plotting the phases visually in the component.
+    * **Media:** <Gallery> of images and videos.
+
+6. **Web App Development:**
+    * **Event:** Developing the web app to visualize the QR encoding process.
+    * **Description:** Briefly describe the technologies you used and the challenges you faced in creating the interactive visualization.
+    * **Media:** <anchor link w/ icon> points to "Interactive QR Encoding Phases" heading.
+
+        The Why
+            Headline: The Why
+            Description: I was inspired to create this project after watching a video by Veritasium featuring Masahiro Hara, the inventor of the QR code. In the video, Hara mentions that he did not leverage the patent for the QR code, which allowed it to be proliferated. This resonated with me because of the impact his design has had as a result of that decision.
+            [Embedded YouTube video from Veritasium, will insert after copy]
+
+        The Outcome
+            Headline: The Outcome
+            Description: This project was a challenging but rewarding experience. I learned a lot about QR codes, computer science, and the design process. I also had the opportunity to collaborate with a local business owner and learn about CNC routing. Most importantly, I created a project and piece that reflects my design philosophy and my passion for learning.
+
+        The Next Steps
+            Headline: The Next Steps
+            Description: I plan to continue to expand on my current work with the QR component and DB set up to make this an interactive lesson to engage w/ computing concepts making the creation of a physical board optional. As well as create more projects that combine physical and digital elements. I'm also excited to share my learnings with others and inspire them to create their own projects.
+            [Links to related pages and blog posts, will create following copy]
+
+        Get in Touch
+            [Existing Get in Touch Section] 

@@ -1,0 +1,41 @@
+Title: From Go Board to Grad School: Crafting a Custom QR Code and My Iovine & Young Application Story
+
+Author(s): Marshal, Aether
+
+Introduction:
+
+The journey to apply to the USC Iovine and Young Academy's MS in Integrated Design, Business, and Technology program wasn't just about writing essays; it was about building a tangible representation of my passion for innovation. For my portfolio, I decided to create a custom QR code, not just any QR code, but one physically encoded on a hand-crafted go board. This project became a microcosm of my approach to problem-solving, blending technical ingenuity with a touch of artistic flair.
+
+The Quest for the Perfect Matrix:
+
+It started with a vision: a 25x25 matrix, meticulously carved into a wooden board. But finding someone to bring this vision to life proved more challenging than expected. I visited numerous small engravers, each with their own reasons for declining. Just when I was about to give up, one kind soul pointed me towards Mahesh, a local craftsman with a CNC router. Mahesh's willingness to take on my unconventional project was the first of many serendipitous moments.
+
+Encoding the Digital into the Physical:
+
+With the go board in hand, the real challenge began: encoding my data. I needed to generate codewords using Reed-Solomon error correction, a mathematical concept that, to be honest, felt like navigating a labyrinth. My math skills, honed through years of self-teaching and a healthy dose of persistence, were put to the ultimate test.
+
+Fortunately, my background in full-stack development came to the rescue. I turned to Python, finding its English-like syntax made complex polynomial long division and Galois field calculations surprisingly accessible. With the help of an LLM to refine my code and add error logging, I developed a suite of functions that could accurately encode my data.
+
+However, printing the binary strings and manually placing the bits on the board proved to be an exercise in futility. It would have taken days! I needed a more efficient solution.
+
+Visualizing the Encoding Process:
+
+That's when I decided to build a visualizer. I taught myself React and Next.js, and after a brief (and frustrating) detour into WordPress theme development, I created a component that could map the encoding phases onto the matrix. I integrated a database using Neon and Drizzle, allowing me to store and retrieve the data for each phase.
+
+The visualizer not only accelerated the encoding process but also revealed a critical flaw: my initial URL was too long for the selected QR code configuration. I had chosen a V2 QR code with M error correction and masking pattern 3. Instead of panicking, I reverse-engineered a working code, refining my Python functions to accommodate a shorter URL and byte encoding.
+
+The Application Journey:
+
+This project became more than just a portfolio piece; it became a metaphor for my application journey. Each challenge, each setback, was an opportunity to learn and grow. The essays, the portfolio, the entire application process, was a reflection of my passion for integrated design, business, and technology.
+
+I wrote about failure, not as a deterrent, but as a mirror reflecting my relationship with myself. I shared my entrepreneurial ventures, the highs and lows, and the lessons learned along the way. I articulated my vision for the future, a future where technology empowers individuals and fosters collaboration.
+
+Looking Ahead:
+
+Submitting my application was a moment of culmination, a testament to the countless hours of work, the late nights, and the unwavering belief in my vision. I'm excited about the possibility of joining the Iovine and Young Academy, a community of innovators and dreamers.
+
+This project, this application, has reinforced my belief in the power of interdisciplinary thinking and the transformative potential of technology. I'm eager to continue my journey, to learn, to collaborate, and to contribute to a world where innovation knows no bounds.
+
+Conclusion:
+
+From a simple go board to a complex QR code, this project has been a journey of discovery. And just like the QR code itself, it represents a bridge between the physical and the digital, the tangible and the abstract. It's a testament to the power of perseverance, the beauty of serendipity, and the endless possibilities that arise when passion meets innovation.

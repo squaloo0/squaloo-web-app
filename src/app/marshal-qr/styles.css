@@ -1,0 +1,87 @@
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.8s ease-in-out forwards;
+}
+
+.animate-slideUp {
+  animation: slideUp 0.8s ease-in-out forwards;
+}
+
+.animation-delay-300 {
+  animation-delay: 300ms;
+}
+
+.animation-delay-500 {
+  animation-delay: 500ms;
+}
+
+/* Header mask styling */
+.mask-image {
+  mask-image: linear-gradient(rgba(0,0,0) 25%, rgba(0, 0, 0, 0) 100%);
+  mask-size: 100% 100%;
+}
+
+/* Code block scrollbar styling */
+.code-scrollbar::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.code-scrollbar::-webkit-scrollbar-track {
+  background: rgba(31, 41, 55, 0.5);
+  border-radius: 4px;
+}
+
+.code-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(75, 85, 99, 0.8);
+  border-radius: 4px;
+}
+
+.code-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(107, 114, 128, 0.8);
+}
+
+/* Line numbers for code blocks */
+.line-numbers .line-numbers-rows {
+  border-right: 1px solid rgba(107, 114, 128, 0.4);
+  padding-right: 0.5rem;
+}
+
+/* Media query for small screens */
+@media (max-width: 640px) {
+  
+  
+  /* If you still want to keep the mask rotation for some reason */
+  header .mask-image {
+    /* transform: rotate(180deg); - removing this too */
+    /* bottom: 0; - removing this too */
+  }
+}
+
+/* Timeline scrollbar styling */
+.timeline-scrollbar::-webkit-scrollbar {
+  height: 6px;
+}
+
+.timeline-scrollbar::-webkit-scrollbar-track {
+  background: rgba(31, 41, 55, 0.5);
+  border-radius: 3px;
+}
+
+.timeline-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(75, 85, 99, 0.8);
+  border-radius: 3px;
+}
+
+.timeline-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(107, 114, 128, 0.8);
+} 
