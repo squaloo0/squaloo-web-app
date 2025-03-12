@@ -3,8 +3,16 @@ import Footer from '../../components/Footer';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 
-// This would typically come from a database or CMS
-const blogPosts = {
+// Define the blog post type
+type BlogPost = {
+  title: string;
+  date: string;
+  readTime: string;
+  content: string;
+};
+
+// Define the blog posts with an index signature
+const blogPosts: Record<string, BlogPost> = {
   "getting-started-nextjs-tailwind": {
     title: "Getting Started with Next.js and Tailwind",
     date: "June 15, 2023",
@@ -59,11 +67,13 @@ export default async function BlogPostPage(props: {
 }) {
   const params = await props.params;
   const slug = params.slug;
-  const post = blogPosts[slug];
   
-  if (!post) {
+  // Check if the slug exists in blogPosts
+  if (!(slug in blogPosts)) {
     notFound();
   }
+  
+  const post = blogPosts[slug];
   
   return (
     <>
