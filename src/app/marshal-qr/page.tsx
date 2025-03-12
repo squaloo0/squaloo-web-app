@@ -1,10 +1,7 @@
 import Header from './components/Header';
 import HeroSection from './components/HeroSection';
 import ProjectCard from './components/ProjectCard';
-import SkillsSection from './components/SkillsSection';
 import Footer from './components/Footer';
-import Image from 'next/image';
-
 
 const projects = [
   {
@@ -122,7 +119,7 @@ export default function PortfolioPage() {
           </div>
         </section>
         
-        {/* About section - Fixed icon alignment */}
+        {/* About section */}
         <section id="about" className="py-12">
           <h2 className="text-2xl font-bold mb-8">About Me</h2>
           <div className="flex flex-col md:flex-row gap-8">
@@ -136,14 +133,14 @@ export default function PortfolioPage() {
             <div className="w-full md:w-2/3">
               <h3 className="text-xl font-semibold mb-4">Marshal: Curious, Steadfast, and Adaptable</h3>
               <p className="text-gray-300 mb-4">
-                I'm a self-taught web developer, marketing technology professional, and entrepreneur with a passion for systems and application design, artificial intelligence, and product design. My background in marketing and business development provides me with a unique perspective on how to leverage technology to achieve business goals. I'm excited to continue my journey as a new developer and spearhead/contribute to projects that make a positive impact.
+                I&apos;m a self-taught web developer, marketing technology professional, and entrepreneur with a passion for systems and application design, artificial intelligence, and product design. My background in marketing and business development provides me with a unique perspective on how to leverage technology to achieve business goals. I&apos;m excited to continue my journey as a new developer and spearhead/contribute to projects that make a positive impact.
               </p>
               <ul className="list-disc pl-5 text-gray-300 space-y-2">
                 <li>Co-founded and led a boutique digital marketing agency, The Greenrose Agency, specializing in providing comprehensive solutions for SMBs.</li>
-                <li>Developed and launched "Digital Jumpstart," a program offering bundled digital marketing services tailored to address common SMB needs and drive revenue growth.</li>
+                <li>Developed and launched &quot;Digital Jumpstart,&quot; a program offering bundled digital marketing services tailored to address common SMB needs and drive revenue growth.</li>
                 <li>Managed omni-channel digital marketing campaigns for clients, including organic and paid search, social media marketing, email marketing, and content marketing.</li>
                 <li>Currently a MarTech and Automation professional at Pacific Life, starting as a catalyst of our SEO and value-add content strategy. I now focus on leading the automation of key marketing processes, including web data integration and social media lead capture.</li>
-                <li>I'm currently applying for my Master's in Integrated Design, Business, and Technology at the USC Iovine and Young Academy to further enhance my skills and knowledge.</li>
+                <li>I&apos;m currently applying for my Master&apos;s in Integrated Design, Business, and Technology at the USC Iovine and Young Academy to further enhance my skills and knowledge.</li>
               </ul>
             </div>
           </div>

@@ -1,6 +1,7 @@
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
 import { notFound } from 'next/navigation';
+import Link from 'next/link';
 
 // This would typically come from a database or CMS
 const blogPosts = {
@@ -74,12 +75,12 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
           />
           
           <div className="mt-12 pt-8 border-t border-gray-800">
-            <a href="/marshal-qr/blog" className="text-blue-400 hover:text-blue-300 transition inline-flex items-center">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <Link href="/marshal-qr/blog/" className="text-blue-400 hover:text-blue-300 inline-flex items-center">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
               </svg>
               Back to all posts
-            </a>
+            </Link>
           </div>
         </article>
       </div>

@@ -19,12 +19,12 @@ export default function AboutPage() {
             </div>
             <div className="w-full md:w-2/3">
               <p className="text-xl text-gray-300 mb-6">
-                I'm Marshal Aldoph, a MarTech and Automation professional and self-taught developer.
+                I&apos;m Marshal Aldoph, a MarTech and Automation professional and self-taught developer.
               </p>
               <p className="text-gray-300 mb-4">
-                I'm a self-taught web developer, marketing technology professional, and entrepreneur with a passion for systems and application design, artificial intelligence, and product design. 
+                I&apos;m a self-taught web developer, marketing technology professional, and entrepreneur with a passion for systems and application design, artificial intelligence, and product design. 
                 My background in marketing and business development provides me with a unique perspective on how to leverage technology to achieve business goals. 
-                I'm excited to continue my journey as a new developer and spearhead/contribute to projects that make a positive impact.
+                I&apos;m excited to continue my journey as a new developer and spearhead/contribute to projects that make a positive impact.
               </p>
             </div>
           </div>

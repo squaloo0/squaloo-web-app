@@ -28,12 +28,12 @@ export default function BlogPostPage() {
           <div className="prose prose-lg prose-invert max-w-none">
             <h2 className="text-2xl font-bold text-white mt-8 mb-4">Introduction</h2>
             <p className="text-gray-300 mb-6 leading-relaxed">
-              The journey to apply to the USC Iovine and Young Academy's MS in Integrated Design, Business, and Technology program wasn't just about writing essays; it was about building a tangible representation of my passion for innovation. For my portfolio, I decided to create a custom QR code, not just any QR code, but one physically encoded on a hand-crafted go board. This project became a microcosm of my approach to problem-solving, blending technical ingenuity with a touch of artistic flair.
+              The journey to apply to the USC Iovine and Young Academy&apos;s MS in Integrated Design, Business, and Technology program wasn&apos;t just about writing essays; it was about building a tangible representation of my passion for innovation. For my portfolio, I decided to create a custom QR code, not just any QR code, but one physically encoded on a hand-crafted go board. This project became a microcosm of my approach to problem-solving, blending technical ingenuity with a touch of artistic flair.
             </p>
             
             <h2 className="text-2xl font-bold text-white mt-8 mb-4">The Quest for the Perfect Matrix</h2>
             <p className="text-gray-300 mb-6 leading-relaxed">
-              It started with a vision: a 25x25 matrix, meticulously carved into a wooden board. But finding someone to bring this vision to life proved more challenging than expected. I visited numerous small engravers, each with their own reasons for declining. Just when I was about to give up, one kind soul pointed me towards Mahesh, a local craftsman with a CNC router. Mahesh's willingness to take on my unconventional project was the first of many serendipitous moments.
+              It started with a vision: a 25x25 matrix, meticulously carved into a wooden board. But finding someone to bring this vision to life proved more challenging than expected. I visited numerous small engravers, each with their own reasons for declining. Just when I was about to give up, one kind soul pointed me towards Mahesh, a local craftsman with a CNC router. Mahesh&apos;s willingness to take on my unconventional project was the first of many serendipitous moments.
             </p>
             
             <h2 className="text-2xl font-bold text-white mt-8 mb-4">Encoding the Digital into the Physical</h2>
@@ -49,7 +49,7 @@ export default function BlogPostPage() {
             
             <h2 className="text-2xl font-bold text-white mt-8 mb-4">Visualizing the Encoding Process</h2>
             <p className="text-gray-300 mb-6 leading-relaxed">
-              That's when I decided to build a visualizer. I taught myself React and Next.js, and after a brief (and frustrating) detour into WordPress theme development, I created a component that could map the encoding phases onto the matrix. I integrated a database using Neon and Drizzle, allowing me to store and retrieve the data for each phase.
+              That&apos;s when I decided to build a visualizer. I taught myself React and Next.js, and after a brief (and frustrating) detour into WordPress theme development, I created a component that could map the encoding phases onto the matrix. I integrated a database using Neon and Drizzle, allowing me to store and retrieve the data for each phase.
             </p>
             <p className="text-gray-300 mb-6 leading-relaxed">
               The visualizer not only accelerated the encoding process but also revealed a critical flaw: my initial URL was too long for the selected QR code configuration. I had chosen a V2 QR code with M error correction and masking pattern 3. Instead of panicking, I reverse-engineered a working code, refining my Python functions to accommodate a shorter URL and byte encoding.
@@ -65,15 +65,15 @@ export default function BlogPostPage() {
             
             <h2 className="text-2xl font-bold text-white mt-8 mb-4">Looking Ahead</h2>
             <p className="text-gray-300 mb-6 leading-relaxed">
-              Submitting my application was a moment of culmination, a testament to the countless hours of work, the late nights, and the unwavering belief in my vision. I'm excited about the possibility of joining the Iovine and Young Academy, a community of innovators and dreamers.
+              Submitting my application was a moment of culmination, a testament to the countless hours of work, the late nights, and the unwavering belief in my vision. I&apos;m excited about the possibility of joining the Iovine and Young Academy, a community of innovators and dreamers.
             </p>
             <p className="text-gray-300 mb-6 leading-relaxed">
-              This project, this application, has reinforced my belief in the power of interdisciplinary thinking and the transformative potential of technology. I'm eager to continue my journey, to learn, to collaborate, and to contribute to a world where innovation knows no bounds.
+              This project, this application, has reinforced my belief in the power of interdisciplinary thinking and the transformative potential of technology. I&apos;m eager to continue my journey, to learn, to collaborate, and to contribute to a world where innovation knows no bounds.
             </p>
             
             <h2 className="text-2xl font-bold text-white mt-8 mb-4">Conclusion</h2>
             <p className="text-gray-300 mb-6 leading-relaxed">
-              From a simple go board to a complex QR code, this project has been a journey of discovery. And just like the QR code itself, it represents a bridge between the physical and the digital, the tangible and the abstract. It's a testament to the power of perseverance, the beauty of serendipity, and the endless possibilities that arise when passion meets innovation.
+              From a simple go board to a complex QR code, this project has been a journey of discovery. And just like the QR code itself, it represents a bridge between the physical and the digital, the tangible and the abstract. It&apos;s a testament to the power of perseverance, the beauty of serendipity, and the endless possibilities that arise when passion meets innovation.
             </p>
           </div>
           

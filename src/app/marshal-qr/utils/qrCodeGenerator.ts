@@ -71,14 +71,15 @@ const dataCW = [64, 119, 119, 119, 46, 115, 113, 117, 97, 108, 111, 111, 46, 99,
 const ecCW = [196, 35, 39, 119, 235, 215, 231, 226, 93, 23];
 
 // Helper function to convert codewords to binary sequence
-function convertToBinarySequence(codewords: number[]): boolean[] {
-  const binarySequence: boolean[] = [];
-  for (const codeword of codewords) {
-    const binary = codeword.toString(2).padStart(8, '0');
-    binarySequence.push(...binary.split('').map(bit => bit === '1'));
-  }
-  return binarySequence;
-}
+// Removing unused function or export it if needed elsewhere
+// function convertToBinarySequence(codewords: number[]): boolean[] {
+//   const binarySequence: boolean[] = [];
+//   for (const codeword of codewords) {
+//     const binary = codeword.toString(2).padStart(8, '0');
+//     binarySequence.push(...binary.split('').map(bit => bit === '1'));
+//   }
+//   return binarySequence;
+// }
 
 // Helper function to create a 25x25 matrix filled with false values
 export function createEmptyMatrix(): boolean[][] {
@@ -350,17 +351,15 @@ function addDataAndErrorCorrection(matrix: boolean[][]): boolean[][] {
 }
 
 // Apply mask pattern 3: (row + column) mod 2 == 0
-function applyMask(matrix: boolean[][], pattern: number = 3): boolean[][] {
+function applyMask(matrix: boolean[][]): boolean[][] {
   const result = JSON.parse(JSON.stringify(matrix));
   
   // Apply mask pattern 3: (row + column) mod 2 == 0
-  for (let i = 0; i < matrix.length; i++) {
-    for (let j = 0; j < matrix.length; j++) {
-      // Skip function patterns (finder patterns, separators, timing patterns, etc.)
-      if (isDataModule(i, j, matrix.length)) {
-        // Apply mask pattern 3: (row + column) mod 2 == 0
-        if ((i + j) % 2 === 0) {
-          result[i][j] = !result[i][j];
+  for (let row = 0; row < matrix.length; row++) {
+    for (let col = 0; col < matrix.length; col++) {
+      if (isDataModule(row, col, matrix.length)) {
+        if ((row + col) % 2 === 0) {
+          result[row][col] = !result[row][col];
         }
       }
     }
@@ -370,40 +369,35 @@ function applyMask(matrix: boolean[][], pattern: number = 3): boolean[][] {
 }
 
 // Add format information
-function addFormatInfo(matrix: boolean[][]): boolean[][] {
+function addFormatInformation(matrix: boolean[][]): boolean[][] {
   const result = JSON.parse(JSON.stringify(matrix));
   
-  // Format information for mask pattern 3 with M level error correction
-  // The format information is 15 bits: 101000100100101
-  const formatBits = [true, false, true, false, false, false, true, false, false, true, false, false, true, false, true];
+  // Format information for mask pattern 3 and error correction level M
+  // 101000100100101
+  const formatInfo = [true, false, true, false, false, false, true, false, false, true, false, false, true, false, true];
   
-  // Place format information around the top-left finder pattern
-  let index = 0;
-  // Horizontal part (top)
-  for (let i = 0; i <= 5; i++) {
-    result[8][i] = formatBits[index++];
+  // Place format information around the finder patterns
+  // Top-left horizontal (right to left)
+  for (let j = 0; j < 6; j++) {
+    result[8][j] = formatInfo[j];
   }
-  // Skip the timing pattern at (8,6)
-  index++;
-  result[8][7] = formatBits[6];
-  result[8][8] = formatBits[7];
+  result[8][7] = formatInfo[6];
+  result[8][8] = formatInfo[7];
+  result[7][8] = formatInfo[8];
   
-  // Vertical part (left)
-  for (let i = 7; i >= 0; i--) {
-    if (i !== 6) { // Skip the timing pattern
-      result[i][8] = formatBits[14 - (7 - i)];
-    }
+  // Top-left vertical (bottom to top)
+  for (let index = 0; index < 6; index++) {
+    result[5 - index][8] = formatInfo[index];
   }
   
-  // Place format information around the top-right and bottom-left finder patterns
-  // Top-right
-  for (let i = matrix.length - 1; i >= matrix.length - 8; i--) {
-    result[8][i] = formatBits[matrix.length - 1 - i];
+  // Top-right horizontal
+  for (let index = 0; index < 8; index++) {
+    result[8][matrix.length - 8 + index] = formatInfo[index + 7];
   }
   
-  // Bottom-left
-  for (let i = matrix.length - 7; i < matrix.length; i++) {
-    result[i][8] = formatBits[i - (matrix.length - 7)];
+  // Bottom-left vertical
+  for (let index = 0; index < 7; index++) {
+    result[matrix.length - 7 + index][8] = formatInfo[index + 8];
   }
   
   return result;
@@ -610,7 +604,7 @@ export async function generateQRCodePhases(text: string): Promise<boolean[][][]>
   const maskedMatrix = applyMask(phase9Matrix);
   
   // Phase 11: Add Format Information
-  const finalMatrix = addFormatInfo(maskedMatrix);
+  const finalMatrix = addFormatInformation(maskedMatrix);
   
   try {
     // Get the library-generated QR code for comparison

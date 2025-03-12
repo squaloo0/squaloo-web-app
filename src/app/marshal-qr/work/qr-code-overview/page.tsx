@@ -1,12 +1,10 @@
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
-import GoQRMatrix from '../../components/GoQRMatrix';
 import Link from 'next/link';
-import Timeline from '../../components/Timeline';
-import ImageGallery from '../../components/ImageGallery';
-import { getQREncodingPhases } from '../../db/qrData';
 import { Suspense } from 'react';
-import Image from 'next/image';
+import GoQRMatrix from '../../components/GoQRMatrix';
+import Timeline from '../../components/Timeline';
+import { getQREncodingPhases } from '../../db/qrData';
 
 // Define a local type for the phases to avoid importing from DB schema
 type Phase = {
