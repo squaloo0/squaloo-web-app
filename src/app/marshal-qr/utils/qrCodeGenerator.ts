@@ -70,17 +70,6 @@ export const qrCodePhases = [
 const dataCW = [64, 119, 119, 119, 46, 115, 113, 117, 97, 108, 111, 111, 46, 99, 111, 109];
 const ecCW = [196, 35, 39, 119, 235, 215, 231, 226, 93, 23];
 
-// Helper function to convert codewords to binary sequence
-// Removing unused function or export it if needed elsewhere
-// function convertToBinarySequence(codewords: number[]): boolean[] {
-//   const binarySequence: boolean[] = [];
-//   for (const codeword of codewords) {
-//     const binary = codeword.toString(2).padStart(8, '0');
-//     binarySequence.push(...binary.split('').map(bit => bit === '1'));
-//   }
-//   return binarySequence;
-// }
-
 // Helper function to create a 25x25 matrix filled with false values
 export function createEmptyMatrix(): boolean[][] {
   return Array(25).fill(null).map(() => Array(25).fill(false));
