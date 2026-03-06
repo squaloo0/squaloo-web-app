@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Amak Studios — Sovereign AI for the Physical World",
+  title: "Amak — Sovereign AI for the New Collar Generation",
   description:
-    "A venture studio building offline-first, sovereign AI operating systems for the New Collar workforce.",
+    "Amak is creating the decentralized, gamified bridge between the physical world and the future of AI — Squaloo's first venture.",
 };
 
 export default function AmakStudiosLayout({

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import PillarCard from "@/components/PillarCard";
+import AppFooter from "@/components/AppFooter";
 
 const pillars = [
   {
@@ -51,10 +52,10 @@ const pillars = [
 const tracks = [
   {
     label: "Venture & Architecture",
-    org: "Amak Studios",
+    org: "Amak",
     description:
       "Architecting the \"One Brain, Two Bodies\" protocol — a sovereign AI operating system for the physical workforce. Sovereign Data Lakehouse on PostgreSQL/PgVector stack with 3.7ms retrieval benchmarks.",
-    href: "/amak-studios",
+    href: "/amak",
     external: false,
     metric: "3.7ms retrieval",
   },
@@ -76,11 +77,20 @@ const tracks = [
     external: false,
     metric: "From First Principles",
   },
+  {
+    label: "Edge AI Device",
+    org: "Amak / Project G",
+    description:
+      "Amak's first product and the physical \"first interface\" of the OB2B Protocol. Powered by a Raspberry Pi 5 (8GB), Project G runs a containerized local Postgres + pgvector stack with 384-dimensional Int8-quantized embeddings for fully offline hybrid search. Features voice I/O, push-to-talk LED arcade button, 2.13\" E-Ink display, and secure cloud sync via Cloudflare Tunnel with SHA-256 differential syncing.",
+    href: "/amak",
+    external: false,
+    metric: "Edge AI Prototype",
+  },
 ];
 
 export default function MarshalPage() {
   return (
-    <div className="min-h-screen bg-black text-white font-sans">
+    <div className="min-h-screen bg-[#08090a] text-white font-sans flex flex-col">
 
       {/* Nav */}
       <nav className="fixed top-0 left-0 right-0 z-50 border-b border-neutral-900 bg-black/90 backdrop-blur-sm">
@@ -106,21 +116,28 @@ export default function MarshalPage() {
 
         {/* ── HERO ── */}
         <section className="mb-32">
-          <div className="text-xs text-neutral-600 font-mono tracking-widest uppercase mb-6">
+          <div className="text-xs text-neutral-500 font-mono tracking-widest uppercase mb-6">
             #002 / The-Architect
           </div>
 
-          <h1 className="text-4xl sm:text-5xl font-bold tracking-tight leading-tight mb-8 max-w-3xl">
-            The future of AI is small,{" "}
-            <span className="text-neutral-500">local, and sovereign.</span>
+          <h1 className="text-4xl sm:text-5xl font-bold tracking-tight leading-tight mb-3">
+            Marshal Aldoph
           </h1>
 
+          <p className="text-neutral-400 text-lg font-mono tracking-wide mb-8 max-w-3xl">
+            The future of AI is small,{" "}
+            <span className="text-neutral-500">local, and sovereign.</span>
+          </p>
+
           <p className="text-neutral-400 text-base leading-relaxed max-w-2xl mb-12">
-            Technical Founder and Systems Architect bridging seven years of enterprise
-            data automation with cutting-edge AI research. Currently pursuing an MSIDBT
-            at USC&apos;s Iovine and Young Academy while scaling Amak Studios — a venture
-            studio building sovereign, offline-first AI operating systems for the
-            &ldquo;New Collar&rdquo; workforce.
+            I&apos;m a Technical Founder and Systems Architect bootstrapping Squaloo and
+            its ventures from the ground up — no institutional capital, no shortcuts.
+            Seven years of enterprise systems experience, now translated into product.
+            Amak, our flagship venture, is building sovereign offline-first AI
+            infrastructure for the physical workforce, and it&apos;s already running.
+            I&apos;m currently an MS candidate at USC&apos;s Iovine and Young Academy,
+            and actively seeking venture fellowships and accelerator programs where
+            momentum and first-principles thinking matter more than pedigree.
           </p>
 
           <div className="flex flex-wrap gap-4">
@@ -140,16 +157,32 @@ export default function MarshalPage() {
             >
               Connect on LinkedIn
             </a>
+            <a
+              href="https://github.com/squaloo0"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-6 py-3 border border-[#1400bf] text-[#5688c7] text-sm font-medium tracking-wide hover:bg-[#1400bf] hover:text-white transition-colors"
+            >
+              Squaloo GitHub
+            </a>
+            <a
+              href="https://github.com/marshal2093"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-6 py-3 border border-neutral-800 text-neutral-400 text-sm font-medium tracking-wide hover:border-neutral-600 hover:text-white transition-colors"
+            >
+              GitHub
+            </a>
           </div>
         </section>
 
         {/* ── CAPABILITIES ── */}
         <section id="capabilities" className="mb-32">
-          <div className="flex items-baseline gap-4 mb-10 border-b border-neutral-900 pb-4">
-            <h2 className="text-xs font-mono tracking-widest uppercase text-neutral-500">
+          <div className="flex items-baseline gap-4 mb-10 border-b border-neutral-800 pb-4">
+            <h2 className="text-xs font-mono tracking-widest uppercase text-neutral-400">
               Capabilities
             </h2>
-            <div className="h-px flex-1 bg-neutral-900" />
+            <div className="h-px flex-1 bg-neutral-800" />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -161,26 +194,26 @@ export default function MarshalPage() {
 
         {/* ── PROJECT TRACKS ── */}
         <section id="tracks" className="mb-32">
-          <div className="flex items-baseline gap-4 mb-10 border-b border-neutral-900 pb-4">
-            <h2 className="text-xs font-mono tracking-widest uppercase text-neutral-500">
+          <div className="flex items-baseline gap-4 mb-10 border-b border-neutral-800 pb-4">
+            <h2 className="text-xs font-mono tracking-widest uppercase text-neutral-400">
               Project Tracks
             </h2>
-            <div className="h-px flex-1 bg-neutral-900" />
+            <div className="h-px flex-1 bg-neutral-800" />
           </div>
 
           <div className="space-y-0">
             {tracks.map((track, i) => (
               <div
                 key={i}
-                className="group border-t border-neutral-900 py-8 grid grid-cols-1 md:grid-cols-[1fr_2fr_auto] gap-6 items-start hover:border-neutral-700 transition-colors"
+                className="group border-t border-neutral-800 py-8 grid grid-cols-1 md:grid-cols-[1fr_2fr_auto] gap-6 items-start hover:border-[#1400bf] transition-colors"
               >
                 {/* Label */}
                 <div>
-                  <div className="text-xs font-mono tracking-widest uppercase text-neutral-600 mb-1">
+                  <div className="text-xs font-mono tracking-widest uppercase text-neutral-500 mb-1 group-hover:text-[#5688c7] transition-colors">
                     Track {String(i + 1).padStart(2, "0")}
                   </div>
                   <div className="text-white text-sm font-medium">{track.label}</div>
-                  <div className="text-neutral-600 text-xs mt-0.5">{track.org}</div>
+                  <div className="text-neutral-500 text-xs mt-0.5">{track.org}</div>
                 </div>
 
                 {/* Description */}
@@ -190,13 +223,13 @@ export default function MarshalPage() {
 
                 {/* CTA / Metric */}
                 <div className="flex flex-col items-end gap-3 min-w-[120px]">
-                  <span className="text-xs font-mono text-neutral-600 border border-neutral-800 px-2 py-1">
+                  <span className="text-xs font-mono text-[#5688c7] border border-[#1400bf] px-2 py-1">
                     {track.metric}
                   </span>
                   {track.href && (
                     <Link
                       href={track.href}
-                      className="text-xs text-neutral-500 hover:text-white transition-colors tracking-widest uppercase"
+                      className="text-xs text-[#5688c7] hover:text-white transition-colors tracking-widest uppercase"
                     >
                       View →
                     </Link>
@@ -206,7 +239,7 @@ export default function MarshalPage() {
             ))}
 
             {/* Bottom border on last track */}
-            <div className="border-t border-neutral-900" />
+            <div className="border-t border-neutral-800" />
           </div>
         </section>
 
@@ -219,14 +252,16 @@ export default function MarshalPage() {
             ← Terminal
           </Link>
           <Link
-            href="/amak-studios"
+            href="/amak"
             className="text-neutral-600 text-xs font-mono tracking-widest uppercase hover:text-white transition-colors"
           >
-            Amak Studios →
+            Amak →
           </Link>
         </div>
 
       </div>
+
+      <AppFooter />
     </div>
   );
 }

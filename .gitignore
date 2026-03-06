@@ -43,5 +43,5 @@ next-env.d.ts
 .env.local
 
 # ai
-/.claude
+/claude
 /.goose

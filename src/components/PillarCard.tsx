@@ -10,13 +10,13 @@ export default function PillarCard({ title, proficiency, level, maxLevel, keywor
   const pips = Array.from({ length: maxLevel }, (_, i) => i < level);
 
   return (
-    <div className="border border-neutral-800 p-6 flex flex-col gap-4 hover:border-neutral-600 transition-colors duration-200">
+    <div className="border border-neutral-800 p-6 flex flex-col gap-4 hover:border-[#1400bf] transition-colors duration-200">
       {/* Level pips */}
       <div className="flex gap-1.5">
         {pips.map((filled, i) => (
           <div
             key={i}
-            className={`h-1 w-6 ${filled ? "bg-white" : "bg-neutral-800"}`}
+            className={`h-1 w-6 ${filled ? "bg-[#1400bf]" : "bg-neutral-800"}`}
           />
         ))}
       </div>
@@ -26,7 +26,7 @@ export default function PillarCard({ title, proficiency, level, maxLevel, keywor
         <h3 className="text-white text-sm font-medium tracking-wide leading-snug">
           {title}
         </h3>
-        <p className="text-neutral-600 text-xs mt-1 font-mono tracking-widest uppercase">
+        <p className="text-[#5688c7] text-xs mt-1 font-mono tracking-widest uppercase">
           {proficiency}
         </p>
       </div>
@@ -36,7 +36,7 @@ export default function PillarCard({ title, proficiency, level, maxLevel, keywor
         {keywords.map((kw) => (
           <span
             key={kw}
-            className="text-neutral-500 text-xs border border-neutral-800 px-2 py-0.5 font-mono"
+            className="text-neutral-400 text-xs border border-neutral-700 px-2 py-0.5 font-mono"
           >
             {kw}
           </span>

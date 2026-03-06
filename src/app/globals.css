@@ -1,26 +1,39 @@
 @import "tailwindcss";
+@plugin "@tailwindcss/typography";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #08090a;
+  --foreground: #f6f7eb;
+  --accent-primary: #1400bf;
+  --accent-secondary: #5688c7;
+  --accent-green: #63a375;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-accent: var(--accent-primary);
+  --color-accent-secondary: var(--accent-secondary);
+  --color-accent-green: var(--accent-green);
+  --font-sans: var(--font-mulish);
+  --font-mono: var(--font-roboto-mono);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-mulish), system-ui, sans-serif;
+}
+
+/* Scrollbar for code blocks */
+.code-scrollbar::-webkit-scrollbar {
+  height: 4px;
+  width: 4px;
+}
+.code-scrollbar::-webkit-scrollbar-track {
+  background: #0d0d0d;
+}
+.code-scrollbar::-webkit-scrollbar-thumb {
+  background: #1400bf;
+  border-radius: 2px;
 }

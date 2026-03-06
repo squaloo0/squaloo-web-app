@@ -1,34 +1,28 @@
 export default function HeroSection() {
   return (
-    <section className="py-20 relative overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-b from-blue-900/20 to-transparent z-0"></div>
-      
-      <div className="relative z-10 max-w-4xl mx-auto">
-        <h1 className="text-5xl md:text-6xl font-bold mb-6 animate-fadeIn">
-          Marshal Aldoph
+    <section className="py-16 border-b border-neutral-800">
+      <div className="max-w-4xl mx-auto font-mono">
+        <div className="text-xs tracking-[0.3em] text-neutral-500 uppercase mb-4">
+          Marshal-QR / v1.0 — Archive
+        </div>
+        <h1 className="text-3xl font-bold tracking-tight text-white mb-6">
+          The Work That Got Me In
         </h1>
-        <p className="text-2xl text-gray-300 mb-8 max-w-2xl animate-slideUp">
-        Think. Create. Design.
-        </p>
-        <div className="flex gap-4 animate-fadeIn animation-delay-300">
-          <a 
-            href="/marshal-qr/work" 
-            className="px-6 py-3 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition"
-          >
-            View My Work
-          </a>
-          <a 
-            href="/marshal-qr/contact" 
-            className="px-6 py-3 bg-gray-800 rounded-full hover:bg-gray-700 transition"
-          >
-            Contact Me
-          </a>
+        <div className="space-y-4 text-sm text-neutral-400 leading-relaxed max-w-2xl">
+          <p>
+            This is where it started. Marshal-QR was my first formal portfolio piece — a custom QR code hand-encoded on a go board, built from first principles without a library. I submitted it as part of my application to the USC Iovine and Young Academy&apos;s MS in Integrated Design, Business, and Technology program.
+          </p>
+          <p>
+            It worked. One of my professors mentioned remembering it when reviewing applications. The work was memorable enough to stand on its own, even if the design of this page tells a different story.
+          </p>
+          <p>
+            This route lives on as an archive of v1.0 — intentionally preserved, not revised. When time permits, I plan to rebuild this entirely as an interactive lesson: a step-by-step walkthrough for building your own QR code board from scratch. Until then, browse the work below.
+          </p>
+        </div>
+        <div className="mt-8 text-xs text-neutral-600 tracking-widest uppercase">
+          — Marshal Aldoph, IYA &apos;27
         </div>
       </div>
-      
-      {/* Abstract shapes for visual interest */}
-      <div className="absolute -bottom-16 -right-16 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl"></div>
-      <div className="absolute top-20 -left-16 w-48 h-48 bg-purple-500/10 rounded-full blur-3xl"></div>
     </section>
   );
 } 
