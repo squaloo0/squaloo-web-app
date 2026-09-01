@@ -15,8 +15,9 @@ const robotoMono = Roboto_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Squaloo — Do You",
-  description: "Squaloo means 'Do you' — Projects, products, devices, and models",
+  title: "Squaloo — Own your intelligence",
+  description:
+    "Squaloo makes Solomon: an offline AI teammate that captures retiring veterans' knowledge and hands it to the next technician — cited, on-site, no internet required.",
 };
 
 export default function RootLayout({
