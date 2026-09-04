@@ -12,11 +12,16 @@ const nextConfig: NextConfig = {
     ];
   },
   async rewrites() {
-    return SOLOMON_HOSTS.map((host) => ({
-      source: "/",
-      has: [{ type: "host" as const, value: host }],
-      destination: "/solomon",
-    }));
+    return {
+      // beforeFiles is load-bearing: "/" exists as a real page, and plain
+      // (afterFiles) rewrites only run when nothing on the filesystem
+      // matches — the home page would win and this rule would never fire.
+      beforeFiles: SOLOMON_HOSTS.map((host) => ({
+        source: "/",
+        has: [{ type: "host" as const, value: host }],
+        destination: "/solomon",
+      })),
+    };
   },
 };
 
