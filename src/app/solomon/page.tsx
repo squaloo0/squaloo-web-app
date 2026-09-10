@@ -113,7 +113,7 @@ export default function SolomonPage() {
             ))}
           </div>
           <p className="text-neutral-500 text-sm max-w-3xl leading-relaxed mb-4">
-            Proven live in August 2026: knowledge captured in conversation, synced to the edge,
+            Proven live, August–September 2026: knowledge captured in conversation, synced to the edge,
             the internet cut, and a junior technician&apos;s question answered with citations —
             every number above measured, not estimated.
           </p>
