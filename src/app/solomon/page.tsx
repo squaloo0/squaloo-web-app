@@ -1,6 +1,7 @@
 import Link from "next/link";
 import AppFooter from "@/components/AppFooter";
 import SolomonTranscript from "@/components/SolomonTranscript";
+import VideoEmbed from "@/components/VideoEmbed";
 
 export const metadata = {
   title: "Solomon — by Squaloo",
@@ -142,11 +143,12 @@ export default function SolomonPage() {
             <h2 className="text-xs font-mono tracking-widest uppercase text-neutral-400">The 60-second demo</h2>
             <div className="h-px flex-1 bg-neutral-800" />
           </div>
-          <div className="border border-dashed border-neutral-800 p-12 text-center">
-            <p className="text-neutral-500 text-sm font-mono tracking-widest uppercase">
-              Video landing this week — the transcript above is the live replay in the meantime.
-            </p>
-          </div>
+          <VideoEmbed
+            id="wo8VvI6iR-w"
+            title="Solomon Demo v1.0 — capture, sync, and a cited answer with the Wi-Fi cut"
+            poster="/video/solomon-demo-poster.jpg"
+            caption="Recorded 2026-09-04. Nothing loads from YouTube until you press play."
+          />
         </section>
 
         {/* ── CTA ── */}
