@@ -78,18 +78,26 @@ export default function BuildPage() {
           </div>
         </section>
 
-        <section className="mb-32 grid grid-cols-2 md:grid-cols-4 gap-4">
-          {[
-            { value: "28", label: "pull requests in the four-day sprint" },
-            { value: "0", label: "unreviewed merges — a human gate on every change" },
-            { value: "260+", label: "tests, CI-run on every pull request" },
-            { value: "6", label: "USC engineers credited on the data foundation" },
-          ].map((m) => (
-            <div key={m.label} className="border border-neutral-800 p-6 hover:border-[#63a375] transition-colors">
-              <div className="text-3xl font-bold font-mono text-white mb-2">{m.value}</div>
-              <p className="text-neutral-400 text-xs leading-relaxed">{m.label}</p>
-            </div>
-          ))}
+        <section className="mb-32">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {[
+              { value: "28", label: "pull requests in the four-day sprint" },
+              { value: "0", label: "unreviewed merges — a human gate on every change" },
+              { value: "260+", label: "tests, CI-run on every pull request" },
+              { value: "6", label: "USC engineers credited on the data foundation" },
+            ].map((m) => (
+              <div key={m.label} className="border border-neutral-800 p-6 hover:border-[#63a375] transition-colors">
+                <div className="text-3xl font-bold font-mono text-white mb-2">{m.value}</div>
+                <p className="text-neutral-400 text-xs leading-relaxed">{m.label}</p>
+              </div>
+            ))}
+          </div>
+          <Link
+            href="/measured"
+            className="mt-6 inline-block text-[#5688c7] text-sm font-mono tracking-widest uppercase hover:text-white transition-colors"
+          >
+            The product&apos;s own scorecard, failures included →
+          </Link>
         </section>
 
         <section className="border border-neutral-800 p-10">

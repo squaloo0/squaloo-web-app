@@ -112,10 +112,17 @@ export default function SolomonPage() {
               </div>
             ))}
           </div>
-          <p className="text-neutral-500 text-sm max-w-3xl leading-relaxed mb-10">
+          <p className="text-neutral-500 text-sm max-w-3xl leading-relaxed mb-4">
             Proven live in August 2026: knowledge captured in conversation, synced to the edge,
             the internet cut, and a junior technician&apos;s question answered with citations —
             every number above measured, not estimated.
+          </p>
+          <p className="text-neutral-500 text-sm max-w-3xl leading-relaxed mb-10">
+            We publish the full scorecard — including the questions Solomon still gets wrong, dated
+            and linked to the fix.{" "}
+            <Link href="/measured" className="text-[#5688c7] hover:text-white transition-colors">
+              See the measurements →
+            </Link>
           </p>
           <div className="space-y-4">
             {guarantees.map((g) => (
