@@ -4,7 +4,7 @@ import AppFooter from "@/components/AppFooter";
 export const metadata = {
   title: "The Build — Squaloo",
   description:
-    "How one founder, a USC capstone team, and four AI engineering agents shipped a working offline AI system — 42 reviewed pull requests in four days.",
+    "How one founder, a USC capstone team, and four AI engineering agents shipped a working offline AI system — 28 reviewed pull requests in four days.",
 };
 
 const timeline = [
@@ -16,7 +16,7 @@ const timeline = [
   {
     date: "AUG 15 — 19, 2026",
     title: "The sprint — v0.1 in four days",
-    text: "One founder directing four AI engineering agents (core, comms, devops, data), each with a written charter, its own isolated git worktree, and a human review gate on every change. 42 pull requests, CI-tested, zero unreviewed merges. The result passed a six-beat live verification: capture, upload, sync, cited offline answer, a deliberate concurrency stress, and two guard checks.",
+    text: "One founder directing four AI engineering agents (core, comms, devops, data), each with a written charter, its own isolated git worktree, and a human review gate on every change. 28 pull requests, CI-tested, zero unreviewed merges. The result passed a six-beat live verification: capture, upload, sync, cited offline answer, a deliberate concurrency stress, and two guard checks.",
   },
   {
     date: "THE SYSTEM",
@@ -26,7 +26,7 @@ const timeline = [
   {
     date: "NOW",
     title: "v1.0 — out of the shadows",
-    text: "The product surface (interactive answer cards, one-command install), the Project G edge hardware (Raspberry Pi 5 + a 40-TOPS NPU), and the first design partner conversations. Solomon's numbers to date: ~7-second cited answers, fully offline, under 6GB.",
+    text: "The product surface (interactive answer cards, one-command install), the Project G edge hardware (Raspberry Pi 5 + a 40-TOPS NPU), and the first design partner conversations. Solomon's numbers to date: 47 pull requests merged since the sprint began, cited answers as fast as 7 seconds warm (median 7.5s across 14 runs), fully offline, under 6GB.",
   },
 ];
 
@@ -78,18 +78,26 @@ export default function BuildPage() {
           </div>
         </section>
 
-        <section className="mb-32 grid grid-cols-2 md:grid-cols-4 gap-4">
-          {[
-            { value: "42", label: "pull requests in the four-day sprint" },
-            { value: "0", label: "unreviewed merges — a human gate on every change" },
-            { value: "260+", label: "tests, CI-run on every pull request" },
-            { value: "6", label: "USC engineers credited on the data foundation" },
-          ].map((m) => (
-            <div key={m.label} className="border border-neutral-800 p-6 hover:border-[#63a375] transition-colors">
-              <div className="text-3xl font-bold font-mono text-white mb-2">{m.value}</div>
-              <p className="text-neutral-400 text-xs leading-relaxed">{m.label}</p>
-            </div>
-          ))}
+        <section className="mb-32">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {[
+              { value: "28", label: "pull requests in the four-day sprint" },
+              { value: "0", label: "unreviewed merges — a human gate on every change" },
+              { value: "260+", label: "tests, CI-run on every pull request" },
+              { value: "6", label: "USC engineers credited on the data foundation" },
+            ].map((m) => (
+              <div key={m.label} className="border border-neutral-800 p-6 hover:border-[#63a375] transition-colors">
+                <div className="text-3xl font-bold font-mono text-white mb-2">{m.value}</div>
+                <p className="text-neutral-400 text-xs leading-relaxed">{m.label}</p>
+              </div>
+            ))}
+          </div>
+          <Link
+            href="/measured"
+            className="mt-6 inline-block text-[#5688c7] text-sm font-mono tracking-widest uppercase hover:text-white transition-colors"
+          >
+            The product&apos;s own scorecard, failures included →
+          </Link>
         </section>
 
         <section className="border border-neutral-800 p-10">

@@ -139,7 +139,7 @@ export default function Home() {
           </div>
           <p className="text-neutral-400 text-base leading-relaxed max-w-3xl mb-6">
             One founder. Four AI engineering agents. A human review gate on every change —
-            <span className="text-white font-mono"> 42 pull requests in four days</span>, CI-tested and measured.
+            <span className="text-white font-mono"> 28 pull requests in four days</span>, CI-tested and measured.
             The way Squaloo builds is part of what Squaloo sells.
           </p>
           <Link href="/build" className="text-[#5688c7] text-sm font-mono tracking-widest uppercase hover:text-white transition-colors">

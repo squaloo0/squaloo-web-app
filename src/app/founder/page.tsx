@@ -60,10 +60,10 @@ const tracks = [
     label: "Venture & Architecture",
     org: "Squaloo / Solomon",
     description:
-      "Founder and architect of Solomon — an offline-first AI teammate for industrial facilities, built on the One Brain, Two Bodies protocol and a Sovereign Data Lakehouse. Proven live August 2026: cited answers in ~7 seconds, fully offline, under 6GB.",
+      "Founder and architect of Solomon — an offline-first AI teammate for industrial facilities, built on the One Brain, Two Bodies protocol and a Sovereign Data Lakehouse. Proven live August 2026: cited answers as fast as 7 seconds warm, fully offline, under 6GB.",
     href: "/solomon",
     external: false,
-    metric: "~7s cited answers",
+    metric: "~7s warm, cited",
   },
   {
     label: "Hardware & Prototyping",

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import AppFooter from "@/components/AppFooter";
 import SolomonTranscript from "@/components/SolomonTranscript";
+import VideoEmbed from "@/components/VideoEmbed";
 
 export const metadata = {
   title: "Solomon — by Squaloo",
@@ -111,10 +112,17 @@ export default function SolomonPage() {
               </div>
             ))}
           </div>
-          <p className="text-neutral-500 text-sm max-w-3xl leading-relaxed mb-10">
-            Proven live in August 2026: knowledge captured in conversation, synced to the edge,
+          <p className="text-neutral-500 text-sm max-w-3xl leading-relaxed mb-4">
+            Proven live, August–September 2026: knowledge captured in conversation, synced to the edge,
             the internet cut, and a junior technician&apos;s question answered with citations —
             every number above measured, not estimated.
+          </p>
+          <p className="text-neutral-500 text-sm max-w-3xl leading-relaxed mb-10">
+            We publish the full scorecard — including the questions Solomon still gets wrong, dated
+            and linked to the fix.{" "}
+            <Link href="/measured" className="text-[#5688c7] hover:text-white transition-colors">
+              See the measurements →
+            </Link>
           </p>
           <div className="space-y-4">
             {guarantees.map((g) => (
@@ -142,11 +150,12 @@ export default function SolomonPage() {
             <h2 className="text-xs font-mono tracking-widest uppercase text-neutral-400">The 60-second demo</h2>
             <div className="h-px flex-1 bg-neutral-800" />
           </div>
-          <div className="border border-dashed border-neutral-800 p-12 text-center">
-            <p className="text-neutral-500 text-sm font-mono tracking-widest uppercase">
-              Video landing this week — the transcript above is the live replay in the meantime.
-            </p>
-          </div>
+          <VideoEmbed
+            id="wo8VvI6iR-w"
+            title="Solomon Demo v1.0 — capture, sync, and a cited answer with the Wi-Fi cut"
+            poster="/video/solomon-demo-poster.jpg"
+            caption="Recorded 2026-09-04. Nothing loads from YouTube until you press play."
+          />
         </section>
 
         {/* ── CTA ── */}
