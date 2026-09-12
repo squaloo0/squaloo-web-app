@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function AppFooter() {
   return (
     <footer className="border-t border-neutral-900 bg-[#08090a]">
@@ -47,6 +49,23 @@ export default function AppFooter() {
             LinkedIn
           </span>
         </a>
+
+        {/* Site sections. The devlog and the Measured page are the two places
+            claims on this site are backed up, so they belong everywhere. */}
+        <div className="flex items-center gap-6">
+          <Link
+            href="/devlog"
+            className="text-neutral-600 hover:text-white transition-colors text-xs font-mono tracking-widest uppercase"
+          >
+            Devlog
+          </Link>
+          <Link
+            href="/measured"
+            className="text-neutral-600 hover:text-white transition-colors text-xs font-mono tracking-widest uppercase"
+          >
+            Measured
+          </Link>
+        </div>
 
       </div>
     </footer>
