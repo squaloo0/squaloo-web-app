@@ -3,7 +3,7 @@ title: "The video that doesn't phone home"
 date: "2026-09-11"
 summary: "We put a 60-second demo on our product page. It contacts YouTube only after you press play — because a page arguing that your data should stay in your building has no business handing you to Google before you've asked for anything."
 author: "Squaloo"
-status: "draft"
+status: "published"
 ---
 
 We just put a 60-second demo video on our product page. It took about forty minutes longer than pasting in an embed code, and the reason is the most Squaloo thing we've done all month.
