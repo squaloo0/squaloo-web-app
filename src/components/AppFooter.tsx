@@ -54,6 +54,12 @@ export default function AppFooter() {
             claims on this site are backed up, so they belong everywhere. */}
         <div className="flex items-center gap-6">
           <Link
+            href="/roadmap"
+            className="text-neutral-600 hover:text-white transition-colors text-xs font-mono tracking-widest uppercase"
+          >
+            Roadmap
+          </Link>
+          <Link
             href="/devlog"
             className="text-neutral-600 hover:text-white transition-colors text-xs font-mono tracking-widest uppercase"
           >
