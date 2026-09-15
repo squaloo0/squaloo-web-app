@@ -56,12 +56,12 @@ export const currentGate: Gate = {
       status: "met",
     },
     {
-      title: "It runs offline on a $200 computer, and a visitor's phone can use it",
+      title: "It runs offline on a $200 computer, and a visitor can use it from their own phone",
       detail:
-        "The whole system installs and runs on a single-board computer with no internet. The board then broadcasts its own Wi-Fi, so a visitor joins from their own phone and uses it with no internet in the room.",
+        "The engine installs and runs on a single-board computer with no internet, proven by a measurement taken on that machine rather than inferred from a bigger one. The device then serves its own page: a visitor joins the Wi-Fi it broadcasts, opens the page, asks a question, and watches the sources assemble before the answer arrives — no login, nothing to install.",
       status: "in-progress",
       outstanding:
-        "The offline install on the board is done. The visitor's-phone demo, where the board broadcasts its own network, is still being built.",
+        "The offline engine on the board is done and measured. The page the visitor reads, and the device broadcasting its own Wi-Fi, are being built now.",
     },
     {
       title: "The optional cloud half works end to end, and is written down",
