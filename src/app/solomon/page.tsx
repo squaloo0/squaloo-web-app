@@ -37,7 +37,7 @@ const metrics = [
 const guarantees = [
   "Citations enforced by architecture — every answer carries its sources; traceability isn't left to the model's discretion.",
   "Honest refusals — no documentation, no answer. Solomon never bluffs a repair procedure.",
-  "Compliance by design — data never leaves the facility, which keeps CUI boundaries physically contracted (ITAR / CMMC / NIST 800-171 postures).",
+  "Compliance by design — data never leaves the facility, built for environments where that's non-negotiable.",
   "Vendor-independent — open model weights we run ourselves. When one API vendor repriced overnight, we deleted the dependency in an afternoon.",
 ];
 
