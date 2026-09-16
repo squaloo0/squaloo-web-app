@@ -10,7 +10,7 @@ export const metadata = {
 const stats = [
   { value: "11,000 / day", label: "veteran technicians retiring — decades of tacit knowledge leaving with them" },
   { value: "$125K–$5M / hr", label: "cost of unplanned downtime, from general manufacturing to aerospace" },
-  { value: "Cloud AI: unusable*", label: "*ITAR · CMMC · steel hulls · basements — banned by law or blocked by physics" },
+  { value: "Cloud AI: unusable*", label: "*ITAR · CMMC · steel hulls · basements — restricted by regulation or blocked by physics" },
 ];
 
 const acts = [
