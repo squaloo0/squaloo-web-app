@@ -1,6 +1,6 @@
 import Link from "next/link";
 import AppFooter from "@/components/AppFooter";
-import { queryRows, latency, overall, run, gaps } from "@/data/measured";
+import { queryRows, latency, overall, run, gaps, contract, recompute } from "@/data/measured";
 
 export const metadata = {
   title: "Measured — Squaloo",
@@ -216,7 +216,7 @@ export default function MeasuredPage() {
                 <div>
                   <div className="text-white text-sm mb-2">{g.title}</div>
                   <div className="font-mono text-xs mb-3" style={{ color: AMBER }}>{g.measured}</div>
-                  <div className="text-neutral-600 text-xs font-mono tracking-wider uppercase">{g.ticket}</div>
+                  <div className="text-neutral-600 text-xs font-mono tracking-wider uppercase">{g.owner}</div>
                 </div>
                 <p className="text-neutral-400 text-sm leading-relaxed max-w-2xl">{g.what}</p>
               </div>
@@ -259,7 +259,7 @@ export default function MeasuredPage() {
               ],
               [
                 "What is not here",
-                `This artifact records the engine code path but not which machine it ran on, so results are not yet broken out per body — that is ${schemaGap.ticket}. These numbers are a single dated run; as more artifacts land this page will carry the trend rather than a snapshot.`,
+                `This artifact records the engine code path but not which machine it ran on, so results are not yet broken out per body — it is ${schemaGap.owner}. These numbers are a single dated run; as more artifacts land this page will carry the trend rather than a snapshot.`,
               ],
             ].map(([h, b]) => (
               <div key={h}>
@@ -270,12 +270,68 @@ export default function MeasuredPage() {
           </div>
         </section>
 
+        {/* The contract — GD-3 */}
+        <section className="mb-32">
+          <div className="flex items-baseline gap-4 mb-6 border-b border-neutral-800 pb-4">
+            <h2 className="text-xs font-mono tracking-widest uppercase text-neutral-400">The contract a model must satisfy</h2>
+            <div className="h-px flex-1 bg-neutral-800" />
+          </div>
+          <p className="text-neutral-400 text-sm leading-relaxed max-w-2xl mb-10">
+            People ask what standard we provide. This is it. The standard is the measured
+            contract, not the model — any model we run is scored against these clauses by the same
+            harness, unmodified. One that fails a clause does not ship, however well it reads.
+            Each clause says how it is checked and what would count as failing it.
+          </p>
+          <div className="space-y-0">
+            {contract.map((c, i) => (
+              <div key={c.name} className="border-t border-neutral-800 py-8 grid grid-cols-1 md:grid-cols-[48px_1fr] gap-6">
+                <div className="text-neutral-700 text-xs font-mono tabular-nums pt-1">
+                  {String(i + 1).padStart(2, "0")}
+                </div>
+                <div>
+                  <div className="text-white text-lg tracking-wide mb-3 max-w-2xl">{c.name}</div>
+                  <p className="text-neutral-300 text-sm leading-relaxed max-w-2xl mb-4">{c.requirement}</p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-4 max-w-3xl">
+                    <div>
+                      <div className="text-neutral-500 text-xs font-mono tracking-widest uppercase mb-2">How it is checked</div>
+                      <p className="text-neutral-400 text-sm leading-relaxed">{c.check}</p>
+                    </div>
+                    <div>
+                      <div className="text-neutral-500 text-xs font-mono tracking-widest uppercase mb-2">The bar</div>
+                      <p className="text-neutral-400 text-sm leading-relaxed">{c.bar}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+            <div className="border-t border-neutral-800" />
+          </div>
+        </section>
+
+        {/* How a number stays honest */}
+        <section className="mb-32 border border-neutral-800 p-10">
+          <div className="text-xs font-mono tracking-widest uppercase text-neutral-400 mb-6">
+            How a number on this page stays honest
+          </div>
+          <p className="text-neutral-300 text-base leading-relaxed max-w-3xl mb-8">{recompute.rule}</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8 max-w-4xl">
+            <div>
+              <div className="text-white text-sm mb-3">Recomputing a figure yourself</div>
+              <p className="text-neutral-400 text-sm leading-relaxed">{recompute.method}</p>
+            </div>
+            <div>
+              <div className="text-white text-sm mb-3">Why figures carry a date</div>
+              <p className="text-neutral-400 text-sm leading-relaxed">{recompute.decay}</p>
+            </div>
+          </div>
+        </section>
+
         {/* Close */}
         <section className="border border-neutral-800 p-10">
           <div className="text-xs font-mono tracking-widest uppercase text-[#63a375] mb-4">Why publish this</div>
           <p className="text-neutral-300 text-lg leading-relaxed max-w-3xl mb-8">
             Industrial AI is sold on demos rehearsed until they worked. We would rather show you the
-            harness, the failing rows, and the tickets — and let you judge whether the numbers are moving.
+            harness, the failing rows, and who owns each fix — and let you judge whether the numbers are moving.
             If you want to watch a run happen live, on a machine with its network disconnected,{" "}
             <span className="text-white">that can be arranged</span>.
           </p>
