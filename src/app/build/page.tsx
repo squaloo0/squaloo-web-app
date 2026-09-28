@@ -9,14 +9,9 @@ export const metadata = {
 
 const timeline = [
   {
-    date: "JAN — MAY 2026",
-    title: "The foundation — USC CSCI 401, Project 42",
-    text: "A six-person USC computer science capstone team, recruited and directed by the founder, built the data layer across a full semester: cloud ingestion on Azure Functions, hybrid vector search on PostgreSQL/pgvector, and the first edge sync pipeline. Seven deliverables, a demo video, and a complete handoff package.",
-  },
-  {
-    date: "AUG 15 — 19, 2026",
-    title: "The sprint — v0.1 in four days",
-    text: "One founder directing four AI engineering agents (core, comms, devops, data), each with a written charter, its own isolated git worktree, and a human review gate on every change. 28 pull requests, CI-tested, zero unreviewed merges. The result passed a six-beat live verification: capture, upload, sync, cited offline answer, a deliberate concurrency stress, and two guard checks.",
+    date: "NOW",
+    title: "v1.0 — out of the shadows",
+    text: "The product surface (interactive answer cards, one-command install), the Project G edge hardware (Raspberry Pi 5 + a 40-TOPS NPU), and the first design partner conversations. Solomon's numbers to date, as of 2026-09-28: 192 pull requests merged since the sprint began, cited answers as fast as 7 seconds warm (median 7.5s across 14 runs, measured 2026-09-05), fully offline, and each machine held to its own memory budget rather than one figure for the fleet.",
   },
   {
     date: "THE SYSTEM",
@@ -24,9 +19,14 @@ const timeline = [
     text: "Binding interface contracts written before implementation. Every demo shortcut ships with a ticketed debt shadow. Model decisions gated by a measured eval harness, not vibes. Incidents become rules: token hygiene, worktree isolation, honest failure reporting. The next cohort of USC engineers inherits a system, not a pile of undocumented code.",
   },
   {
-    date: "NOW",
-    title: "v1.0 — out of the shadows",
-    text: "The product surface (interactive answer cards, one-command install), the Project G edge hardware (Raspberry Pi 5 + a 40-TOPS NPU), and the first design partner conversations. Solomon's numbers to date: 47 pull requests merged since the sprint began, cited answers as fast as 7 seconds warm (median 7.5s across 14 runs), fully offline, under 6GB.",
+    date: "AUG 15 — 19, 2026",
+    title: "The sprint — v0.1 in four days",
+    text: "One founder directing four AI engineering agents (core, comms, devops, data), each with a written charter, its own isolated git worktree, and a human review gate on every change. 28 pull requests, CI-tested, zero unreviewed merges. The result passed a six-beat live verification: capture, upload, sync, cited offline answer, a deliberate concurrency stress, and two guard checks.",
+  },
+  {
+    date: "JAN — MAY 2026",
+    title: "The foundation — USC CSCI 401, Project 42",
+    text: "A six-person USC computer science capstone team, recruited and directed by the founder, built the data layer across a full semester: cloud ingestion on Azure Functions, hybrid vector search on PostgreSQL/pgvector, and the first edge sync pipeline. Seven deliverables, a demo video, and a complete handoff package.",
   },
 ];
 
@@ -59,6 +59,35 @@ export default function BuildPage() {
           </p>
         </section>
 
+        {/* ── HOW IT GETS BUILT (full narrative, moved from the homepage) ── */}
+        <section className="mb-32">
+          <div className="flex items-baseline gap-4 mb-8 border-b border-neutral-800 pb-4">
+            <h2 className="text-xs font-mono tracking-widest uppercase text-neutral-400">How it gets built</h2>
+            <div className="h-px flex-1 bg-neutral-800" />
+          </div>
+          <p className="text-neutral-400 text-base leading-relaxed max-w-3xl mb-5">
+            One founder who learned to engineer from the models themselves, and four AI engineering
+            agents working under a written charter with a human review gate on every change. An
+            engineering life lived entirely inside the model era: founder-in-the-loop binding before
+            it had a name, built by someone who never learned it was supposed to be impossible.
+          </p>
+          <p className="text-neutral-400 text-base leading-relaxed max-w-3xl mb-5">
+            The charter is a versioned document, and the version moves when something goes wrong
+            badly enough to earn a new rule — a guard that cannot be shown failing is decoration; a
+            number without its boundary is not a number; the rules bind the coordinator too. Each
+            seat owns a lane, files across lanes instead of editing, and presents a diff at a gate
+            that a human holds. Work lands in gates with written criteria and an evidence file where
+            every claim carries an artifact, a date and a named machine.
+          </p>
+          <p className="text-neutral-400 text-base leading-relaxed max-w-3xl mb-6">
+            That is not an origin story bolted on afterwards — it is the reason we can build this
+            layer at all. The discipline we sell is the discipline we are built under, and the record
+            of it is public, including the parts where we were wrong.{" "}
+            <Link href="/devlog" className="text-[#5688c7] hover:text-white transition-colors">The devlog</Link>{" "}
+            carries those in full.
+          </p>
+        </section>
+
         <section className="mb-32">
           <div className="flex items-baseline gap-4 mb-10 border-b border-neutral-800 pb-4">
             <h2 className="text-xs font-mono tracking-widest uppercase text-neutral-400">Timeline</h2>
@@ -81,10 +110,10 @@ export default function BuildPage() {
         <section className="mb-32">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
-              { value: "28", label: "pull requests in the four-day sprint" },
-              { value: "0", label: "unreviewed merges — a human gate on every change" },
-              { value: "260+", label: "tests, CI-run on every pull request" },
-              { value: "6", label: "USC engineers credited on the data foundation" },
+              { value: "0", label: "unreviewed merges — a human gate on every change, from the first day to this one" },
+              { value: "192", label: "pull requests merged since the sprint began, every one reviewed (as of 2026-09-28)" },
+              { value: "686", label: "tests, CI-run on every pull request (as of 2026-09-28)" },
+              { value: "28", label: "of those merged in the first four days — the sprint that proved the method" },
             ].map((m) => (
               <div key={m.label} className="border border-neutral-800 p-6 hover:border-[#63a375] transition-colors">
                 <div className="text-3xl font-bold font-mono text-white mb-2">{m.value}</div>
@@ -92,11 +121,16 @@ export default function BuildPage() {
               </div>
             ))}
           </div>
+          <p className="text-neutral-400 text-sm leading-relaxed max-w-3xl mt-6">
+            We ask a technician to trust an answer because it shows what it checked. The same standard
+            has to hold for how the thing was built — so the process is measured the way the product
+            is, and both sets of numbers carry the date they were true.
+          </p>
           <Link
             href="/measured"
-            className="mt-6 inline-block text-[#5688c7] text-sm font-mono tracking-widest uppercase hover:text-white transition-colors"
+            className="mt-5 inline-block text-[#5688c7] text-sm font-mono tracking-widest uppercase hover:text-white transition-colors"
           >
-            The product&apos;s own scorecard, failures included →
+            The same ruler, pointed at the product →
           </Link>
         </section>
 
@@ -107,7 +141,7 @@ export default function BuildPage() {
             constraints are physical, and the mission is <span className="text-white">AI people can own</span> —
             we&apos;re assembling the founding team now.
           </p>
-          <a href="mailto:admin@squaloo.com?subject=Founding%20team" className="inline-block px-6 py-3 bg-[#1400bf] text-white text-sm font-medium tracking-wide hover:bg-[#5688c7] transition-colors">
+          <a href="mailto:marshal@squaloo.com?subject=Founding%20team" className="inline-block px-6 py-3 bg-[#1400bf] text-white text-sm font-medium tracking-wide hover:bg-[#5688c7] transition-colors">
             Introduce yourself →
           </a>
         </section>

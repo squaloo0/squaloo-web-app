@@ -1,6 +1,8 @@
 import Link from "next/link";
 import AppFooter from "@/components/AppFooter";
 import { queryRows, latency, overall, run, gaps, contract, recompute } from "@/data/measured";
+import { nights, streak, asOf as ledgerAsOf, latest } from "@/data/ledger";
+import { getPostsByTag } from "@/lib/devlog";
 
 export const metadata = {
   title: "Measured — Squaloo",
@@ -59,16 +61,66 @@ export default function MeasuredPage() {
             real corpus and scores the answers. The same harness gates every model change. This page
             publishes what it found, unedited.
           </p>
-          <p className="text-neutral-400 text-lg leading-relaxed max-w-2xl">
-            On the run below, our flagship demo question scored{" "}
+          <p className="text-neutral-400 text-lg leading-relaxed max-w-2xl mb-6">
+            When this page first went up, our flagship demo question scored{" "}
             <span style={{ color: AMBER }} className="font-mono">0% correctness</span> — three times out
-            of three. We committed the artifact anyway, and the fix is in progress. That is the point of
-            this page: a vendor who only shows you the good runs is showing you marketing.
+            of three — and we published the artifact anyway. It now scores{" "}
+            <span style={{ color: GREEN }} className="font-mono">100%, 24 of 24 scored observations</span>,
+            and the original row is still below with its date on it. A vendor who only shows you the good
+            runs is showing you marketing; a vendor who deletes the bad ones once they are fixed is doing
+            the same thing more slowly.
+          </p>
+          <p className="text-neutral-500 text-sm leading-relaxed max-w-2xl">
+            Current as of <span className="text-neutral-300 font-mono">{ledgerAsOf}</span>. Latest nightly:{" "}
+            <span className="text-neutral-300 font-mono">{latest.date}</span> on{" "}
+            <span className="text-neutral-300 font-mono">{latest.body ?? "an unrecorded machine"}</span>
+            {latest.verdict ? <> — <span className="text-neutral-300 font-mono">{latest.verdict}</span> against the night before.</> : "."}
           </p>
         </section>
 
-        {/* Run metadata */}
+        {/* ── WHAT IS UNDER TEST (consolidates the old run-metadata, speed and
+             per-question sections, so results can be swapped in as they land) ── */}
+        <section className="mb-10">
+          <div className="flex items-baseline gap-4 mb-6 border-b border-neutral-800 pb-4">
+            <h2 className="text-xs font-mono tracking-widest uppercase text-neutral-400">What is under test</h2>
+            <div className="h-px flex-1 bg-neutral-800" />
+            <span className="text-neutral-600 text-xs font-mono">as of {ledgerAsOf}</span>
+          </div>
+          <p className="text-neutral-400 text-sm leading-relaxed max-w-3xl mb-8">
+            The ruler does not belong to a model. Any model we run goes through the same harness,
+            unmodified, and is scored against the same contract. This section is the current state of
+            that testing — it changes as models come through, and the figures below always name the
+            run they came from. Each machine is measured against its own budget, not a fleet-wide one
+            — a laptop and a credit-card-sized computer are not the same promise (amended 2026-09-27).
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
+            <div className="border border-neutral-800 p-6">
+              <div className="text-xs font-mono tracking-widest uppercase text-neutral-500 mb-2">Currently shipping</div>
+              <div className="text-white text-base mb-2">{run.model}</div>
+              <p className="text-neutral-400 text-sm leading-relaxed">
+                The model behind every number on this page. Scored question by question below, from a
+                single dated deep run.
+              </p>
+            </div>
+            <div className="border border-neutral-800 p-6" style={{ borderColor: "#d98c5f55" }}>
+              <div className="text-xs font-mono tracking-widest uppercase mb-2" style={{ color: "#d98c5f" }}>In testing now</div>
+              <div className="text-white text-base mb-2">A second, unrelated open model</div>
+              <p className="text-neutral-400 text-sm leading-relaxed">
+                Going through this harness with <span className="text-white">zero engine changes</span> —
+                the experiment that could falsify our central claim. Scored on truth checks only; speed
+                is reported but does not gate, because today&apos;s budgets were measured against
+                today&apos;s model and would otherwise be marking their own homework.{" "}
+                <span className="text-neutral-500">No results yet. They appear here when they exist, pass or fail.</span>
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* The deep run — the dated snapshot the scorecard below describes */}
         <section className="mb-16 border border-neutral-800 p-6">
+          <div className="text-xs font-mono tracking-widest uppercase text-neutral-500 mb-5">
+            The deep run — the dated snapshot scored below
+          </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-sm">
             {[
               ["Run date", run.date],
@@ -107,7 +159,7 @@ export default function MeasuredPage() {
         {/* Latency */}
         <section className="mb-32">
           <div className="flex items-baseline gap-4 mb-10 border-b border-neutral-800 pb-4">
-            <h2 className="text-xs font-mono tracking-widest uppercase text-neutral-400">Speed, decomposed</h2>
+            <h2 className="text-xs font-mono tracking-widest uppercase text-neutral-400">The scorecard — speed</h2>
             <div className="h-px flex-1 bg-neutral-800" />
           </div>
           <p className="text-neutral-400 text-sm leading-relaxed max-w-2xl mb-10">
@@ -156,7 +208,7 @@ export default function MeasuredPage() {
         {/* Per-question results */}
         <section className="mb-32">
           <div className="flex items-baseline gap-4 mb-10 border-b border-neutral-800 pb-4">
-            <h2 className="text-xs font-mono tracking-widest uppercase text-neutral-400">Every question, every metric</h2>
+            <h2 className="text-xs font-mono tracking-widest uppercase text-neutral-400">The scorecard — every question</h2>
             <div className="h-px flex-1 bg-neutral-800" />
           </div>
           <div className="overflow-x-auto">
@@ -227,6 +279,80 @@ export default function MeasuredPage() {
             Ticket identifiers are the durable reference for each fix. Our tracker is private, so these
             are labels rather than links — ask, and we will walk you through any of them.
           </p>
+        </section>
+
+        {/* ── THE RUN LEDGER (§2.2) ── */}
+        <section className="mb-32">
+          <div className="flex items-baseline gap-4 mb-6 border-b border-neutral-800 pb-4">
+            <h2 className="text-xs font-mono tracking-widest uppercase text-neutral-400">The nightly run, night after night</h2>
+            <div className="h-px flex-1 bg-neutral-800" />
+            <span className="text-neutral-600 text-xs font-mono">as of {ledgerAsOf}</span>
+          </div>
+          <p className="text-neutral-400 text-sm leading-relaxed max-w-3xl mb-3">
+            This page used to show one run and promise a trend. Here is the trend: every committed
+            nightly artifact, its machine, and the verdict of comparing it against the night before.
+          </p>
+          <p className="text-neutral-300 text-sm leading-relaxed max-w-3xl mb-8">
+            <span className="text-white">{streak.count} consecutive clean runs</span>, {streak.from} → {streak.to}.
+            Two boundaries travel with that number and we will not drop them: the run before the streak
+            could not be compared at all (a changed composition, not a regression), and one calendar
+            night in the window has no artifact — so these are consecutive <em>runs</em>, not consecutive nights.
+          </p>
+          <div className="overflow-x-auto overflow-y-auto max-h-[28rem] border border-neutral-900">
+            <table className="w-full text-sm border-collapse">
+              <thead>
+                <tr className="border-b border-neutral-800 text-neutral-500 font-mono text-xs uppercase tracking-widest sticky top-0 bg-[#08090a]">
+                  <th className="text-left py-3 pr-4 font-normal">Night</th>
+                  <th className="text-left py-3 pr-4 font-normal">Machine</th>
+                  <th className="text-left py-3 pr-4 font-normal">Vs. previous</th>
+                  <th className="text-left py-3 font-normal">Same corpus</th>
+                </tr>
+              </thead>
+              <tbody>
+                {[...nights].reverse().map((n) => (
+                  <tr key={n.date} className="border-b border-neutral-900">
+                    <td className="py-3 pr-4 font-mono text-neutral-300 tabular-nums whitespace-nowrap">{n.date}</td>
+                    <td className="py-3 pr-4 text-neutral-400 font-mono text-xs">{n.body ?? "not recorded"}</td>
+                    <td className="py-3 pr-4 font-mono text-xs" style={{ color: n.verdict === "CLEAN" ? "#63a375" : n.verdict ? "#d98c5f" : "#737373" }}>
+                      {n.verdict ?? "no comparison"}
+                    </td>
+                    <td className="py-3 text-neutral-500 font-mono text-xs">{n.corpus ? n.corpus.slice(0, 8) : "—"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p className="text-neutral-500 text-xs leading-relaxed max-w-3xl mt-5">
+            &ldquo;Machine not recorded&rdquo; on the earliest rows is honest, not missing data: artifacts did not
+            carry a machine identity until 2026-09-17. A blank corpus digest means the same — the field
+            did not exist yet. We left those rows in rather than starting the table where it flatters us.
+          </p>
+        </section>
+
+        {/* ── WRITTEN UP (pulls devlog posts tagged "measured") ── */}
+        <section className="mb-32">
+          <div className="flex items-baseline gap-4 mb-6 border-b border-neutral-800 pb-4">
+            <h2 className="text-xs font-mono tracking-widest uppercase text-neutral-400">When the measurement caught something</h2>
+            <div className="h-px flex-1 bg-neutral-800" />
+          </div>
+          <p className="text-neutral-400 text-sm leading-relaxed max-w-3xl mb-8">
+            A number moving is not the interesting part. The interesting part is what the measurement
+            caught that nobody else did — including when what it caught was us. These are written up
+            in full, and new ones appear here as they are published.
+          </p>
+          <div className="space-y-0">
+            {getPostsByTag("measured").map((post) => (
+              <Link key={post.slug} href={`/devlog/${post.slug}`}
+                    className="group border-t border-neutral-800 py-6 grid grid-cols-1 md:grid-cols-[110px_1fr] gap-5 hover:border-[#1400bf] transition-colors block">
+                <div className="text-neutral-600 text-xs font-mono tabular-nums pt-1">{post.date}</div>
+                <div>
+                  <div className="text-white text-base mb-2 group-hover:text-[#5688c7] transition-colors">{post.title} →</div>
+                  <p className="text-neutral-400 text-sm leading-relaxed max-w-2xl">{post.summary}</p>
+                </div>
+              </Link>
+            ))}
+            <div className="border-t border-neutral-800" />
+          </div>
         </section>
 
         {/* Method */}
@@ -328,18 +454,18 @@ export default function MeasuredPage() {
 
         {/* Close */}
         <section className="border border-neutral-800 p-10">
-          <div className="text-xs font-mono tracking-widest uppercase text-[#63a375] mb-4">Why publish this</div>
+          <div className="text-xs font-mono tracking-widest uppercase text-[#63a375] mb-4">Ask about a number</div>
           <p className="text-neutral-300 text-lg leading-relaxed max-w-3xl mb-8">
-            Industrial AI is sold on demos rehearsed until they worked. We would rather show you the
-            harness, the failing rows, and who owns each fix — and let you judge whether the numbers are moving.
-            If you want to watch a run happen live, on a machine with its network disconnected,{" "}
-            <span className="text-white">that can be arranged</span>.
+            Every figure on this page names the run it came from and the date it was true, and the
+            method to recompute it is published above. If one of them does not add up, or you want to
+            watch a run happen live on a machine with its network disconnected, ask — we answer
+            questions about the data with the artifact attached.
           </p>
           <a
-            href="mailto:admin@squaloo.com?subject=Solomon%20%E2%80%94%20the%20numbers"
+            href="mailto:marshal@squaloo.com?subject=Solomon%20%E2%80%94%20a%20question%20about%20the%20numbers"
             className="inline-block px-6 py-3 bg-[#1400bf] text-white text-sm font-medium tracking-wide hover:bg-[#5688c7] transition-colors"
           >
-            Ask us about a number →
+            marshal@squaloo.com
           </a>
         </section>
       </div>

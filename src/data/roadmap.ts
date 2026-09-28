@@ -56,9 +56,9 @@ export const currentGate: Gate = {
       status: "met",
     },
     {
-      title: "It runs offline on a $200 computer, and a visitor can use it from their own phone",
+      title: "It runs offline on a single-board computer, and a visitor can use it from their own phone",
       detail:
-        "The engine installs and runs on a single-board computer with no internet, proven by a measurement taken on that machine rather than inferred from a bigger one. The device then serves its own page: a visitor joins the Wi-Fi it broadcasts, opens the page, asks a question, and watches the sources assemble before the answer arrives — no login, nothing to install.",
+        "The engine installs and runs on a single-board computer with no internet, proven by a measurement taken on that machine rather than inferred from a bigger one. (We used to price that board at about $200. Memory prices moved sharply in 2026 and we are re-checking against a real receipt before quoting a figure again — a stale price is still a wrong one.) The device then serves its own page: a visitor joins the Wi-Fi it broadcasts, opens the page, asks a question, and watches the sources assemble before the answer arrives — no login, nothing to install.",
       status: "in-progress",
       outstanding:
         "The offline engine on the board is done and measured. The page the visitor reads, and the device broadcasting its own Wi-Fi, are being built now.",

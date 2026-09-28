@@ -51,15 +51,19 @@ export default function RoadmapPage() {
             What we&apos;re proving next.
           </h1>
           <p className="text-neutral-400 text-lg leading-relaxed max-w-2xl mb-6">
-            We work in gates: a named set of promises, a date, and a verification pass where each
-            promise either holds or doesn&apos;t. This page is the current gate, in plain language,
-            with an honest status against every line.
+            Solomon only earns the word &ldquo;verification&rdquo; if we apply it to ourselves, so we work
+            in gates: a named set of promises, a date, and a pass where each one either holds or
+            doesn&apos;t. This page is the current gate, in plain language, with an honest status on
+            every line — including the lines that are not met.
           </p>
           <p className="text-neutral-400 text-lg leading-relaxed max-w-2xl">
-            Our <Link href="/measured" className="text-[#5688c7] hover:text-white transition-colors">measurements page</Link> shows
-            what we&apos;ve proved, unflattering numbers included. This is the other half: what we
-            said we&apos;d prove, and how far along it is. Publishing it before the date is the point —
-            a roadmap you only see after everything worked isn&apos;t accountability.
+            It is the forward half of the same two questions Solomon has to answer for a technician:{" "}
+            <span className="text-white">how do you know</span>, and{" "}
+            <span className="text-white">what did you check</span>. The{" "}
+            <Link href="/measured" className="text-[#5688c7] hover:text-white transition-colors">measurements page</Link>{" "}
+            answers the first for work already done. This page answers the second in advance — here is
+            what we said we would check, and how far along it is. Publishing it before the date is the
+            point; a roadmap you only see after everything worked is not accountability.
           </p>
         </section>
 
@@ -144,11 +148,12 @@ export default function RoadmapPage() {
           <p className="text-neutral-300 text-lg leading-relaxed max-w-3xl mb-8">
             A roadmap is easy to write and easy to quietly revise. Ours sits next to the numbers,
             carries a date, and says which promises are only partly kept — so the next version can be
-            checked against this one. If a line here stops moving, that should be a question someone
-            asks us.
+            checked against this one. A gate closes here only when the evidence for it exists on the
+            measurements page, not when we decide it feels done. If a line stops moving, that is a
+            fair question to put to us.
           </p>
           <a
-            href="mailto:admin@squaloo.com?subject=Squaloo%20%E2%80%94%20roadmap"
+            href="mailto:marshal@squaloo.com?subject=Squaloo%20%E2%80%94%20roadmap"
             className="inline-block px-6 py-3 bg-[#1400bf] text-white text-sm font-medium tracking-wide hover:bg-[#5688c7] transition-colors"
           >
             Ask us about a line →

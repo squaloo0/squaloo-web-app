@@ -58,6 +58,15 @@ export default async function DevlogPost({ params }: { params: Promise<Params> }
           <p className="text-neutral-400 text-lg leading-relaxed border-l-2 border-[#1400bf] pl-6">
             {post.summary}
           </p>
+          {post.tags.length ? (
+            <div className="flex flex-wrap gap-2 mt-6">
+              {post.tags.map((t) => (
+                <span key={t} className="text-[10px] font-mono uppercase tracking-widest text-neutral-500 border border-neutral-800 px-2 py-1">
+                  {t}
+                </span>
+              ))}
+            </div>
+          ) : null}
         </header>
 
         {/*

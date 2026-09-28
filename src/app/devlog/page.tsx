@@ -68,6 +68,15 @@ export default function DevlogIndex() {
                       ) : null}
                     </div>
                     <p className="text-neutral-400 text-sm leading-relaxed max-w-2xl">{p.summary}</p>
+                    {p.tags.length ? (
+                      <div className="flex flex-wrap gap-2 mt-3">
+                        {p.tags.map((t) => (
+                          <span key={t} className="text-[10px] font-mono uppercase tracking-widest text-neutral-500 border border-neutral-800 px-2 py-1">
+                            {t}
+                          </span>
+                        ))}
+                      </div>
+                    ) : null}
                   </div>
                 </Link>
               ))}

@@ -26,6 +26,8 @@ export type DevlogPost = {
   author: string;
   /** "published" renders publicly; anything else is treated as a draft. */
   status: string;
+  /** Comma-separated in frontmatter. Lets other routes pull their own posts. */
+  tags: string[];
   /** Rendered HTML body (frontmatter stripped). */
   html: string;
 };
@@ -80,6 +82,7 @@ function readPost(filename: string): DevlogPost {
     summary: data.summary || "",
     author: data.author || "Squaloo",
     status: data.status || "draft",
+    tags: (data.tags || "").split(",").map((t) => t.trim()).filter(Boolean),
     html: marked.parse(body, { async: false }) as string,
   };
 }
@@ -127,4 +130,9 @@ export function formatDate(iso: string): string {
     day: "numeric",
     timeZone: "UTC",
   });
+}
+
+/** Published posts carrying a tag, newest first. Used by /measured to pull its own write-ups. */
+export function getPostsByTag(tag: string): DevlogPost[] {
+  return getPublishedPosts().filter((p) => p.tags.includes(tag));
 }

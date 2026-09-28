@@ -35,9 +35,9 @@ export const spine = {
 
 /** Stratum 3 — compute. Same anatomy on every box: learn it once, it travels. */
 export const bodies: Body[] = [
-  { name: "Plant floor", note: "answers offline" },
-  { name: "Lunchbox", note: "dead-zone ready" },
-  { name: "Any edge box", note: "same contract" },
+  { name: "In the building", note: "a box on your own network" },
+  { name: "At the machine", note: "portable, no signal needed" },
+  { name: "Whatever's next", note: "new hardware, same contract" },
 ];
 
 /**
@@ -51,7 +51,7 @@ export const bodies: Body[] = [
  */
 export const ruler = {
   title: "The ruler",
-  items: ["budgets, measured", "cited answers", "nightly checks", "published methodology"],
+  items: ["Answers cited", "Speed per machine", "Checked nightly", "Method published"],
   /** Always rendered, at every width — geometry carries the claim, and so do words. */
   microLabel: "measures the bodies — never your brain",
 };
