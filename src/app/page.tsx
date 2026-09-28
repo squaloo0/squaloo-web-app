@@ -2,14 +2,14 @@ import Link from "next/link";
 import AppFooter from "@/components/AppFooter";
 
 export const metadata = {
-  title: "Squaloo — Own your intelligence",
+  title: "Squaloo — the trust and verification layer for edge AI",
   description:
-    "Squaloo makes Solomon: an offline AI teammate that captures retiring veterans' knowledge and hands it to the next technician — cited, on-site, no internet required.",
+    "Squaloo builds the trust and verification layer for edge and agentic AI. First use case: industrial operations, where custody and verification are legally required and still unsolved.",
 };
 
 const stats = [
-  { value: "11,000 / day", label: "veteran technicians retiring — decades of tacit knowledge leaving with them" },
-  { value: "$125K–$5M / hr", label: "cost of unplanned downtime, from general manufacturing to aerospace" },
+  { value: "2.1 million", label: "US manufacturing jobs projected unfilled by 2030 — and the intuition to do them leaves with the people retiring (The Manufacturing Institute)" },
+  { value: "$125K–$2.3M / hr", label: "cost of unplanned downtime — general manufacturing median to automotive peak (ABB Value of Reliability Survey; Siemens, The True Cost of Downtime 2024)" },
   { value: "Cloud AI: unusable*", label: "*ITAR · CMMC · steel hulls · basements — banned by law or blocked by physics" },
 ];
 
@@ -51,15 +51,19 @@ export default function Home() {
         {/* ── HERO ── */}
         <section className="mb-32">
           <div className="text-xs text-neutral-500 font-mono tracking-[0.3em] uppercase mb-6">
-            A future where AI is <span className="text-[#5688c7]">safe</span> · <span className="text-[#5688c7]">sovereign</span> · <span className="text-[#5688c7]">secure</span>
+            The <span className="text-[#5688c7]">trust</span> and <span className="text-[#5688c7]">verification</span> layer for edge and agentic AI
           </div>
           <h1 className="text-5xl sm:text-6xl font-bold tracking-tight leading-tight mb-6">
-            Own your <span className="text-[#5688c7]">intelligence.</span>
+            How do you <span className="text-[#5688c7]">know?</span>
           </h1>
           <p className="text-neutral-400 text-lg leading-relaxed max-w-2xl mb-4">
-            Squaloo makes <span className="text-white">Solomon</span> — an AI teammate that captures what
-            retiring veterans know in plain conversation, and hands it to the next technician at the
-            machine. In seconds. With cited sources. No internet required.
+            It is the one question most AI cannot answer. Squaloo builds the layer that makes it
+            answerable — <span className="text-white">custody you can point to, verification you can
+            re-run, and receipts attached to every claim</span>.
+          </p>
+          <p className="text-neutral-400 text-lg leading-relaxed max-w-2xl mb-4">
+            Our first use case is industrial operations, where verification and custody are already
+            legally mandatory — and still unsolved. That is the beachhead, not the boundary.
           </p>
           <div className="flex flex-wrap gap-4 mt-10">
             <Link
@@ -93,14 +97,16 @@ export default function Home() {
           </div>
           <p className="text-neutral-500 text-sm mt-6 max-w-3xl leading-relaxed">
             The facilities losing knowledge fastest — defense manufacturing, maritime, energy — are exactly
-            the ones where cloud AI can&apos;t follow. What leaves with every retirement never made it into a manual.
+            the ones where cloud AI cannot follow. So &ldquo;how do you know?&rdquo; has to be answerable on a
+            device inside the building, with no line back to anyone&apos;s servers. What leaves with every
+            retirement never made it into a manual in the first place.
           </p>
         </section>
 
         {/* ── SOLOMON, IN THREE ACTS ── */}
         <section className="mb-32">
           <div className="flex items-baseline gap-4 mb-10 border-b border-neutral-800 pb-4">
-            <h2 className="text-xs font-mono tracking-widest uppercase text-neutral-400">The flagship — Solomon</h2>
+            <h2 className="text-xs font-mono tracking-widest uppercase text-neutral-400">The first use case — Solomon</h2>
             <div className="h-px flex-1 bg-neutral-800" />
           </div>
           <div className="space-y-0">
@@ -124,10 +130,20 @@ export default function Home() {
         {/* ── VISION STRIP ── */}
         <section className="mb-32 border-l-2 border-[#1400bf] pl-8 py-2">
           <div className="text-xs font-mono tracking-widest uppercase text-neutral-500 mb-4">The thesis</div>
+          <p className="text-neutral-300 text-base leading-relaxed max-w-3xl mb-5">
+            Three questions decide whether AI belongs in a serious operation.
+            <span className="text-white"> How do you know?</span> — every answer carries its sources, and says
+            plainly when it could not check one, because &ldquo;could not check&rdquo; is not the same as &ldquo;not there&rdquo;.
+            <span className="text-white"> Where does it live?</span> — your building, your box, your keys; cut
+            the cord and nothing stops working.
+            <span className="text-white"> Who is checking?</span> — not us. A published ruler, measured nightly,
+            that anyone can re-run, including on us.
+          </p>
           <p className="text-neutral-300 text-base leading-relaxed max-w-3xl">
-            Today, Solomon keeps knowledge alive on factory floors. The thesis is bigger: <span className="text-white">safe,
-            sovereign, secure AI — owned by the people who use it</span>, not rented from a hyperscaler.
-            Project G, our edge hardware line, is the first step on a decade-long road from the plant floor to everywhere.
+            Industry is where those questions are already legally mandatory, which is why we started there.
+            We believe the binding underneath works for any model — and we have
+            <span className="text-white"> scheduled the experiment that could prove us wrong</span>. We will
+            publish that result whichever way it goes.
           </p>
         </section>
 
@@ -138,9 +154,16 @@ export default function Home() {
             <div className="h-px flex-1 bg-neutral-800" />
           </div>
           <p className="text-neutral-400 text-base leading-relaxed max-w-3xl mb-6">
-            One founder. Four AI engineering agents. A human review gate on every change —
+            One founder who learned to engineer from the models themselves, and four AI engineering agents
+            working under a written charter with a human review gate on every change —
             <span className="text-white font-mono"> 28 pull requests in four days</span>, CI-tested and measured.
-            The way Squaloo builds is part of what Squaloo sells.
+            An engineering life lived entirely inside the model era: founder-in-the-loop binding before it had
+            a name, built by someone who never learned it was supposed to be impossible.
+          </p>
+          <p className="text-neutral-400 text-base leading-relaxed max-w-3xl mb-6">
+            That is not an origin story bolted on afterwards — it is the reason we can build this layer at all.
+            The discipline we sell is the discipline we are built under, and the record of it is public,
+            including the parts where we were wrong.
           </p>
           <Link href="/build" className="text-[#5688c7] text-sm font-mono tracking-widest uppercase hover:text-white transition-colors">
             The full build story →
