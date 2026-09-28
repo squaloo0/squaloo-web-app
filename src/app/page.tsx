@@ -6,7 +6,7 @@ import { streak, veteranFix, latest, asOf } from "@/data/ledger";
 export const metadata = {
   title: "Squaloo — Solomon, the trust and verification layer for edge AI",
   description:
-    "Squaloo builds Solomon — the trust and verification layer for edge and agentic AI. We aim it at industrial operations, where custody and verification are legally required and still unsolved.",
+    "Squaloo builds Solomon — the trust and verification layer for edge and agentic AI. Solomon's first use case is industrial operations, where custody and verification are legally required and still unsolved.",
 };
 
 export default function Home() {
@@ -41,14 +41,17 @@ export default function Home() {
             answerable — custody you can point to, and verification anyone can re-run. Squaloo builds it.
           </p>
           <p className="text-neutral-400 text-lg leading-relaxed max-w-2xl">
-            It exists because one engineer spent a career entirely inside the model era and kept
-            hitting the same wall: the answer was confident, and nothing behind it could be checked.
-            We aim it at industrial operations because that is where verification and custody are
-            already legally mandatory — ITAR, CMMC, plants the cloud cannot legally or physically
-            reach — and still unsolved. It is also the hardest room to be vague in: the first person
-            we build for is a technician standing at a broken machine, who needs to know whether to
-            trust an answer before acting on it. That is where we aim Solomon, not the limit of what
-            the layer is for.
+            It exists because our founder, <span className="text-white">Marshal Aldoph</span>, spent
+            an engineering career entirely inside the model era and kept hitting the same wall: the
+            answer was confident, and nothing behind it could be checked.
+          </p>
+          <p className="text-neutral-400 text-lg leading-relaxed max-w-2xl">
+            <span className="text-white">Solomon&apos;s first use case is industrial operations</span> —
+            because that is where verification and custody are already legally mandatory (ITAR, CMMC,
+            plants the cloud cannot legally or physically reach) and still unsolved. It is also the
+            hardest room to be vague in: the first person we build for is a technician standing at a
+            broken machine, deciding whether to trust an answer before acting on it. A first use
+            case, not the limit of what the layer is for.
           </p>
         </section>
 
@@ -117,7 +120,7 @@ export default function Home() {
             <h2 className="text-xs font-mono tracking-widest uppercase text-neutral-400">Where to go next</h2>
             <div className="h-px flex-1 bg-neutral-800" />
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {[
               { href: "/solomon", k: "Solomon", t: "The product",
                 d: "The layer itself — answers at the machine, offline, with their sources attached and checkable." },
@@ -125,6 +128,8 @@ export default function Home() {
                 d: "One founder, AI engineering agents, a human gate on every change — and a public record of the misses." },
               { href: "/measured", k: "Measured", t: "The ruler",
                 d: "The contract a model must satisfy, the nightly numbers, and the method to recompute them yourself." },
+              { href: "/roadmap", k: "Roadmap", t: "What is not proved yet",
+                d: "The promises we have made and have not kept yet, with an honest status on each — published before the date, not after." },
             ].map((c) => (
               <Link key={c.href} href={c.href}
                     className="group border border-neutral-800 p-6 hover:border-[#1400bf] transition-colors block">
@@ -138,16 +143,16 @@ export default function Home() {
 
         {/* ── CTA ── */}
         <section className="border border-neutral-800 p-10">
-          <div className="text-xs font-mono tracking-widest uppercase text-[#63a375] mb-4">Out of the shadows</div>
+          <div className="text-xs font-mono tracking-widest uppercase text-[#63a375] mb-4">Get in touch</div>
           <p className="text-neutral-300 text-lg leading-relaxed max-w-3xl mb-8">
-            Solomon spent the summer being built in the dark. Now we&apos;re looking for
-            <span className="text-white"> design partners</span> with machines that can&apos;t afford to forget,
-            <span className="text-white"> mentors</span> who&apos;ve sold into industry, and
-            <span className="text-white"> founding teammates</span> who want to build the sovereign stack.
+            If any of this is useful to you — a facility with machines that cannot afford to forget,
+            a question about how the verification actually works, or a claim on this site you want
+            to check — write to us. We answer technical questions with the artifact attached, and we
+            will run the demo live, on a machine with its network disconnected, for anyone who asks.
           </p>
           <div className="flex flex-wrap gap-4">
-            <a href="mailto:admin@squaloo.com" className="px-6 py-3 bg-[#1400bf] text-white text-sm font-medium tracking-wide hover:bg-[#5688c7] transition-colors">
-              admin@squaloo.com
+            <a href="mailto:marshal@squaloo.com" className="px-6 py-3 bg-[#1400bf] text-white text-sm font-medium tracking-wide hover:bg-[#5688c7] transition-colors">
+              marshal@squaloo.com
             </a>
             <a href="https://github.com/squaloo0" target="_blank" rel="noopener noreferrer" className="px-6 py-3 border border-neutral-700 text-white text-sm font-medium tracking-wide hover:border-white transition-colors">
               github.com/squaloo0

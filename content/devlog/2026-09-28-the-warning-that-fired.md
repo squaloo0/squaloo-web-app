@@ -1,22 +1,25 @@
 ---
-title: "The warning that fired"
+title: "Correct, cited, and too slow"
 date: "2026-09-28"
-summary: "We taught the system to say 'correct, but too slow for this machine' — a verdict that is neither pass nor fail. Then we made it fire on real hardware. Then we found the part of it we still cannot claim."
+summary: "A technician at a stopped machine needs to know which kind of answer they just got. That is why our system has three verdicts instead of two — and why the third one firing on real hardware mattered more than it sounds."
 author: "Squaloo"
+tags: "measured"
 status: "published"
 ---
 
-Every machine we run on boots with a self-test: it asks itself a known question, checks that the answer is right and carries its sources, and records how long it took. Pass or fail.
+Picture the person we build for. A machine has stopped. They are holding a tool, the line is down, and they have asked a question. What comes back has to answer two things before they act on it: **how do you know that**, and **what did you check?**
 
-Pass or fail turned out to be the wrong shape.
+Everything below is a consequence of taking that moment seriously.
 
-## The state that did not exist
+## Pass and fail are the wrong shape
 
-A credit-card-sized computer answering correctly, with the right sources, in two minutes is not a failure. It is a correct answer from a small machine. But it is also not a pass, because two minutes is too long for someone standing at a broken machine waiting.
+Every machine we run on boots with a self-test: it asks itself a known question, checks that the answer is right and carries its sources, and records how long it took. Originally that produced one of two verdicts.
 
-Calling it a failure teaches people to ignore failures. Calling it a pass hides something real. So we added a third verdict — **warning** — with a rule attached: *slow and wrong must never share a sentence.*
+But consider a small computer bolted near the line, answering correctly, with the right sources, in two minutes.
 
-What the system reports now:
+That is **not a failure** — the answer is right and the technician can act on it. It is also **not a pass** — two minutes is a long time to stand next to a stopped machine. Call it a failure and people learn to ignore failures. Call it a pass and you have hidden something real from the person whose shift it is costing.
+
+So we added a third verdict, **warning**, with a rule attached: *slow and wrong must never share a sentence.*
 
 ```
 status: warn
@@ -26,43 +29,41 @@ detail: "answer was correct and cited, but took 414840ms
          against a 300000ms budget for this body"
 ```
 
-Three fields, three separate facts, no blending. The detail names the latency, the budget, and which machine — because a budget only means something attached to the hardware it was set for. A laptop and a single-board computer are not the same promise, so they no longer share a deadline.
+Three fields, three separate facts, no blending. And the budget is **per machine** — because a laptop in an office and a credit-card-sized computer in a plant are not the same promise, and holding them to one deadline would either flatter the small one or slander it.
 
 ## Making it fire
 
-A verdict nobody has seen fire is a verdict nobody should trust. That is a rule here: a guard that cannot be shown failing is decoration, and you only find out which you have by trying.
+A verdict nobody has seen fire is a verdict nobody should trust. That is a standing rule here: a guard that cannot be shown failing is decoration, and you only learn which kind you have by trying.
 
-So we forced it. On 2026-09-26 we pushed the single-board computer past its budget on a real question, on real hardware, and watched. It reported warning. `passed: true`, `within_budget: false`, the detail naming all three facts. Exactly the state we designed, arriving for the first time from a machine rather than a test fixture.
+So we forced it — pushed the small computer past its budget on a real question, on real hardware, and watched. It reported warning, with all three facts, naming the machine. The first time that state arrived from a machine rather than a test.
 
-## The part we cannot claim
+## The part we cannot claim yet
 
-Here is where this post stops being a victory lap.
+The warning exists as a **state**, proven on hardware. The warning **shown on the card a technician actually reads** is *not* proven.
 
-The warning exists as a **state**, proven on hardware. The warning being **shown in the product** — rendered on the card a technician actually reads — is *not* proven. We checked before writing this, and every card on our demo machine reads healthy.
+It is not a bug, it is a structural gap: the machine that can produce this warning does not run the chat surface, and the machine that runs the chat surface was not in warning. The rendering is covered by tests — including tests that deliberately break it to confirm they notice — but not yet by a live answer.
 
-It is not a bug. It is a structural gap: the machine that can produce this warning does not run the chat surface, and the machine that runs the chat surface was not in warning. The rendering is covered by tests, including tests that deliberately break it to confirm they notice. It is not covered by a live payload.
+Both sentences are true and only one is quotable:
 
-Both sentences are true, and only one of them is quotable as product evidence:
+- *The warning state is real on real hardware.* Yes.
+- *The warning renders correctly in the product.* Not yet.
 
-- *The warning state is real on real hardware* — yes.
-- *The warning renders correctly in the product* — not yet.
-
-So that is what our measurements page says, in those words, and it will keep saying it until a real card carries a real warning. We would rather publish the smaller claim.
+That distinction is not pedantry, it is the product. We ask a technician to believe an answer because it shows what it checked. A company that blurred **proven** into **nearly proven** in its own devlog would be asking for a trust it does not extend.
 
 ## The tool that nearly lied about it
 
-The capture we used to record all this is worth a paragraph, because it failed in an instructive way.
+The capture we used to record all this failed in an instructive way, and it is the best illustration of why the use case drives the engineering.
 
-To claim the panel and the engine agree, you must show they are describing the **same** engine process. A card is a snapshot from when it was posted; a health check is live. Read a stale card against a fresh reading and you will confidently report a disagreement that never happened.
+To claim the on-screen panel and the engine agree, you must show they describe the **same** moment. The card is a snapshot from when it was posted; the health reading is live. Compare a stale card against a fresh reading and you will confidently report a disagreement that never happened.
 
-So the capture refuses to vouch for a result unless it can prove both surfaces came from one process. That guard caught a stale card on its first real run — good. Then the guard itself shipped a defect: it read the machine's start time as local when the machine reports it in UTC, which put the start hours into the future and made **every fresh card look stale**. It failed in the safe direction and it was still wrong: it printed "this describes a process that no longer exists" about perfectly live data.
+So the capture refuses to vouch for a result unless it can prove both came from one process. That guard caught a stale card on its first real run. Then the guard itself shipped a defect: it read the machine's start time as local when the machine reports it in universal time, putting the start hours into the future and making **every fresh card look stale**.
 
-A tool built to prevent manufactured findings manufactured one. No test would have caught it — the bad value came from the live system, so any fixture would have passed. Only running it for real on a real machine did.
+It failed in the safe direction and it was still wrong — it printed *"this describes a process that no longer exists"* about perfectly live data. A tool built to prevent manufactured findings manufactured one. No test would have caught it: the bad value came from the live system, so any fixture would have passed.
 
-## What this is actually about
+## Why this matters where we are pointed
 
-Three verdicts instead of two is a small change. The reason it matters is that most systems built to report on themselves have exactly one interesting failure mode: they report something true about the wrong thing, and nobody notices because the report looks fine.
+Most systems built to report on themselves have one interesting failure mode: they report something true about the wrong thing, and nobody notices because the report looks fine. A green tick over an unchecked condition. A health check that asks whether a process is alive when the question is whether it can write.
 
-A green tick over an unchecked condition. A health check that asks whether the process is alive when the question is whether it can write. A number that is correctly formatted, correctly bounded, and sourced from nothing.
+On a dashboard, that is an annoyance. Next to a machine that has stopped, with someone deciding whether to act on what they just read, it is the whole risk.
 
-We have a name for that family now, and a growing file of our own instances. The warning that fired is one entry — the useful kind, where the system said something uncomfortable and specific instead of something reassuring and vague.
+Three verdicts instead of two is a small change. It exists because the third one is the honest answer roughly as often as the other two, and because the person reading it is standing somewhere that the difference matters.

@@ -65,18 +65,25 @@ export default function SolomonPage() {
             Solomon — by Squaloo
           </div>
           <h1 className="text-4xl sm:text-5xl font-bold tracking-tight leading-tight mb-6 max-w-3xl">
-            How do you <span className="text-[#5688c7]">know?</span>
+            How do you <span className="text-[#5688c7]">know?</span><br />
+            What did you <span className="text-[#5688c7]">check?</span>
           </h1>
           <p className="text-neutral-400 text-lg leading-relaxed max-w-2xl mb-5">
-            It is the question you cannot ask most AI. Solomon is built to answer it every time:
-            it captures what retiring veterans know and hands it to the next technician at the
-            machine — in seconds, with cited sources, no internet required.
-          </p>
-          <p className="text-neutral-500 text-sm leading-relaxed max-w-2xl mb-12">
-            Solomon is{" "}
+            Two questions you cannot ask most AI. Solomon is{" "}
             <Link href="/" className="text-[#5688c7] hover:text-white transition-colors">the trust and verification layer</Link>{" "}
-            — aimed first at industrial operations, because that is where verification is already
-            legally mandatory and where a wrong answer costs the most.
+            that makes both answerable, and it does three things to get there:{" "}
+            <span className="text-white">your knowledge stays on hardware you own</span>;{" "}
+            <span className="text-white">questions are answered on that same hardware</span>, with no
+            line back to anyone&apos;s servers; and{" "}
+            <span className="text-white">every answer arrives with its sources attached</span> — saying
+            plainly when it could not check one, because could-not-check and not-there are different
+            answers.
+          </p>
+          <p className="text-neutral-400 text-lg leading-relaxed max-w-2xl mb-5">
+            Its first use case is industrial operations. Verification there is already legally
+            mandatory, the buildings are places the cloud cannot legally or physically reach, and the
+            reader is a technician at a stopped machine deciding whether to trust an answer before
+            acting on it. If the layer holds anywhere, it has to hold there first.
           </p>
           <SolomonTranscript />
           <p className="text-neutral-600 text-xs mt-3 font-mono">
@@ -88,9 +95,15 @@ export default function SolomonPage() {
         {/* ── HOW ── */}
         <section id="how" className="mb-32">
           <div className="flex items-baseline gap-4 mb-10 border-b border-neutral-800 pb-4">
-            <h2 className="text-xs font-mono tracking-widest uppercase text-neutral-400">How it works</h2>
+            <h2 className="text-xs font-mono tracking-widest uppercase text-neutral-400">The layer, applied to a plant floor</h2>
             <div className="h-px flex-1 bg-neutral-800" />
           </div>
+          <p className="text-neutral-400 text-sm leading-relaxed max-w-2xl mb-10">
+            Custody, on-site answering and checkable sources are general properties. Here is what
+            they look like pointed at one problem — a retiring workforce, machines that stop, and a
+            building with no usable connection. Three steps, each one a piece of the layer doing a
+            job somebody on that floor actually has.
+          </p>
           <div className="space-y-0">
             {acts.map((a) => (
               <div key={a.n} className="group border-t border-neutral-800 py-8 grid grid-cols-1 md:grid-cols-[auto_1fr] gap-6 hover:border-[#1400bf] transition-colors">
@@ -108,7 +121,7 @@ export default function SolomonPage() {
         {/* ── PROOF ── */}
         <section id="proof" className="mb-32">
           <div className="flex items-baseline gap-4 mb-10 border-b border-neutral-800 pb-4">
-            <h2 className="text-xs font-mono tracking-widest uppercase text-neutral-400">Proof, not promises</h2>
+            <h2 className="text-xs font-mono tracking-widest uppercase text-neutral-400">What the first tests show</h2>
             <div className="h-px flex-1 bg-neutral-800" />
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
@@ -119,10 +132,18 @@ export default function SolomonPage() {
               </div>
             ))}
           </div>
+          <p className="text-neutral-400 text-sm max-w-3xl leading-relaxed mb-4">
+            These are early results, and we label them that way on purpose. They test one thing: whether
+            the layer is viable for this first use case. Measured live, August–September 2026 — knowledge
+            captured in conversation, synced to the device, the network disconnected, and a junior
+            technician&apos;s question answered with its sources attached. Measured, not estimated, and
+            each figure carries the date it was true.
+          </p>
           <p className="text-neutral-500 text-sm max-w-3xl leading-relaxed mb-4">
-            Proven live, August–September 2026: knowledge captured in conversation, synced to the edge,
-            the internet cut, and a junior technician&apos;s question answered with citations —
-            every number above measured, not estimated.
+            What they do not yet show: a wide corpus, many machines, or many technicians. The scripted
+            question set is small and we say so wherever we quote it. As the work gets more concrete
+            these numbers change — and when they do, the old ones stay on the measurements page with
+            their dates rather than disappearing.
           </p>
           <p className="text-neutral-500 text-sm max-w-3xl leading-relaxed mb-10">
             We publish the full scorecard — including the questions Solomon still gets wrong, dated
@@ -161,7 +182,7 @@ export default function SolomonPage() {
 
         {/* ── THE ASTERISK ── */}
         <section className="mb-32 border-l-2 border-[#1400bf] pl-8 py-2">
-          <div className="text-xs font-mono tracking-widest uppercase text-neutral-500 mb-4">Why not the incumbents?</div>
+          <div className="text-xs font-mono tracking-widest uppercase text-neutral-500 mb-4">Where is the disruption?</div>
           <p className="text-neutral-300 text-base leading-relaxed max-w-3xl">
             Cloud connected-worker platforms promise AI teammates — <span className="text-white">with an asterisk</span>:
             requires connectivity, expands your compliance boundary into their cloud, and rides on a model vendor
@@ -185,14 +206,15 @@ export default function SolomonPage() {
 
         {/* ── CTA ── */}
         <section className="border border-neutral-800 p-10">
-          <div className="text-xs font-mono tracking-widest uppercase text-[#63a375] mb-4">Design partners</div>
+          <div className="text-xs font-mono tracking-widest uppercase text-[#63a375] mb-4">Get in touch</div>
           <p className="text-neutral-300 text-lg leading-relaxed max-w-3xl mb-8">
-            We&apos;re selecting a small number of design partners — facilities where the machines can&apos;t
-            afford to forget and the cloud isn&apos;t an option. If that&apos;s your floor, we want the hard version
-            of your problem.
+            If any of this is useful to you — a facility with machines that cannot afford to forget,
+            a question about how the verification actually works, or a claim on this page you want to
+            check — write to us. We answer technical questions with the artifact attached, and we will
+            run the demo live, on a machine with its network disconnected, for anyone who asks.
           </p>
-          <a href="mailto:admin@squaloo.com?subject=Solomon%20design%20partner" className="inline-block px-6 py-3 bg-[#1400bf] text-white text-sm font-medium tracking-wide hover:bg-[#5688c7] transition-colors">
-            Talk to the founder →
+          <a href="mailto:marshal@squaloo.com?subject=Solomon" className="inline-block px-6 py-3 bg-[#1400bf] text-white text-sm font-medium tracking-wide hover:bg-[#5688c7] transition-colors">
+            marshal@squaloo.com
           </a>
         </section>
       </div>

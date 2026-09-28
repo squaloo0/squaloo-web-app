@@ -28,7 +28,7 @@ import { brain, spine, bodies, ruler, fidelity, caption } from "@/data/solomon_l
 // guessed constant. The band is now derived: wrap at a fixed character budget,
 // then make the band wide enough for that budget at this font size.
 const RULER_FS = 15;
-const RULER_MAX_CHARS = 13;
+const RULER_MAX_CHARS = 15;
 const CHAR_W = 0.58; // conservative advance for the site's sans stack
 const GUTTER_W = Math.ceil(RULER_MAX_CHARS * RULER_FS * CHAR_W) + 30;
 
@@ -47,7 +47,7 @@ function wrap(text: string, max: number): string[] {
 // ── Rhythm: consistent box heights per row, equal gaps sized to hold an arrow ─
 const W = 760;
 const PAD = 16;
-const GAP = 56;
+const GAP = 72;
 
 const BRAIN_Y = 12, BRAIN_H = 96;
 const SPINE_Y = BRAIN_Y + BRAIN_H + GAP, SPINE_H = 76;
@@ -147,15 +147,15 @@ export default function SolomonLayerDiagram() {
                     stroke={GREEN} strokeWidth="1.6" markerEnd="url(#sl-ah-home)" />
             </g>
           ))}
-          <text x={DOWN_X - 12} y={BRAIN_Y + BRAIN_H + 32} fill={BLUE} fontSize="14" textAnchor="end">knowledge down</text>
-          <text x={HOME_X + 12} y={BRAIN_Y + BRAIN_H + 32} fill={GREEN} fontSize="14">experience home</text>
+          <text x={DOWN_X - 12} y={BRAIN_Y + BRAIN_H + 22} fill={BLUE} fontSize="14" textAnchor="end">knowledge down</text>
+          <text x={HOME_X + 12} y={BRAIN_Y + BRAIN_H + 22} fill={GREEN} fontSize="14">experience home</text>
 
           {/* The severability cut — deliberate and labelled, across the link it cuts.
               v0 left an unlabelled dashed fragment floating near the ruler, which
               read as debris. It is a claim, so it is drawn as one. */}
-          <line x1={DOWN_X - 34} y1={SPINE_Y - 22} x2={HOME_X + 34} y2={SPINE_Y - 22}
+          <line x1={DOWN_X - 34} y1={SPINE_Y - 16} x2={HOME_X + 34} y2={SPINE_Y - 16}
                 stroke={DIM} strokeWidth="1" strokeDasharray="5 5" />
-          <text x={HOME_X + 42} y={SPINE_Y - 18} fill={DIM} fontSize="13">severable</text>
+          <text x={HOME_X + 42} y={SPINE_Y - 11} fill={DIM} fontSize="13">severable</text>
 
           {/* ── Stratum 2 · the sync ── */}
           <rect x={PAD} y={SPINE_Y} width={STACK_W} height={SPINE_H} rx="3"
@@ -197,20 +197,24 @@ export default function SolomonLayerDiagram() {
         </g>
       </svg>
 
-      <p className="text-xs font-mono tracking-wider mt-3" style={{ color: AMBER }}>
-        ↑ {ruler.microLabel}
+      {/* Sits under the ruler column, because that is what the arrow points at.
+          Left-aligned it pointed at the bodies and said the opposite thing. */}
+      <p className="text-xs font-mono tracking-wider mt-3 text-right" style={{ color: AMBER }}>
+        {ruler.microLabel} ↑
       </p>
-      <p className="text-neutral-400 text-sm mt-5">{caption}</p>
+      <p className="text-neutral-400 text-sm mt-6 text-center">{caption}</p>
 
+      <div className="text-center">
       <button type="button" onClick={() => setRevealed((v) => !v)} aria-expanded={revealed}
-        className="mt-6 text-xs font-mono tracking-widest uppercase text-neutral-500 border-b border-dotted border-neutral-600 hover:text-white hover:border-white transition-colors">
+        className="mt-5 text-xs font-mono tracking-widest uppercase text-neutral-500 border-b border-dotted border-neutral-600 hover:text-white hover:border-white transition-colors">
         {fidelity.affordance} {revealed ? "−" : "+"}
       </button>
       {revealed ? (
-        <p className="text-neutral-400 text-sm leading-relaxed max-w-2xl mt-4 pl-4 border-l-2 border-neutral-700">
+        <p className="text-neutral-400 text-sm leading-relaxed max-w-2xl mx-auto mt-4 text-left pl-4 border-l-2 border-neutral-700">
           {fidelity.body}
         </p>
       ) : null}
+      </div>
     </div>
   );
 }
