@@ -59,6 +59,35 @@ export default function BuildPage() {
           </p>
         </section>
 
+        {/* ── HOW IT GETS BUILT (full narrative, moved from the homepage) ── */}
+        <section className="mb-32">
+          <div className="flex items-baseline gap-4 mb-8 border-b border-neutral-800 pb-4">
+            <h2 className="text-xs font-mono tracking-widest uppercase text-neutral-400">How it gets built</h2>
+            <div className="h-px flex-1 bg-neutral-800" />
+          </div>
+          <p className="text-neutral-400 text-base leading-relaxed max-w-3xl mb-5">
+            One founder who learned to engineer from the models themselves, and four AI engineering
+            agents working under a written charter with a human review gate on every change. An
+            engineering life lived entirely inside the model era: founder-in-the-loop binding before
+            it had a name, built by someone who never learned it was supposed to be impossible.
+          </p>
+          <p className="text-neutral-400 text-base leading-relaxed max-w-3xl mb-5">
+            The charter is a versioned document, and the version moves when something goes wrong
+            badly enough to earn a new rule — a guard that cannot be shown failing is decoration; a
+            number without its boundary is not a number; the rules bind the coordinator too. Each
+            seat owns a lane, files across lanes instead of editing, and presents a diff at a gate
+            that a human holds. Work lands in gates with written criteria and an evidence file where
+            every claim carries an artifact, a date and a named machine.
+          </p>
+          <p className="text-neutral-400 text-base leading-relaxed max-w-3xl mb-6">
+            That is not an origin story bolted on afterwards — it is the reason we can build this
+            layer at all. The discipline we sell is the discipline we are built under, and the record
+            of it is public, including the parts where we were wrong.{" "}
+            <Link href="/devlog" className="text-[#5688c7] hover:text-white transition-colors">The devlog</Link>{" "}
+            carries those in full.
+          </p>
+        </section>
+
         <section className="mb-32">
           <div className="flex items-baseline gap-4 mb-10 border-b border-neutral-800 pb-4">
             <h2 className="text-xs font-mono tracking-widest uppercase text-neutral-400">Timeline</h2>

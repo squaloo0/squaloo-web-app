@@ -65,11 +65,17 @@ export default function SolomonPage() {
             Solomon — by Squaloo
           </div>
           <h1 className="text-4xl sm:text-5xl font-bold tracking-tight leading-tight mb-6 max-w-3xl">
-            The AI teammate for the places the cloud can&apos;t reach.
+            How do you <span className="text-[#5688c7]">know?</span>
           </h1>
-          <p className="text-neutral-400 text-lg leading-relaxed max-w-2xl mb-12">
-            Solomon captures what retiring veterans know and hands it to the next technician at the
+          <p className="text-neutral-400 text-lg leading-relaxed max-w-2xl mb-5">
+            It is the question you cannot ask most AI. Solomon is built to answer it every time:
+            it captures what retiring veterans know and hands it to the next technician at the
             machine — in seconds, with cited sources, no internet required.
+          </p>
+          <p className="text-neutral-500 text-sm leading-relaxed max-w-2xl mb-12">
+            Solomon is the first use case for{" "}
+            <Link href="/" className="text-[#5688c7] hover:text-white transition-colors">Squaloo&apos;s trust and verification layer</Link>{" "}
+            — the place we started because verification here is already legally mandatory.
           </p>
           <SolomonTranscript />
           <p className="text-neutral-600 text-xs mt-3 font-mono">
@@ -132,6 +138,24 @@ export default function SolomonPage() {
               </div>
             ))}
           </div>
+        </section>
+
+        {/* ── THE THREE QUESTIONS (moved here from the homepage — product-level) ── */}
+        <section className="mb-32 border-l-2 border-[#1400bf] pl-8 py-2">
+          <div className="text-xs font-mono tracking-widest uppercase text-neutral-500 mb-4">The three questions</div>
+          <p className="text-neutral-300 text-base leading-relaxed max-w-3xl mb-5">
+            <span className="text-white">How do you know?</span> — every answer carries its sources, and says
+            plainly when it could not check one, because &ldquo;could not check&rdquo; is not the same as &ldquo;not there&rdquo;.
+            <span className="text-white"> Where does it live?</span> — your building, your box, your keys; cut
+            the cord and nothing stops working.
+            <span className="text-white"> Who is checking?</span> — not us. A published ruler, measured nightly,
+            that anyone can re-run, including on us.
+          </p>
+          <p className="text-neutral-300 text-base leading-relaxed max-w-3xl">
+            We believe the binding underneath works for any model — and we have
+            <span className="text-white"> scheduled the experiment that could prove us wrong</span>. We will
+            publish that result whichever way it goes.
+          </p>
         </section>
 
         {/* ── THE ASTERISK ── */}
