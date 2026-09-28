@@ -31,7 +31,6 @@ function Pct({ value }: { value: number | null }) {
 }
 
 export default function MeasuredPage() {
-  const schemaGap = gaps[gaps.length - 1];
 
   return (
     <div className="min-h-screen bg-[#08090a] text-white flex flex-col">
@@ -110,10 +109,148 @@ export default function MeasuredPage() {
                 the experiment that could falsify our central claim. Scored on truth checks only; speed
                 is reported but does not gate, because today&apos;s budgets were measured against
                 today&apos;s model and would otherwise be marking their own homework.{" "}
-                <span className="text-neutral-500">No results yet. They appear here when they exist, pass or fail.</span>
+                <span className="text-white">Results below — 2026-09-28. The binding held; it also showed us exactly where the coupling is.</span>
               </p>
             </div>
           </div>
+        </section>
+
+        {/* ── GD-2 · the pre-registered comparison, published pass and fail ── */}
+        <section className="mb-32">
+          <div className="flex items-baseline gap-4 mb-6 border-b border-neutral-800 pb-4">
+            <h2 className="text-xs font-mono tracking-widest uppercase text-neutral-400">The same ruler, two models</h2>
+            <div className="h-px flex-1 bg-neutral-800" />
+            <span className="text-neutral-600 text-xs font-mono">2026-09-28</span>
+          </div>
+
+          {/* Boundaries go ABOVE the table. A reader who meets the numbers first
+              has already drawn the wrong conclusion by the time a footnote
+              corrects them. */}
+          <div className="border-l-2 pl-6 py-1 mb-10 max-w-3xl" style={{ borderColor: AMBER }}>
+            <div className="text-xs font-mono tracking-widest uppercase mb-3" style={{ color: AMBER }}>
+              Read this before the numbers
+            </div>
+            <p className="text-neutral-300 text-base leading-relaxed mb-4">
+              What is being tested is <span className="text-white">the harness as it ships, prompts
+              included, given a second model</span> — not which model is better. The second model was
+              handed Phi-3&apos;s chat scaffold <span className="text-white">verbatim</span>,
+              including turn-markers it does not emit, because that is what &ldquo;runs on our harness
+              unchanged&rdquo; actually means.
+            </p>
+            <p className="text-neutral-300 text-base leading-relaxed mb-4">
+              <span className="text-white">Every gap below is evidence about the coupling, not about
+              Qwen&apos;s capability.</span> Quoting these as &ldquo;Qwen is worse than Phi-3&rdquo;
+              would state something this experiment did not test — in the direction that flatters the
+              model we already ship.
+            </p>
+            <p className="text-neutral-300 text-base leading-relaxed">
+              The symmetric reading is equally wrong: <span className="text-white">76% cannot be read as
+              near-parity either.</span> Four points apart on correctness sits beside a refusal-honesty
+              figure that went to zero. A model adapted to its own prompt format is a separate,
+              labelled experiment. It has not been run.
+            </p>
+          </div>
+
+          <div className="overflow-x-auto mb-8">
+            <table className="w-full text-sm border-collapse">
+              <thead>
+                <tr className="border-b border-neutral-800 text-neutral-500 font-mono text-xs uppercase tracking-widest">
+                  <th className="text-left py-3 pr-4 font-normal">Metric</th>
+                  <th className="text-left py-3 pr-4 font-normal">Phi-3 Mini (3.8B) — in production</th>
+                  <th className="text-left py-3 font-normal">Qwen2.5-1.5B-Instruct</th>
+                </tr>
+              </thead>
+              <tbody className="font-mono">
+                {[
+                  ["correctness", "80% (17/21)", "76% (16/21)", false],
+                  ["citation compliance", "94% (17/18)", "85% (18/21)", false],
+                  ["full recall", "50% (9/18)", "50% (9/18)", false],
+                  ["refusal honesty", "100% (3/3)", "0% (0/3)", true],
+                  ["veteran-fix leads", "66% (2/3)", "33% (1/3)", false],
+                  ["mean latency", "16,105ms", "24,087ms", false],
+                  ["answered when it should have refused", "0", "3", true],
+                ].map(([m, a, b, flag]) => (
+                  <tr key={m as string} className="border-b border-neutral-900">
+                    <td className="py-3 pr-4 text-neutral-300">{m}</td>
+                    <td className="py-3 pr-4 text-neutral-400">{a}</td>
+                    <td className="py-3" style={{ color: flag ? AMBER : "#a3a3a3" }}>{b}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <div className="space-y-8 max-w-3xl">
+            <div>
+              <div className="text-white text-base mb-2">Identical recall is the control, not a coincidence</div>
+              <p className="text-neutral-400 text-sm leading-relaxed">
+                50% on both. Retrieval runs <em>before</em> generation and does not depend on the model,
+                so an identical figure is exactly what a correctly wired comparison must produce. Had it
+                differed, the comparison itself would be suspect. It is the strongest single piece of
+                evidence that the harness treated both models the same — the experiment proving its own
+                wiring before you read anything else in the table.
+              </p>
+            </div>
+            <div className="border-l-2 pl-5" style={{ borderColor: AMBER }}>
+              <div className="text-white text-base mb-2">The finding that matters: refusal honesty went to zero</div>
+              <p className="text-neutral-400 text-sm leading-relaxed mb-3">
+                One question in the set has only one correct answer: a refusal. The production model
+                refused cleanly, three times out of three. The second model said the refusal sentence
+                and then kept going — restating the instruction it had just been given, followed by
+                citation tags, until it hit the length cap.
+              </p>
+              <p className="text-neutral-400 text-sm leading-relaxed">
+                The scorer marked that <span className="text-white">not a refusal</span>, and that is
+                correct: a refusal requires the phrase <em>and</em> the absence of substance, because
+                anything cited or enumerated is an answer however it hedges. Scoring it as a clean
+                refusal would have been generous to the point of dishonesty — a technician reading it
+                gets a wall of citations to a question we have no documentation for.
+              </p>
+            </div>
+            <div>
+              <div className="text-white text-base mb-2">The slower model is the smaller one, and that is the coupling with a stopwatch on it</div>
+              <p className="text-neutral-400 text-sm leading-relaxed">
+                A third of the parameters and 50% slower. The reason is length: a median answer of 1,169
+                characters against 250, roughly 4.7× more text, with most generations ending mid-clause
+                at the length cap. The scaffold&apos;s stop-markers are ones this model never emits, so
+                generation simply never stopped. It is not a slow model; it was
+                <span className="text-white"> never told to stop</span>.
+              </p>
+            </div>
+            <div>
+              <div className="text-white text-base mb-2">Eleven citations are marked unverified, and stay that way</div>
+              <p className="text-neutral-400 text-sm leading-relaxed">
+                The second model produced 11 rows carrying citations the run could not check against the
+                corpus, against 4 for the production model. They are tagged
+                <span className="text-white"> unverified</span> — our third citation tier, meaning
+                neither confirmed nor refuted. That is a recorded observation,
+                <span className="text-white"> not a finding that they were fabricated</span>, and it
+                stays unverified here until a corpus check settles it. &ldquo;Unverified&rdquo; is a state
+                we publish, not a gap to smooth over in either direction.
+              </p>
+            </div>
+          </div>
+
+          <div className="border border-neutral-800 p-6 mt-10 max-w-3xl">
+            <div className="text-xs font-mono tracking-widest uppercase text-neutral-500 mb-3">How it was run</div>
+            <p className="text-neutral-400 text-sm leading-relaxed">
+              One sweep, both models, one artifact — <span className="text-white">zero engine changes and
+              zero harness changes</span>. Same machine, because comparing across machines would confuse
+              the model with the hardware. Same corpus by construction (one digest, 41 passages, 31
+              documents), same sampling settings, same fixed seed chain, each model loaded sequentially
+              in its own isolated container. Memory and speed budgets are reported but do not grade here:
+              those constants were measured against the production model, so holding a different model to
+              them would be marking our own homework.
+            </p>
+          </div>
+
+          <p className="text-neutral-300 text-base leading-relaxed max-w-3xl mt-8">
+            The verdict the experiment was pre-registered to answer:{" "}
+            <span className="text-white">the harness bound a second model to the same measured contracts
+            with no changes to the engine, the scorer, or the ruler — and reported the truth about what
+            happened.</span> Where it held and where it broke were both measured, here, rather than
+            discovered later on a stage.
+          </p>
         </section>
 
         {/* The deep run — the dated snapshot the scorecard below describes */}
@@ -365,7 +502,7 @@ export default function MeasuredPage() {
             {[
               [
                 "The harness",
-                "A script builds the engine image with the model baked in, seeds the demo corpus through the real ingestion pipeline, runs each scripted question N times in an isolated container, and writes a dated JSON artifact. It prints GO or NO-GO. By its own gate logic, the run on this page is a NO-GO.",
+                "A script builds the engine image with the model baked in, seeds the demo corpus through the real ingestion pipeline, runs each scripted question N times in an isolated container, and writes a dated JSON artifact. It prints GO or NO-GO. By its own gate logic, that particular deep run was a NO-GO — the nightly ledger below records the verdict of every run since.",
               ],
               [
                 "Correctness",
@@ -385,7 +522,7 @@ export default function MeasuredPage() {
               ],
               [
                 "What is not here",
-                `This artifact records the engine code path but not which machine it ran on, so results are not yet broken out per body — it is ${schemaGap.owner}. These numbers are a single dated run; as more artifacts land this page will carry the trend rather than a snapshot.`,
+                "Everything in this block describes the deep run only — one dated snapshot, scored question by question. It is not the trend and not the current state: the nightly ledger below is the trend, and the comparison above is the current state. Artifacts now record the machine they ran on, so results can be read per body.",
               ],
             ].map(([h, b]) => (
               <div key={h}>
