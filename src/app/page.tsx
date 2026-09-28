@@ -62,7 +62,7 @@ export default function Home() {
             <div className="h-px flex-1 bg-neutral-800" />
           </div>
           <SolomonLayerDiagram />
-          <p className="text-neutral-500 text-sm leading-relaxed max-w-2xl mt-8">
+          <p className="text-neutral-500 text-sm leading-relaxed max-w-2xl mx-auto text-center mt-8">
             Cut the link between the brain and the bodies and everything below it keeps working.
             The numbers behind the ruler — with their dates, and the method to recompute them — are on the{" "}
             <Link href="/measured" className="text-[#5688c7] hover:text-white transition-colors">measurements page</Link>.

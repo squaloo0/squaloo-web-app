@@ -89,6 +89,14 @@ export default function SolomonLayerDiagram() {
   }, []);
 
   const bodyW = (STACK_W - 2 * 12) / 3;
+  // Text budgets derived from the box, not guessed. SVG <text> does not wrap,
+  // so an over-long label silently paints over its neighbour -- which is what
+  // v0 did. Budget = usable width / advance-per-char at that font size.
+  const BODY_PAD = 16;
+  const NAME_FS = 16, NOTE_FS = 15;
+  const usable = bodyW - BODY_PAD * 2;
+  const nameMax = Math.floor(usable / (NAME_FS * 0.55));
+  const noteMax = Math.floor(usable / (NOTE_FS * 0.5));
   const travel = BODIES_Y - (BRAIN_Y + BRAIN_H); // exact arrow span, both ways
 
   return (
@@ -174,8 +182,14 @@ export default function SolomonLayerDiagram() {
               <g key={b.name}>
                 <rect x={x} y={BODIES_Y} width={bodyW} height={BODIES_H} rx="3"
                       fill="rgba(99,163,117,0.10)" stroke={GREEN} strokeWidth="1.5" />
-                <text x={x + 16} y={BODIES_Y + 42} fill="#fff" fontSize="19" fontWeight="600">{b.name}</text>
-                <text x={x + 16} y={BODIES_Y + 70} fill={DIM} fontSize="16">{b.note}</text>
+                {wrap(b.name, nameMax).map((l, li) => (
+                  <text key={l} x={x + BODY_PAD} y={BODIES_Y + 34 + li * (NAME_FS + 5)}
+                        fill="#fff" fontSize={NAME_FS} fontWeight="600">{l}</text>
+                ))}
+                {wrap(b.note, noteMax).map((l, li) => (
+                  <text key={l} x={x + BODY_PAD} y={BODIES_Y + 64 + li * (NOTE_FS + 5)}
+                        fill={DIM} fontSize={NOTE_FS}>{l}</text>
+                ))}
               </g>
             );
           })}

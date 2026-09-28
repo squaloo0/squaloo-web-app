@@ -51,7 +51,7 @@ export const bodies: Body[] = [
  */
 export const ruler = {
   title: "The ruler",
-  items: ["answers cited", "speed per machine", "checked nightly", "method published"],
+  items: ["Answers cited", "Speed per machine", "Checked nightly", "Method published"],
   /** Always rendered, at every width — geometry carries the claim, and so do words. */
   microLabel: "measures the bodies — never your brain",
 };
