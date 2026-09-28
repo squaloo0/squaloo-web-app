@@ -1,5 +1,6 @@
 import Link from "next/link";
 import AppFooter from "@/components/AppFooter";
+import SolomonLayerDiagram from "@/components/SolomonLayerDiagram";
 
 export const metadata = {
   title: "Squaloo — Own your intelligence",
@@ -75,6 +76,20 @@ export default function Home() {
               The build story
             </Link>
           </div>
+        </section>
+
+        {/* ── THE LAYER, DRAWN ── */}
+        <section className="mb-32">
+          <div className="flex items-baseline gap-4 mb-8 border-b border-neutral-800 pb-4">
+            <h2 className="text-xs font-mono tracking-widest uppercase text-neutral-400">The layer, drawn</h2>
+            <div className="h-px flex-1 bg-neutral-800" />
+          </div>
+          <SolomonLayerDiagram />
+          <p className="text-neutral-500 text-sm leading-relaxed max-w-2xl mt-8">
+            Cut the link between the brain and the bodies and everything below it keeps working.
+            The numbers behind the ruler — with their dates, and the method to recompute them — are on the{" "}
+            <Link href="/measured" className="text-[#5688c7] hover:text-white transition-colors">measurements page</Link>.
+          </p>
         </section>
 
         {/* ── THE PROBLEM ── */}
