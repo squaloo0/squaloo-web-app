@@ -1,3 +1,5 @@
+import { veteranFix, asOf as ledgerAsOf } from "./ledger";
+
 /**
  * Measured — eval artifact data for /measured.
  *
@@ -90,9 +92,9 @@ export type Gap = {
 export const gaps: Gap[] = [
     {
     title: "Conflict precedence — CLOSED, and now the strongest row on the page",
-    measured: "100% — 24 of 24 scored observations, as of 2026-09-27",
+    measured: `100% — ${veteranFix.passes} of ${veteranFix.scored} scored observations, as of ${ledgerAsOf}`,
     what:
-      "When the veteran's log contradicts the manual, the log's fix should lead the answer. It now does, in every scored run from 2026-09-12 to 2026-09-27, zero failures. Boundaries that travel with it and are not optional: the metric scores ONE scripted scenario (act3-e207-primary; the other six queries report n/a), and the rate is prompt-scoped — the same check measured 60% across 5 runs under a different prompt variant on 2026-09-09. It evidences the behaviour on a repeated case, not as a general property. This row read 0% when the page froze; the work landed and the page did not.",
+      "When the veteran's log contradicts the manual, the log's fix should lead the answer. It now does, in every scored run on the nightly trail, zero failures. Boundaries that travel with it and are not optional: the metric scores ONE scripted scenario (act3-e207-primary; the other six queries report n/a), and the rate is prompt-scoped — the same check measured 60% across 5 runs under a different prompt variant on 2026-09-09. It evidences the behaviour on a repeated case, not as a general property. This row read 0% when the page froze; the work landed and the page did not.",
     owner: "closed — engine team",
   },
   {
