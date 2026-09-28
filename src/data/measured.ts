@@ -64,11 +64,11 @@ export const run = {
   /** The engine code path, not a hardware label. See `bodyKnown`. */
   device: "edge",
   /**
-   * The artifact schema does not record which physical machine the run
-   * executed on, so this page cannot break results out per body yet.
-   * Tracked for the harness owner as a schema gap.
+   * CLOSED 2026-09-17. Artifacts now carry a `measurement_body` block naming
+   * the machine (label, arch, cpu count, container memory limit). The page no
+   * longer has to say "we cannot tell you which machine this was".
    */
-  bodyKnown: false,
+  bodyKnown: true,
 };
 
 export type Gap = {
@@ -88,12 +88,12 @@ export type Gap = {
 
 /** Failing or incomplete results, each with the team that owns the fix. */
 export const gaps: Gap[] = [
-  {
-    title: "Conflict precedence",
-    measured: "0% correctness, 3 of 3 runs",
+    {
+    title: "Conflict precedence — CLOSED, and now the strongest row on the page",
+    measured: "100% — 24 of 24 scored observations, as of 2026-09-27",
     what:
-      "When the veteran's log contradicts the manual, the log's fix should lead the answer. It does not. Retrieval found both sources every time — 100% manual recall, 100% log recall — but the answer put a wrong six-hour replacement procedure first and buried the veteran's shim fix at steps 6 and 7. No precedence logic exists in the engine yet.",
-    owner: "owned — engine team",
+      "When the veteran's log contradicts the manual, the log's fix should lead the answer. It now does, in every scored run from 2026-09-12 to 2026-09-27, zero failures. Boundaries that travel with it and are not optional: the metric scores ONE scripted scenario (act3-e207-primary; the other six queries report n/a), and the rate is prompt-scoped — the same check measured 60% across 5 runs under a different prompt variant on 2026-09-09. It evidences the behaviour on a repeated case, not as a general property. This row read 0% when the page froze; the work landed and the page did not.",
+    owner: "closed — engine team",
   },
   {
     title: "Refusal honesty on the primary query",
@@ -116,14 +116,7 @@ export const gaps: Gap[] = [
       "Both the manual section and the veteran's log surfaced together in half the runs. Log recall was 100%; the manual is what dropped. A k=5 A/B is queued to test whether widening retrieval fixes it without costing compliance or latency.",
     owner: "owned — evaluation team",
   },
-  {
-    title: "Results are not broken out per machine",
-    measured: "not recorded",
-    what:
-      "The artifact records the engine code path but not the physical body it ran on, so this page cannot yet separate results by machine. Adding a host field to the harness output is a schema change owned by the engine seat.",
-    owner: "owned — engine team",
-  },
-];
+  ];
 
 /**
  * The contract a model must satisfy — GD-3, "publish the ruler".
