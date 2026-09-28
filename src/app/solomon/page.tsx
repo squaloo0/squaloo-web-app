@@ -73,9 +73,10 @@ export default function SolomonPage() {
             machine — in seconds, with cited sources, no internet required.
           </p>
           <p className="text-neutral-500 text-sm leading-relaxed max-w-2xl mb-12">
-            Solomon is the first use case for{" "}
-            <Link href="/" className="text-[#5688c7] hover:text-white transition-colors">Squaloo&apos;s trust and verification layer</Link>{" "}
-            — the place we started because verification here is already legally mandatory.
+            Solomon is{" "}
+            <Link href="/" className="text-[#5688c7] hover:text-white transition-colors">the trust and verification layer</Link>{" "}
+            — aimed first at industrial operations, because that is where verification is already
+            legally mandatory and where a wrong answer costs the most.
           </p>
           <SolomonTranscript />
           <p className="text-neutral-600 text-xs mt-3 font-mono">

@@ -4,9 +4,9 @@ import SolomonLayerDiagram from "@/components/SolomonLayerDiagram";
 import { streak, veteranFix, latest, asOf } from "@/data/ledger";
 
 export const metadata = {
-  title: "Squaloo — the trust and verification layer for edge AI",
+  title: "Squaloo — Solomon, the trust and verification layer for edge AI",
   description:
-    "Squaloo builds the trust and verification layer for edge and agentic AI. It starts in industrial operations, where custody and verification are legally required and still unsolved.",
+    "Squaloo builds Solomon — the trust and verification layer for edge and agentic AI. We aim it at industrial operations, where custody and verification are legally required and still unsolved.",
 };
 
 export default function Home() {
@@ -32,20 +32,23 @@ export default function Home() {
             Squaloo
           </div>
           <h1 className="text-5xl sm:text-6xl font-bold tracking-tight leading-tight mb-6 max-w-3xl">
-            The <span className="text-[#5688c7]">trust and verification</span> layer for edge and agentic AI.
+            Solomon is the <span className="text-[#5688c7]">trust and verification</span> layer for edge and agentic AI.
           </h1>
           <p className="text-neutral-400 text-lg leading-relaxed max-w-2xl mb-5">
             AI that runs outside a datacenter still has to answer two questions nobody has made it
             answer: <span className="text-white">how do you know that</span>, and{" "}
-            <span className="text-white">who is checking</span>. We build the layer that makes both
-            answerable — custody you can point to, and verification anyone can re-run.
+            <span className="text-white">who is checking</span>. Solomon is the layer that makes both
+            answerable — custody you can point to, and verification anyone can re-run. Squaloo builds it.
           </p>
           <p className="text-neutral-400 text-lg leading-relaxed max-w-2xl">
             It exists because one engineer spent a career entirely inside the model era and kept
             hitting the same wall: the answer was confident, and nothing behind it could be checked.
-            We started in industrial operations because that is where verification and custody are
+            We aim it at industrial operations because that is where verification and custody are
             already legally mandatory — ITAR, CMMC, plants the cloud cannot legally or physically
-            reach — and still unsolved. That is the beachhead, not the boundary.
+            reach — and still unsolved. It is also the hardest room to be vague in: the first person
+            we build for is a technician standing at a broken machine, who needs to know whether to
+            trust an answer before acting on it. That is where we aim Solomon, not the limit of what
+            the layer is for.
           </p>
         </section>
 
@@ -117,7 +120,7 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {[
               { href: "/solomon", k: "Solomon", t: "The product",
-                d: "The first use case: answers at the machine, offline, with their sources attached and checkable." },
+                d: "The layer itself — answers at the machine, offline, with their sources attached and checkable." },
               { href: "/build", k: "The build", t: "The discipline",
                 d: "One founder, AI engineering agents, a human gate on every change — and a public record of the misses." },
               { href: "/measured", k: "Measured", t: "The ruler",

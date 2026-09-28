@@ -15,9 +15,9 @@ const robotoMono = Roboto_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Squaloo — the trust and verification layer for edge AI",
+  title: "Squaloo — Solomon, the trust and verification layer for edge AI",
   description:
-    "Squaloo builds the trust and verification layer for edge and agentic AI. It starts in industrial operations, where custody and verification are legally required and still unsolved.",
+    "Squaloo builds Solomon — the trust and verification layer for edge and agentic AI. We aim it at industrial operations, where custody and verification are legally required and still unsolved.",
 };
 
 export default function RootLayout({

@@ -60,16 +60,28 @@ export default function MeasuredPage() {
             real corpus and scores the answers. The same harness gates every model change. This page
             publishes what it found, unedited.
           </p>
-          <p className="text-neutral-400 text-lg leading-relaxed max-w-2xl">
-            On the run below, our flagship demo question scored{" "}
+          <p className="text-neutral-400 text-lg leading-relaxed max-w-2xl mb-6">
+            When this page first went up, our flagship demo question scored{" "}
             <span style={{ color: AMBER }} className="font-mono">0% correctness</span> — three times out
-            of three. We committed the artifact anyway, and the fix is in progress. That is the point of
-            this page: a vendor who only shows you the good runs is showing you marketing.
+            of three — and we published the artifact anyway. It now scores{" "}
+            <span style={{ color: GREEN }} className="font-mono">100%, 24 of 24 scored observations</span>,
+            and the original row is still below with its date on it. A vendor who only shows you the good
+            runs is showing you marketing; a vendor who deletes the bad ones once they are fixed is doing
+            the same thing more slowly.
+          </p>
+          <p className="text-neutral-500 text-sm leading-relaxed max-w-2xl">
+            Current as of <span className="text-neutral-300 font-mono">{ledgerAsOf}</span>. Latest nightly:{" "}
+            <span className="text-neutral-300 font-mono">{latest.date}</span> on{" "}
+            <span className="text-neutral-300 font-mono">{latest.body ?? "an unrecorded machine"}</span>
+            {latest.verdict ? <> — <span className="text-neutral-300 font-mono">{latest.verdict}</span> against the night before.</> : "."}
           </p>
         </section>
 
-        {/* Run metadata */}
+        {/* Run metadata — scoped, so the page's lead is no longer its oldest run */}
         <section className="mb-16 border border-neutral-800 p-6">
+          <div className="text-xs font-mono tracking-widest uppercase text-neutral-500 mb-5">
+            The deep run — one dated snapshot, scored question by question
+          </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-sm">
             {[
               ["Run date", run.date],
