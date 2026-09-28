@@ -117,7 +117,7 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {[
               { href: "/solomon", k: "Solomon", t: "The product",
-                d: "The first use case: an offline AI teammate that answers at the machine, with its sources attached." },
+                d: "The first use case: answers at the machine, offline, with their sources attached and checkable." },
               { href: "/build", k: "The build", t: "The discipline",
                 d: "One founder, AI engineering agents, a human gate on every change — and a public record of the misses." },
               { href: "/measured", k: "Measured", t: "The ruler",
