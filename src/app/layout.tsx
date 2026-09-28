@@ -15,9 +15,9 @@ const robotoMono = Roboto_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Squaloo — Own your intelligence",
+  title: "Squaloo — the trust and verification layer for edge AI",
   description:
-    "Squaloo makes Solomon: an offline AI teammate that captures retiring veterans' knowledge and hands it to the next technician — cited, on-site, no internet required.",
+    "Squaloo builds the trust and verification layer for edge and agentic AI. It starts in industrial operations, where custody and verification are legally required and still unsolved.",
 };
 
 export default function RootLayout({

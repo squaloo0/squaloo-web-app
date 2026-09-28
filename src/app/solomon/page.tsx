@@ -28,10 +28,10 @@ const acts = [
 ];
 
 const metrics = [
-  { value: "~7s", label: "to a cited answer, measured warm" },
-  { value: "100%", label: "offline — verified with the internet cut" },
-  { value: "<6GB", label: "full AI stack, small enough for a $200 device" },
-  { value: "0", label: "cloud APIs in the runtime — nothing to reprice, nothing to leak" },
+  { value: "~7s", label: "to a cited answer, measured warm — median 7.5s across 14 runs, 2026-09-05" },
+  { value: "100%", label: "offline — verified with the network disconnected, 2026-09-05" },
+  { value: "6GB", label: "the single-board computer's budget. Each machine now has its own — a laptop and a credit-card-sized computer are not the same promise (2026-09-27)" },
+  { value: "0", label: "cloud services in the answer path — nothing to reprice, nothing to leak" },
 ];
 
 const guarantees = [
