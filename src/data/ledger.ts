@@ -2,12 +2,22 @@
  * Nightly run ledger — GENERATED, not typed.
  *
  * Produced by reading every committed artifact in the engine repo's
- * evals/results/ (the .json for composition and the .compare.md for the
+ * evals/results/ (the .json for composition, the .compare.md for the
  * comparison verdict) on the date below. Regenerate to refresh; do not hand-edit.
  *
  * Why generated: a hardcoded streak is wrong by morning. Every figure here
  * therefore travels with `asOf`, and the page prints it. (Charter rule 16 — a
  * number without its boundary is not a number.)
+ *
+ * SINGLE-MODEL SWEEPS ONLY — this filter is load-bearing.
+ * A comparison sweep (more than one entry in meta.models) is a labelled
+ * experiment, not a nightly run. Including one does not merely add a spurious
+ * row: its rows carry a DIFFERENT model's verdicts, which land in the
+ * conflict-precedence tally and move a headline number. Measured on
+ * 2026-09-28: without this filter the tally reads 28/31 (90%) instead of
+ * 25/25 (100%), because the second model's failures get absorbed into the
+ * shipping model's figure — and it would read as a regression in a model that
+ * did not regress.
  *
  * TWO BOUNDARIES THAT MUST TRAVEL WITH THE STREAK:
  *  - It counts consecutive CLEAN *comparison verdicts*, newest backwards. It
@@ -47,19 +57,20 @@ export const nights: Night[] = [
   { date: "2026-09-25", body: "solomon-pi", corpus: "2920eabb7b3622ed", verdict: "CLEAN", veteranFix: true },
   { date: "2026-09-26", body: "solomon-pi", corpus: "2920eabb7b3622ed", verdict: "CLEAN", veteranFix: true },
   { date: "2026-09-27", body: "solomon-pi", corpus: "2920eabb7b3622ed", verdict: "CLEAN", veteranFix: true },
+  { date: "2026-09-28", body: "solomon-pi", corpus: "2920eabb7b3622ed", verdict: "CLEAN", veteranFix: true },
 ];
 
 /** Consecutive CLEAN comparisons, newest backwards. Read the boundaries above. */
-export const streak = { count: 9, from: "2026-09-18", to: "2026-09-27" };
+export const streak = { count: 10, from: "2026-09-18", to: "2026-09-28" };
 
 /** Conflict precedence, in OBSERVATION units to match the claims register. */
 export const veteranFix = {
-  passes: 24, scored: 24,
-  from: "2026-09-12", to: "2026-09-27",
+  passes: 25, scored: 25,
+  from: "2026-09-12", to: "2026-09-28",
 };
 
 export const latest = {
-  date: "2026-09-27",
+  date: "2026-09-28",
   body: "solomon-pi",
   verdict: "CLEAN",
 };

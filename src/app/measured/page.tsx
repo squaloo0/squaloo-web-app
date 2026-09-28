@@ -1,7 +1,7 @@
 import Link from "next/link";
 import AppFooter from "@/components/AppFooter";
 import { queryRows, latency, overall, run, gaps, contract, recompute } from "@/data/measured";
-import { nights, streak, asOf as ledgerAsOf, latest } from "@/data/ledger";
+import { nights, streak, asOf as ledgerAsOf, latest, veteranFix } from "@/data/ledger";
 import { getPostsByTag } from "@/lib/devlog";
 
 export const metadata = {
@@ -64,7 +64,7 @@ export default function MeasuredPage() {
             When this page first went up, our flagship demo question scored{" "}
             <span style={{ color: AMBER }} className="font-mono">0% correctness</span> — three times out
             of three — and we published the artifact anyway. It now scores{" "}
-            <span style={{ color: GREEN }} className="font-mono">100%, 24 of 24 scored observations</span>,
+            <span style={{ color: GREEN }} className="font-mono">100%, {veteranFix.passes} of {veteranFix.scored} scored observations</span>,
             and the original row is still below with its date on it. A vendor who only shows you the good
             runs is showing you marketing; a vendor who deletes the bad ones once they are fixed is doing
             the same thing more slowly.
