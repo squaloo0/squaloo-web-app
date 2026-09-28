@@ -1,6 +1,7 @@
 import Link from "next/link";
 import AppFooter from "@/components/AppFooter";
 import { queryRows, latency, overall, run, gaps, contract, recompute } from "@/data/measured";
+import { nights, streak, asOf as ledgerAsOf, latest } from "@/data/ledger";
 
 export const metadata = {
   title: "Measured — Squaloo",
@@ -227,6 +228,99 @@ export default function MeasuredPage() {
             Ticket identifiers are the durable reference for each fix. Our tracker is private, so these
             are labels rather than links — ask, and we will walk you through any of them.
           </p>
+        </section>
+
+        {/* ── THE RUN LEDGER (§2.2) ── */}
+        <section className="mb-32">
+          <div className="flex items-baseline gap-4 mb-6 border-b border-neutral-800 pb-4">
+            <h2 className="text-xs font-mono tracking-widest uppercase text-neutral-400">Every night, since we started publishing</h2>
+            <div className="h-px flex-1 bg-neutral-800" />
+            <span className="text-neutral-600 text-xs font-mono">as of {ledgerAsOf}</span>
+          </div>
+          <p className="text-neutral-400 text-sm leading-relaxed max-w-3xl mb-3">
+            This page used to show one run and promise a trend. Here is the trend: every committed
+            nightly artifact, its machine, and the verdict of comparing it against the night before.
+          </p>
+          <p className="text-neutral-300 text-sm leading-relaxed max-w-3xl mb-8">
+            <span className="text-white">{streak.count} consecutive clean runs</span>, {streak.from} → {streak.to}.
+            Two boundaries travel with that number and we will not drop them: the run before the streak
+            could not be compared at all (a changed composition, not a regression), and one calendar
+            night in the window has no artifact — so these are consecutive <em>runs</em>, not consecutive nights.
+          </p>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm border-collapse">
+              <thead>
+                <tr className="border-b border-neutral-800 text-neutral-500 font-mono text-xs uppercase tracking-widest">
+                  <th className="text-left py-3 pr-4 font-normal">Night</th>
+                  <th className="text-left py-3 pr-4 font-normal">Machine</th>
+                  <th className="text-left py-3 pr-4 font-normal">Vs. previous</th>
+                  <th className="text-left py-3 font-normal">Same corpus</th>
+                </tr>
+              </thead>
+              <tbody>
+                {[...nights].reverse().map((n) => (
+                  <tr key={n.date} className="border-b border-neutral-900">
+                    <td className="py-3 pr-4 font-mono text-neutral-300 tabular-nums whitespace-nowrap">{n.date}</td>
+                    <td className="py-3 pr-4 text-neutral-400 font-mono text-xs">{n.body ?? "not recorded"}</td>
+                    <td className="py-3 pr-4 font-mono text-xs" style={{ color: n.verdict === "CLEAN" ? "#63a375" : n.verdict ? "#d98c5f" : "#737373" }}>
+                      {n.verdict ?? "no comparison"}
+                    </td>
+                    <td className="py-3 text-neutral-500 font-mono text-xs">{n.corpus ? n.corpus.slice(0, 8) : "—"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p className="text-neutral-500 text-xs leading-relaxed max-w-3xl mt-5">
+            &ldquo;Machine not recorded&rdquo; on the earliest rows is honest, not missing data: artifacts did not
+            carry a machine identity until 2026-09-17. A blank corpus digest means the same — the field
+            did not exist yet. We left those rows in rather than starting the table where it flatters us.
+          </p>
+        </section>
+
+        {/* ── WHAT THE RULER CAUGHT (§2.2) ── */}
+        <section className="mb-32">
+          <div className="flex items-baseline gap-4 mb-8 border-b border-neutral-800 pb-4">
+            <h2 className="text-xs font-mono tracking-widest uppercase text-neutral-400">What the ruler caught</h2>
+            <div className="h-px flex-1 bg-neutral-800" />
+          </div>
+          <div className="space-y-8 max-w-3xl">
+            <div className="border-l-2 pl-5" style={{ borderColor: "#d98c5f" }}>
+              <div className="text-white text-base mb-2">A warning fired, and it was the right kind</div>
+              <p className="text-neutral-400 text-sm leading-relaxed">
+                On 2026-09-26 the single-board computer answered a question correctly and with its
+                sources — and took longer than that machine&apos;s budget allows. The system reported{" "}
+                <span className="text-white">warning</span>, not failure:{" "}
+                <span className="font-mono text-xs">passed: true, within_budget: false</span>, naming the
+                latency, the budget and the machine in one sentence. Slow and wrong are different
+                things and the product refuses to let them share a verdict.
+              </p>
+              <p className="text-neutral-500 text-xs leading-relaxed mt-3">
+                Boundary, stated because it is the honest edge of this claim: the warning{" "}
+                <em>state</em> is proven on real hardware and captured. The warning being{" "}
+                <em>rendered</em> in the chat product is not — the machine that can produce this
+                warning does not run the chat surface, and the machine that runs it was not in
+                warning. Covered by tests, not yet by a live payload. We will say so until it is.
+              </p>
+            </div>
+            <div className="border-l-2 border-neutral-700 pl-5">
+              <div className="text-white text-base mb-2">One budget per machine, not one for the fleet</div>
+              <p className="text-neutral-400 text-sm leading-relaxed">
+                A laptop and a credit-card-sized computer are not the same promise, so they no longer
+                share a deadline. Each machine declares itself and is measured against its own budget;
+                an undeclared machine gets the most permissive one and says so. Amended 2026-09-27.
+              </p>
+            </div>
+            <div className="border-l-2 border-neutral-700 pl-5">
+              <div className="text-white text-base mb-2">The experiment that could prove us wrong</div>
+              <p className="text-neutral-400 text-sm leading-relaxed">
+                We claim the binding works for any model. A second, unrelated model goes through this
+                same harness with zero engine changes — scored on truth checks only, with speed
+                reported but not gating, because the current budgets were measured against today&apos;s
+                model and would be marking its own homework. Whatever it returns is published here.
+              </p>
+            </div>
+          </div>
         </section>
 
         {/* Method */}
