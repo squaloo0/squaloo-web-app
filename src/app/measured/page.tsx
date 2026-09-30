@@ -212,9 +212,10 @@ export default function MeasuredPage() {
               <p className="text-neutral-400 text-sm leading-relaxed">
                 A third of the parameters and 50% slower. The reason is length: a median answer of 1,169
                 characters against 250, roughly 4.7× more text, with most generations ending mid-clause
-                at the length cap. The scaffold&apos;s stop-markers are ones this model never emits, so
-                generation simply never stopped. It is not a slow model; it was
-                <span className="text-white"> never told to stop</span>.
+                at the length cap.{" "}
+                <span className="text-white">Cause (amended 2026-09-29): the prompt template.</span> This
+                model was never put into its own template, so it had no reason to emit a stop marker. A
+                paired test that fixed only the stop token returned byte-identical answers, 7 of 7.
               </p>
             </div>
             <div>
