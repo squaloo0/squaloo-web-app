@@ -208,14 +208,41 @@ export default function MeasuredPage() {
               </p>
             </div>
             <div>
-              <div className="text-white text-base mb-2">The slower model is the smaller one, and that is the coupling with a stopwatch on it</div>
-              <p className="text-neutral-400 text-sm leading-relaxed">
+              <div className="text-white text-base mb-2">The slower model is the smaller one</div>
+              <p className="text-neutral-400 text-sm leading-relaxed mb-4">
                 A third of the parameters and 50% slower. The reason is length: a median answer of 1,169
                 characters against 250, roughly 4.7× more text, with most generations ending mid-clause
-                at the length cap. The scaffold&apos;s stop-markers are ones this model never emits, so
-                generation simply never stopped. It is not a slow model; it was
-                <span className="text-white"> never told to stop</span>.
+                at the length cap.
               </p>
+              {/* The original explanation was withdrawn the following day. It is shown
+                  struck through rather than deleted: a page that quietly swaps a wrong
+                  explanation for a right one is asking to be trusted on exactly the
+                  thing it just got wrong. */}
+              <div className="border-l-2 pl-5 py-1" style={{ borderColor: AMBER }}>
+                <div className="text-xs font-mono tracking-widest uppercase mb-3" style={{ color: AMBER }}>
+                  Corrected 2026-09-29 — we had the cause wrong
+                </div>
+                <p className="text-neutral-500 text-sm leading-relaxed mb-3">
+                  <span className="line-through">We first published this as a stop-token problem: the
+                  scaffold&apos;s stop-markers are ones this model never emits, so generation never
+                  stopped — &ldquo;it was never told to stop.&rdquo;</span>
+                </p>
+                <p className="text-neutral-400 text-sm leading-relaxed mb-3">
+                  <span className="text-white">That explanation is withdrawn.</span> A paired test the
+                  next day changed exactly one thing — the stop sequence, corrected to this model&apos;s
+                  own end token — and the answers came back{" "}
+                  <span className="text-white">byte-identical, 7 of 7</span>. Not shorter, not faster,
+                  not one character different. Fixing the stop token changed nothing, so the stop token
+                  was never the cause.
+                </p>
+                <p className="text-neutral-400 text-sm leading-relaxed">
+                  The real cause is the one the comparison named at the top and then talked itself past:
+                  <span className="text-white"> the prompt template</span>. A stop sequence can only fire
+                  on a token the model actually emits, and this model was never put into its own template,
+                  so it had no reason to emit either marker. Stopping on one never-generated token is
+                  exactly as useless as stopping on another.
+                </p>
+              </div>
             </div>
             <div>
               <div className="text-white text-base mb-2">Eleven citations are marked unverified, and stay that way</div>
