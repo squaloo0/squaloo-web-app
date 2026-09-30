@@ -2,6 +2,7 @@ import Link from "next/link";
 import AppFooter from "@/components/AppFooter";
 import SolomonLayerDiagram from "@/components/SolomonLayerDiagram";
 import { streak, veteranFix, latest, asOf } from "@/data/ledger";
+import Wordmark from "@/components/Wordmark";
 
 export const metadata = {
   title: "Squaloo — Solomon, the trust and verification layer for edge AI",
@@ -15,7 +16,7 @@ export default function Home() {
       {/* Nav */}
       <nav className="fixed top-0 left-0 right-0 z-50 border-b border-neutral-900 bg-black/90 backdrop-blur-sm">
         <div className="max-w-5xl mx-auto px-8 h-14 flex items-center justify-between">
-          <span className="text-white text-sm font-bold tracking-[0.2em] font-mono">SQUALOO</span>
+          <Wordmark />
           <div className="flex items-center gap-6">
             <Link href="/solomon" className="text-neutral-500 text-xs tracking-widest uppercase font-mono hover:text-white transition-colors">Solomon</Link>
             <Link href="/build" className="text-neutral-500 text-xs tracking-widest uppercase font-mono hover:text-white transition-colors">The Build</Link>
