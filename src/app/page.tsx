@@ -36,23 +36,22 @@ export default function Home() {
             Solomon is the <span className="text-[#5688c7]">trust and verification</span> layer for edge and agentic AI.
           </h1>
           <p className="text-neutral-400 text-lg leading-relaxed max-w-2xl mb-5">
-            AI that runs outside a datacenter still has to answer two questions nobody has made it
-            answer: <span className="text-white">how do you know that</span>, and{" "}
-            <span className="text-white">who is checking</span>. Solomon is the layer that makes both
-            answerable — custody you can point to, and verification anyone can re-run. Squaloo builds it.
+            AI running outside a datacenter has two questions no one has made it answer:{" "}
+            <span className="text-white">how do you know that</span>, and{" "}
+            <span className="text-white">who is checking</span>. Solomon makes both answerable: custody
+            you can point to, and verification anyone can re-run. Squaloo builds it.
           </p>
+          {/* SQU-288: founder call — move or cut */}
           <p className="text-neutral-400 text-lg leading-relaxed max-w-2xl">
             It exists because our founder, <span className="text-white">Marshal Aldoph</span>, spent
             an engineering career entirely inside the model era and kept hitting the same wall: the
             answer was confident, and nothing behind it could be checked.
           </p>
           <p className="text-neutral-400 text-lg leading-relaxed max-w-2xl">
-            <span className="text-white">Solomon&apos;s first use case is industrial operations</span> —
-            because that is where verification and custody are already legally mandatory (ITAR, CMMC,
-            plants the cloud cannot legally or physically reach) and still unsolved. It is also the
-            hardest room to be vague in: the first person we build for is a technician standing at a
-            broken machine, deciding whether to trust an answer before acting on it. A first use
-            case, not the limit of what the layer is for.
+            <span className="text-white">Solomon&apos;s first use case is industrial operations</span>,
+            where verification and custody are already legally mandatory (ITAR, CMMC, plants the cloud
+            cannot legally or physically reach) and still unsolved. The first person we build for is a
+            technician at a broken machine, deciding whether to trust an answer before acting on it.
           </p>
         </section>
 
@@ -64,8 +63,8 @@ export default function Home() {
           </div>
           <SolomonLayerDiagram />
           <p className="text-neutral-500 text-sm leading-relaxed max-w-2xl mx-auto text-center mt-8">
-            Cut the link between the brain and the bodies and everything below it keeps working.
-            The numbers behind the ruler — with their dates, and the method to recompute them — are on the{" "}
+            Cut the link between the brain and the bodies, and everything below it keeps working.
+            The numbers, dated and recomputable, are on the{" "}
             <Link href="/measured" className="text-[#5688c7] hover:text-white transition-colors">measurements page</Link>.
           </p>
         </section>
@@ -82,9 +81,9 @@ export default function Home() {
               <div className="text-xs font-mono tracking-widest uppercase text-neutral-500 mb-3">Measured nightly</div>
               <div className="text-2xl font-bold font-mono text-white mb-3 tabular-nums">{streak.count} clean runs</div>
               <p className="text-neutral-400 text-sm leading-relaxed">
-                Consecutive clean nightly comparisons, {streak.from} → {streak.to}. Counted from the
-                committed artifacts, not asserted — and these are consecutive <em>runs</em>: one
-                calendar night in that window has no artifact.
+                Consecutive clean nightly comparisons, {streak.from} → {streak.to}, counted from the
+                committed artifacts. Consecutive <em>runs</em>, not nights: one calendar night in that
+                window has no artifact.
               </p>
             </div>
             <div className="border border-neutral-800 p-6">
@@ -95,8 +94,8 @@ export default function Home() {
                 ))}
               </div>
               <p className="text-neutral-400 text-sm leading-relaxed">
-                The actual sources carried by one answer in the {latest.date} run — the manual and
-                the veteran&apos;s log, side by side. Engine-derived; the model cannot author them.
+                The sources carried by one answer in the {latest.date} run: the manual and the
+                veteran&apos;s log, side by side. The engine attaches them; the model cannot author them.
               </p>
             </div>
             <div className="border border-neutral-800 p-6">
@@ -110,8 +109,8 @@ export default function Home() {
             </div>
           </div>
           <p className="text-neutral-500 text-sm mt-6 max-w-3xl leading-relaxed">
-            Every number on this site carries the date it was true and the boundary it holds within.
-            Where we have been wrong — including on this page — the correction is in the record.
+            Every number here is dated and scoped. Where we were wrong, including on this page, the
+            correction is in the record.
           </p>
         </section>
 
@@ -124,13 +123,13 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {[
               { href: "/solomon", k: "Solomon", t: "The product",
-                d: "The layer itself — answers at the machine, offline, with their sources attached and checkable." },
+                d: "Answers at the machine, offline, with sources attached and checkable." },
               { href: "/build", k: "The build", t: "The discipline",
-                d: "One founder, AI engineering agents, a human gate on every change — and a public record of the misses." },
+                d: "One founder, AI engineering agents, a human gate on every change, and a public record of the misses." },
               { href: "/measured", k: "Measured", t: "The ruler",
-                d: "The contract a model must satisfy, the nightly numbers, and the method to recompute them yourself." },
+                d: "The contract a model must satisfy, the nightly numbers, and how to recompute them yourself." },
               { href: "/roadmap", k: "Roadmap", t: "What is not proved yet",
-                d: "The promises we have made and have not kept yet, with an honest status on each — published before the date, not after." },
+                d: "Promises not yet kept, each with its status, published before the date, not after." },
             ].map((c) => (
               <Link key={c.href} href={c.href}
                     className="group border border-neutral-800 p-6 hover:border-[#1400bf] transition-colors block">
@@ -146,10 +145,9 @@ export default function Home() {
         <section className="border border-neutral-800 p-10">
           <div className="text-xs font-mono tracking-widest uppercase text-[#63a375] mb-4">Get in touch</div>
           <p className="text-neutral-300 text-lg leading-relaxed max-w-3xl mb-8">
-            If any of this is useful to you — a facility with machines that cannot afford to forget,
-            a question about how the verification actually works, or a claim on this site you want
-            to check — write to us. We answer technical questions with the artifact attached, and we
-            will run the demo live, on a machine with its network disconnected, for anyone who asks.
+            Machines that cannot afford to forget, a question about how the verification works, or a
+            claim here you want to check? Write to us. We answer technical questions with the artifact
+            attached, and we will run the demo live, network disconnected, for anyone who asks.
           </p>
           <div className="flex flex-wrap gap-4">
             <a href="mailto:marshal@squaloo.com" className="px-6 py-3 bg-[#1400bf] text-white text-sm font-medium tracking-wide hover:bg-[#5688c7] transition-colors">
