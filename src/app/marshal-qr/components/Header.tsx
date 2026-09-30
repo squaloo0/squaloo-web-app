@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Wordmark from "@/components/Wordmark";
 
 export default function Header() {
   const [scrolled, setScrolled] = useState(false);
@@ -73,9 +74,9 @@ export default function Header() {
               <div className="flex items-center gap-4">
                 <Link
                   href="/"
-                  className="text-xs font-mono tracking-widest text-gray-600 hover:text-gray-300 transition-colors uppercase"
+                  className="group inline-flex items-center gap-1.5 text-xs font-mono tracking-widest text-gray-600 hover:text-gray-300 transition-colors uppercase"
                 >
-                  ← Squaloo
+                  ← <Wordmark className="h-3.5 opacity-60 group-hover:opacity-100 transition-opacity" />
                 </Link>
                 <span className="text-gray-800 hidden sm:inline">|</span>
                 <div className="hidden sm:flex items-center">
