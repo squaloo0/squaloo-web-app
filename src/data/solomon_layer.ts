@@ -35,9 +35,9 @@ export const spine = {
 
 /** Stratum 3 — compute. Same anatomy on every box: learn it once, it travels. */
 export const bodies: Body[] = [
-  { name: "In the building", note: "a box on your own network" },
-  { name: "At the machine", note: "portable, no signal needed" },
-  { name: "Whatever's next", note: "new hardware, same contract" },
+  { name: "In the building", note: "A box on your own network" },
+  { name: "At the machine", note: "Portable, no signal needed" },
+  { name: "Whatever's next", note: "New hardware, same contract" },
 ];
 
 /**
@@ -48,10 +48,14 @@ export const bodies: Body[] = [
  * "Published methodology", not "open standard": the methodology page is live,
  * but a standard implies adoption by someone other than its author, and nobody
  * has adopted this one yet. Claim no further than the surface that exists.
+ *
+ * Items name what the ruler DOES, not what it guarantees (SQU-288 polish):
+ * "Citations checked", not "Answers cited" -- /measured reports citation
+ * compliance below 100%, so a guarantee-shaped label would overclaim.
  */
 export const ruler = {
   title: "The ruler",
-  items: ["Answers cited", "Speed per machine", "Checked nightly", "Method published"],
+  items: ["Citations checked", "Speed per machine", "Run nightly", "Method published"],
   /** Always rendered, at every width — geometry carries the claim, and so do words. */
   microLabel: "measures the bodies — never your brain",
 };
@@ -66,5 +70,8 @@ export const fidelity = {
   body:
     "A body's memory is a truncated prefix of the brain's — the more exposed the box, the less reconstructable what it carries. By construction, not by policy.",
 };
+
+/** The dashed cut across the sync: plain words, not "severable". */
+export const cutLabel = "can be cut";
 
 export const caption = "Any body. Any model. Same contract.";
