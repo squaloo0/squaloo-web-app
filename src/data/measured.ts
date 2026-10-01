@@ -91,10 +91,10 @@ export type Gap = {
 /** Failing or incomplete results, each with the team that owns the fix. */
 export const gaps: Gap[] = [
     {
-    title: "Conflict precedence — CLOSED, and now the strongest row on the page",
+    title: "Conflict precedence — CLOSED",
     measured: `100% — ${veteranFix.passes} of ${veteranFix.scored} scored observations, as of ${ledgerAsOf}`,
     what:
-      "When the veteran's log contradicts the manual, the log's fix should lead the answer. It now does, in every scored run on the nightly trail, zero failures. Boundaries that travel with it and are not optional: the metric scores ONE scripted scenario (act3-e207-primary; the other six queries report n/a), and the rate is prompt-scoped — the same check measured 60% across 5 runs under a different prompt variant on 2026-09-09. It evidences the behaviour on a repeated case, not as a general property. This row read 0% when the page froze; the work landed and the page did not.",
+      "When the veteran's log contradicts the manual, the log's fix should lead the answer. It now does, in every scored run on the nightly trail, zero failures. Two boundaries travel with it: the metric scores ONE scripted scenario (act3-e207-primary; the other six queries report n/a), and the rate is prompt-scoped: the same check measured 60% across 5 runs under a different prompt variant on 2026-09-09. It evidences the behaviour on a repeated case, not as a general property. This row read 0% when the page froze; the work landed and the page did not.",
     owner: "closed — engine team",
   },
   {
@@ -108,7 +108,7 @@ export const gaps: Gap[] = [
     title: "Inline citation compliance",
     measured: "82% across 21 runs",
     what:
-      "Every answer ships with engine-derived sources — that part is architectural and cannot fail. This metric is narrower: whether the model placed the tags inline, next to the step they support. On E-150 it did so 0% of the time. The known degradation at wider retrieval was fixed and shipped; this residual at k=3 has no dedicated ticket yet and is tracked by the harness.",
+      "Every answer ships with engine-derived sources; that part is architectural and cannot fail. This metric is narrower: whether the model placed the tags inline, next to the step they support. On E-150 it did so 0% of the time. The known degradation at wider retrieval was fixed and shipped; this residual at k=3 has no dedicated ticket yet and is tracked by the harness.",
     owner: "no owner yet — tracked by the harness",
   },
   {
@@ -204,7 +204,7 @@ export const recompute = {
   rule:
     "Every number here carries how many runs it covers, which machine produced it, which configuration, and the date it was true. A headline number we cannot recompute from our committed evidence files does not get published.",
   method:
-    "Results are written to dated evidence files, one per run, committed as they are produced. To check a figure, read every committed file, take the rows for the question in play, and count the recorded verdicts. That is the whole method — no spreadsheet, no summary document that could drift from the files.",
+    "Results are written to dated evidence files, one per run, committed as they are produced. To check a figure, read every committed file, take the rows for the question in play, and count the recorded verdicts. That is the whole method: no spreadsheet or summary document that could drift from the files.",
   decay:
-    "Counts that cover a growing series are published with an as-of date, because they move. If a figure here is older than the newest evidence file, it is stale by definition rather than by suspicion — and you can tell without asking us.",
+    "Counts that cover a growing series are published with an as-of date, because they move. If a figure here is older than the newest evidence file, it is stale by definition, and you can tell without asking us.",
 };

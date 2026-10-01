@@ -57,18 +57,15 @@ export default function MeasuredPage() {
             Our numbers, including the ones that don&apos;t flatter us.
           </h1>
           <p className="text-neutral-400 text-lg leading-relaxed max-w-2xl mb-6">
-            Solomon is graded by an eval harness that runs scripted maintenance questions against the
-            real corpus and scores the answers. The same harness gates every model change. This page
-            publishes what it found, unedited.
+            When this page first went up, our flagship demo question scored{" "}
+            <span style={{ color: AMBER }} className="font-mono">0% correctness</span>, three times out
+            of three, and we published the artifact anyway. It now scores{" "}
+            <span style={{ color: GREEN }} className="font-mono">100%, {veteranFix.passes} of {veteranFix.scored} scored observations</span>,
+            and the original row is still below with its date on it.
           </p>
           <p className="text-neutral-400 text-lg leading-relaxed max-w-2xl mb-6">
-            When this page first went up, our flagship demo question scored{" "}
-            <span style={{ color: AMBER }} className="font-mono">0% correctness</span> — three times out
-            of three — and we published the artifact anyway. It now scores{" "}
-            <span style={{ color: GREEN }} className="font-mono">100%, {veteranFix.passes} of {veteranFix.scored} scored observations</span>,
-            and the original row is still below with its date on it. A vendor who only shows you the good
-            runs is showing you marketing; a vendor who deletes the bad ones once they are fixed is doing
-            the same thing more slowly.
+            An eval harness runs scripted maintenance questions against the real corpus, scores the
+            answers, and gates every model change. This page publishes what it found, unedited.
           </p>
           <p className="text-neutral-500 text-sm leading-relaxed max-w-2xl">
             Current as of <span className="text-neutral-300 font-mono">{ledgerAsOf}</span>. Latest nightly:{" "}
@@ -87,11 +84,10 @@ export default function MeasuredPage() {
             <span className="text-neutral-600 text-xs font-mono">as of {ledgerAsOf}</span>
           </div>
           <p className="text-neutral-400 text-sm leading-relaxed max-w-3xl mb-8">
-            The ruler does not belong to a model. Any model we run goes through the same harness,
-            unmodified, and is scored against the same contract. This section is the current state of
-            that testing — it changes as models come through, and the figures below always name the
-            run they came from. Each machine is measured against its own budget, not a fleet-wide one
-            — a laptop and a credit-card-sized computer are not the same promise (amended 2026-09-27).
+            The ruler does not belong to a model: every model runs through the same harness,
+            unmodified, against the same contract. Each
+            machine is measured against its own budget, not a fleet-wide one: a laptop and a
+            credit-card-sized computer are not the same promise (amended 2026-09-27).
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
             <div className="border border-neutral-800 p-6">
@@ -106,11 +102,10 @@ export default function MeasuredPage() {
               <div className="text-xs font-mono tracking-widest uppercase mb-2" style={{ color: "#d98c5f" }}>In testing now</div>
               <div className="text-white text-base mb-2">A second, unrelated open model</div>
               <p className="text-neutral-400 text-sm leading-relaxed">
-                Going through this harness with <span className="text-white">zero engine changes</span> —
-                the experiment that could falsify our central claim. Scored on truth checks only; speed
-                is reported but does not gate, because today&apos;s budgets were measured against
-                today&apos;s model and would otherwise be marking their own homework.{" "}
-                <span className="text-white">Results below — 2026-09-28. The binding held; it also showed us exactly where the coupling is.</span>
+                Going through this harness with <span className="text-white">zero engine changes</span>.
+                Scored on truth checks only; speed is reported but does not gate, because today&apos;s
+                budgets were measured against today&apos;s model.{" "}
+                <span className="text-white">Results below, 2026-09-28: the binding held, and it showed exactly where the coupling is.</span>
               </p>
             </div>
           </div>
@@ -133,21 +128,18 @@ export default function MeasuredPage() {
             </div>
             <p className="text-neutral-300 text-base leading-relaxed mb-4">
               What is being tested is <span className="text-white">the harness as it ships, prompts
-              included, given a second model</span> — not which model is better. The second model was
+              included, given a second model</span>, not which model is better. The second model was
               handed Phi-3&apos;s chat scaffold <span className="text-white">verbatim</span>,
               including turn-markers it does not emit, because that is what &ldquo;runs on our harness
-              unchanged&rdquo; actually means.
+              unchanged&rdquo; means.
             </p>
             <p className="text-neutral-300 text-base leading-relaxed mb-4">
               <span className="text-white">Every gap below is evidence about the coupling, not about
-              Qwen&apos;s capability.</span> Quoting these as &ldquo;Qwen is worse than Phi-3&rdquo;
-              would state something this experiment did not test — in the direction that flatters the
-              model we already ship.
+              Qwen&apos;s capability.</span>
             </p>
             <p className="text-neutral-300 text-base leading-relaxed">
-              The symmetric reading is equally wrong: <span className="text-white">76% cannot be read as
-              near-parity either.</span> Four points apart on correctness sits beside a refusal-honesty
-              figure that went to zero. A model adapted to its own prompt format is a separate,
+              <span className="text-white">Nor is 76% near-parity.</span> Four points apart on
+              correctness sits beside a refusal-honesty figure that went to zero. A model adapted to its own prompt format is a separate,
               labelled experiment. It has not been run.
             </p>
           </div>
@@ -186,26 +178,23 @@ export default function MeasuredPage() {
               <div className="text-white text-base mb-2">Identical recall is the control, not a coincidence</div>
               <p className="text-neutral-400 text-sm leading-relaxed">
                 50% on both. Retrieval runs <em>before</em> generation and does not depend on the model,
-                so an identical figure is exactly what a correctly wired comparison must produce. Had it
+                so an identical figure is what a correctly wired comparison must produce. Had it
                 differed, the comparison itself would be suspect. It is the strongest single piece of
-                evidence that the harness treated both models the same — the experiment proving its own
-                wiring before you read anything else in the table.
+                evidence that the harness treated both models the same.
               </p>
             </div>
             <div className="border-l-2 pl-5" style={{ borderColor: AMBER }}>
               <div className="text-white text-base mb-2">The finding that matters: refusal honesty went to zero</div>
               <p className="text-neutral-400 text-sm leading-relaxed mb-3">
-                One question in the set has only one correct answer: a refusal. The production model
-                refused cleanly, three times out of three. The second model said the refusal sentence
-                and then kept going — restating the instruction it had just been given, followed by
-                citation tags, until it hit the length cap.
+                One question has only one correct answer: a refusal. The production model refused
+                cleanly, three times out of three. The second model said the refusal sentence and kept
+                going, restating its instruction and then emitting citation tags until the length cap.
               </p>
               <p className="text-neutral-400 text-sm leading-relaxed">
-                The scorer marked that <span className="text-white">not a refusal</span>, and that is
-                correct: a refusal requires the phrase <em>and</em> the absence of substance, because
-                anything cited or enumerated is an answer however it hedges. Scoring it as a clean
-                refusal would have been generous to the point of dishonesty — a technician reading it
-                gets a wall of citations to a question we have no documentation for.
+                The scorer marked that <span className="text-white">not a refusal</span>, correctly: a
+                refusal requires the phrase <em>and</em> the absence of substance, because anything
+                cited or enumerated is an answer however it hedges. A technician reading it gets a wall
+                of citations to a question we have no documentation for.
               </p>
             </div>
             <div>
@@ -222,13 +211,12 @@ export default function MeasuredPage() {
             <div>
               <div className="text-white text-base mb-2">Eleven citations are marked unverified, and stay that way</div>
               <p className="text-neutral-400 text-sm leading-relaxed">
-                The second model produced 11 rows carrying citations the run could not check against the
+                The second model produced 11 rows with citations the run could not check against the
                 corpus, against 4 for the production model. They are tagged
-                <span className="text-white"> unverified</span> — our third citation tier, meaning
-                neither confirmed nor refuted. That is a recorded observation,
+                <span className="text-white"> unverified</span>, our third citation tier: neither
+                confirmed nor refuted. That is a recorded observation,
                 <span className="text-white"> not a finding that they were fabricated</span>, and it
-                stays unverified here until a corpus check settles it. &ldquo;Unverified&rdquo; is a state
-                we publish, not a gap to smooth over in either direction.
+                stays unverified here until a corpus check settles it.
               </p>
             </div>
           </div>
@@ -236,22 +224,19 @@ export default function MeasuredPage() {
           <div className="border border-neutral-800 p-6 mt-10 max-w-3xl">
             <div className="text-xs font-mono tracking-widest uppercase text-neutral-500 mb-3">How it was run</div>
             <p className="text-neutral-400 text-sm leading-relaxed">
-              One sweep, both models, one artifact — <span className="text-white">zero engine changes and
-              zero harness changes</span>. Same machine, because comparing across machines would confuse
-              the model with the hardware. Same corpus by construction (one digest, 41 passages, 31
+              One sweep, both models, one artifact: <span className="text-white">zero engine changes and
+              zero harness changes</span>. Same machine, so the model is not confused with the hardware. Same corpus by construction (one digest, 41 passages, 31
               documents), same sampling settings, same fixed seed chain, each model loaded sequentially
               in its own isolated container. Memory and speed budgets are reported but do not grade here:
-              those constants were measured against the production model, so holding a different model to
-              them would be marking our own homework.
+              they were measured against the production model.
             </p>
           </div>
 
           <p className="text-neutral-300 text-base leading-relaxed max-w-3xl mt-8">
             The verdict the experiment was pre-registered to answer:{" "}
             <span className="text-white">the harness bound a second model to the same measured contracts
-            with no changes to the engine, the scorer, or the ruler — and reported the truth about what
-            happened.</span> Where it held and where it broke were both measured, here, rather than
-            discovered later on a stage.
+            with no changes to the engine, the scorer, or the ruler, and reported the truth about what
+            happened.</span> Where it held and where it broke were both measured, here.
           </p>
         </section>
 
@@ -302,10 +287,10 @@ export default function MeasuredPage() {
             <div className="h-px flex-1 bg-neutral-800" />
           </div>
           <p className="text-neutral-400 text-sm leading-relaxed max-w-2xl mb-10">
-            A single average would mislead here, so here is the distribution. Each question&apos;s first
-            run pays a cold-start cost — loading a multi-gigabyte model off disk. Every run after it is
-            warm. Refusals are fastest of all, because when retrieval comes back empty the engine answers
-            &ldquo;I don&apos;t have documentation for that&rdquo; without loading the model at all.
+            Each question&apos;s first run pays a cold-start cost: loading a multi-gigabyte model off
+            disk. Every run after it is warm. Refusals are fastest, because when retrieval comes back
+            empty the engine answers &ldquo;I don&apos;t have documentation for that&rdquo; without
+            loading the model.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
             {[
@@ -339,8 +324,8 @@ export default function MeasuredPage() {
           </div>
           <p className="text-neutral-500 text-xs leading-relaxed max-w-2xl">
             The fastest run in the set was a refusal at {secs(latency.fastestRefusalMs)}; the slowest was
-            a cold start at {secs(latency.slowestMs)}. We warm the engine before a demo — a real
-            operational caveat, and not a number we get to quote as typical.
+            a cold start at {secs(latency.slowestMs)}. We warm the engine before a demo: an operational
+            caveat, not a number to quote as typical.
           </p>
         </section>
 
@@ -416,7 +401,7 @@ export default function MeasuredPage() {
           </div>
           <p className="text-neutral-600 text-xs leading-relaxed max-w-2xl mt-6">
             Ticket identifiers are the durable reference for each fix. Our tracker is private, so these
-            are labels rather than links — ask, and we will walk you through any of them.
+            are labels, not links. Ask, and we will walk you through any of them.
           </p>
         </section>
 
@@ -428,14 +413,14 @@ export default function MeasuredPage() {
             <span className="text-neutral-600 text-xs font-mono">as of {ledgerAsOf}</span>
           </div>
           <p className="text-neutral-400 text-sm leading-relaxed max-w-3xl mb-3">
-            This page used to show one run and promise a trend. Here is the trend: every committed
-            nightly artifact, its machine, and the verdict of comparing it against the night before.
+            Every committed nightly artifact, its machine, and the verdict of comparing it against the
+            night before.
           </p>
           <p className="text-neutral-300 text-sm leading-relaxed max-w-3xl mb-8">
             <span className="text-white">{streak.count} consecutive clean runs</span>, {streak.from} → {streak.to}.
-            Two boundaries travel with that number and we will not drop them: the run before the streak
-            could not be compared at all (a changed composition, not a regression), and one calendar
-            night in the window has no artifact — so these are consecutive <em>runs</em>, not consecutive nights.
+            Two boundaries travel with that number: the run before the streak could not be compared at
+            all (a changed composition, not a regression), and one calendar night in the window has no
+            artifact, so these are consecutive <em>runs</em>, not consecutive nights.
           </p>
           <div className="overflow-x-auto overflow-y-auto max-h-[28rem] border border-neutral-900">
             <table className="w-full text-sm border-collapse">
@@ -462,9 +447,9 @@ export default function MeasuredPage() {
             </table>
           </div>
           <p className="text-neutral-500 text-xs leading-relaxed max-w-3xl mt-5">
-            &ldquo;Machine not recorded&rdquo; on the earliest rows is honest, not missing data: artifacts did not
-            carry a machine identity until 2026-09-17. A blank corpus digest means the same — the field
-            did not exist yet. We left those rows in rather than starting the table where it flatters us.
+            &ldquo;Machine not recorded&rdquo; on the earliest rows is not missing data: artifacts did not
+            carry a machine identity until 2026-09-17. A blank corpus digest means the same: the field
+            did not exist yet. Those rows stay in.
           </p>
         </section>
 
@@ -475,9 +460,8 @@ export default function MeasuredPage() {
             <div className="h-px flex-1 bg-neutral-800" />
           </div>
           <p className="text-neutral-400 text-sm leading-relaxed max-w-3xl mb-8">
-            A number moving is not the interesting part. The interesting part is what the measurement
-            caught that nobody else did — including when what it caught was us. These are written up
-            in full, and new ones appear here as they are published.
+            What the measurement caught that nobody else did, including when what it caught was us.
+            Written up in full; new ones appear here as they are published.
           </p>
           <div className="space-y-0">
             {getPostsByTag("measured").map((post) => (
@@ -504,7 +488,7 @@ export default function MeasuredPage() {
             {[
               [
                 "The harness",
-                "A script builds the engine image with the model baked in, seeds the demo corpus through the real ingestion pipeline, runs each scripted question N times in an isolated container, and writes a dated JSON artifact. It prints GO or NO-GO. By its own gate logic, that particular deep run was a NO-GO — the nightly ledger below records the verdict of every run since.",
+                "A script builds the engine image with the model baked in, seeds the demo corpus through the real ingestion pipeline, runs each scripted question N times in an isolated container, and writes a dated JSON artifact. It prints GO or NO-GO. By its own gate logic, that deep run was a NO-GO; the nightly ledger below records the verdict of every run since.",
               ],
               [
                 "Correctness",
@@ -516,7 +500,7 @@ export default function MeasuredPage() {
               ],
               [
                 "Citations",
-                "Every answer carries sources derived by the engine from the retrieved passages — the model cannot invent them, and an answer cannot ship without them. The percentage here measures something narrower: whether the model also placed those tags inline, beside the step they support.",
+                "Every answer carries sources the engine derives from the retrieved passages; the model cannot invent them, and an answer cannot ship without them. The percentage here measures something narrower: whether the model also placed those tags inline, beside the step they support.",
               ],
               [
                 "Retrieval",
@@ -524,7 +508,7 @@ export default function MeasuredPage() {
               ],
               [
                 "What is not here",
-                "Everything in this block describes the deep run only — one dated snapshot, scored question by question. It is not the trend and not the current state: the nightly ledger below is the trend, and the comparison above is the current state. Artifacts now record the machine they ran on, so results can be read per body.",
+                "Everything in this block describes the deep run only: one dated snapshot, scored question by question. The nightly ledger below is the trend; the comparison above is the current state. Artifacts now record the machine they ran on, so results can be read per body.",
               ],
             ].map(([h, b]) => (
               <div key={h}>
@@ -542,9 +526,8 @@ export default function MeasuredPage() {
             <div className="h-px flex-1 bg-neutral-800" />
           </div>
           <p className="text-neutral-400 text-sm leading-relaxed max-w-2xl mb-10">
-            People ask what standard we provide. This is it. The standard is the measured
-            contract, not the model — any model we run is scored against these clauses by the same
-            harness, unmodified. One that fails a clause does not ship, however well it reads.
+            The standard is the measured contract, not the model. Any model we run is scored against
+            these clauses by the same harness, unmodified. One that fails a clause does not ship, however well it reads.
             Each clause says how it is checked and what would count as failing it.
           </p>
           <div className="space-y-0">
@@ -595,10 +578,9 @@ export default function MeasuredPage() {
         <section className="border border-neutral-800 p-10">
           <div className="text-xs font-mono tracking-widest uppercase text-[#63a375] mb-4">Ask about a number</div>
           <p className="text-neutral-300 text-lg leading-relaxed max-w-3xl mb-8">
-            Every figure on this page names the run it came from and the date it was true, and the
-            method to recompute it is published above. If one of them does not add up, or you want to
-            watch a run happen live on a machine with its network disconnected, ask — we answer
-            questions about the data with the artifact attached.
+            Every figure on this page names its run and the date it was true, and the recompute method
+            is above. If one does not add up, or you want to watch a run live on a machine with its
+            network disconnected, ask. We answer questions about the data with the artifact attached.
           </p>
           <a
             href="mailto:marshal@squaloo.com?subject=Solomon%20%E2%80%94%20a%20question%20about%20the%20numbers"
