@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Wordmark from "@/components/Wordmark";
 
 export default function ShopHeader() {
   return (
@@ -6,8 +7,8 @@ export default function ShopHeader() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center py-4">
           {/* Logo */}
-          <Link href="/" className="text-2xl font-bold text-gray-900">
-            SQUALOO
+          <Link href="/" className="inline-flex items-center">
+            <Wordmark variant="light" className="h-7" />
           </Link>
 
           {/* Navigation */}

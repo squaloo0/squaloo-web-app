@@ -1,6 +1,7 @@
 import Link from "next/link";
 import PillarCard from "@/components/PillarCard";
 import AppFooter from "@/components/AppFooter";
+import Wordmark from "@/components/Wordmark";
 
 export const metadata = {
   title: "Founder — Marshal Aldoph",
@@ -102,9 +103,9 @@ export default function FounderPage() {
         <div className="max-w-5xl mx-auto px-8 h-14 flex items-center justify-between">
           <Link
             href="/"
-            className="text-neutral-600 text-xs tracking-widest uppercase font-mono hover:text-white transition-colors"
+            className="group inline-flex items-center gap-1.5 text-neutral-600 text-xs tracking-widest uppercase font-mono hover:text-white transition-colors"
           >
-            ← Squaloo
+            ← <Wordmark className="h-3.5 opacity-60 group-hover:opacity-100 transition-opacity" />
           </Link>
           <div className="flex items-center gap-8">
             <a href="#capabilities" className="text-neutral-500 text-xs tracking-widest uppercase hover:text-white transition-colors">
@@ -245,9 +246,9 @@ export default function FounderPage() {
         <div className="flex justify-between items-center pt-8 border-t border-neutral-900">
           <Link
             href="/"
-            className="text-neutral-600 text-xs font-mono tracking-widest uppercase hover:text-white transition-colors"
+            className="group inline-flex items-center gap-1.5 text-neutral-600 text-xs font-mono tracking-widest uppercase hover:text-white transition-colors"
           >
-            ← Squaloo
+            ← <Wordmark className="h-3.5 opacity-60 group-hover:opacity-100 transition-opacity" />
           </Link>
           <Link
             href="/build"

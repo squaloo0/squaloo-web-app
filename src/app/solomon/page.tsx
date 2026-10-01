@@ -2,6 +2,7 @@ import Link from "next/link";
 import AppFooter from "@/components/AppFooter";
 import SolomonTranscript from "@/components/SolomonTranscript";
 import VideoEmbed from "@/components/VideoEmbed";
+import Wordmark from "@/components/Wordmark";
 
 export const metadata = {
   title: "Solomon — by Squaloo",
@@ -47,8 +48,8 @@ export default function SolomonPage() {
       {/* Nav */}
       <nav className="fixed top-0 left-0 right-0 z-50 border-b border-neutral-900 bg-black/90 backdrop-blur-sm">
         <div className="max-w-5xl mx-auto px-8 h-14 flex items-center justify-between">
-          <Link href="/" className="text-neutral-600 text-xs tracking-widest uppercase font-mono hover:text-white transition-colors">
-            ← Squaloo
+          <Link href="/" className="group inline-flex items-center gap-1.5 text-neutral-600 text-xs tracking-widest uppercase font-mono hover:text-white transition-colors">
+            ← <Wordmark className="h-3.5 opacity-60 group-hover:opacity-100 transition-opacity" />
           </Link>
           <div className="flex items-center gap-6">
             <a href="#how" className="text-neutral-500 text-xs tracking-widest uppercase font-mono hover:text-white transition-colors">How</a>

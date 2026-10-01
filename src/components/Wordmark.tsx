@@ -1,22 +1,29 @@
-// The one place the Squaloo wordmark is rendered.
+// The one place the Squaloo wordmark is rendered (SQU-285).
 //
-// Until the founder's asset is uploaded, WORDMARK_SRC is null and this renders
-// the text mark the site has always shown. The upload is two steps: drop the
-// file at public/brand/wordmark.svg, then set WORDMARK_SRC below.
+// The SVGs are generated, never hand-edited: brand/make_wordmark.py builds
+// them from the design tokens of solomon-os #237 (Mulish 800, -0.03em, accent
+// full stop). Text is converted to outlines, so no font loads at runtime.
 //
-// The text stays as the image's alt, so the brand name is never lost to
-// screen readers or to a failed image load.
+//   dark  : white ink, for the site's #08090a surfaces
+//   light : gray-900 ink, for light surfaces (the shop header)
+//
+// "Squaloo" stays as the alt, so the name survives screen readers and a
+// failed image load.
 
-const WORDMARK_SRC: string | null = null; // e.g. "/brand/wordmark.svg"
+const WORDMARK_SRC = {
+  dark: "/brand/wordmark.svg",
+  light: "/brand/wordmark-light.svg",
+} as const;
 
-export default function Wordmark({ className = "" }: { className?: string }) {
-  if (WORDMARK_SRC) {
-    // eslint-disable-next-line @next/next/no-img-element -- static SVG, no optimisation needed
-    return <img src={WORDMARK_SRC} alt="Squaloo" className={`h-5 w-auto ${className}`} />;
-  }
+type Props = {
+  variant?: keyof typeof WORDMARK_SRC;
+  // Height utility; width follows the SVG's aspect ratio.
+  className?: string;
+};
+
+export default function Wordmark({ variant = "dark", className = "h-5" }: Props) {
   return (
-    <span className={`text-white text-sm font-bold tracking-[0.2em] font-mono ${className}`}>
-      SQUALOO
-    </span>
+    // eslint-disable-next-line @next/next/no-img-element -- static SVG, no optimisation needed
+    <img src={WORDMARK_SRC[variant]} alt="Squaloo" className={`w-auto ${className}`} />
   );
 }

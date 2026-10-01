@@ -3,6 +3,7 @@ import AppFooter from "@/components/AppFooter";
 import { queryRows, latency, overall, run, gaps, contract, recompute } from "@/data/measured";
 import { nights, streak, asOf as ledgerAsOf, latest, veteranFix } from "@/data/ledger";
 import { getPostsByTag } from "@/lib/devlog";
+import Wordmark from "@/components/Wordmark";
 
 export const metadata = {
   title: "Measured — Squaloo",
@@ -36,8 +37,8 @@ export default function MeasuredPage() {
     <div className="min-h-screen bg-[#08090a] text-white flex flex-col">
       <nav className="fixed top-0 left-0 right-0 z-50 border-b border-neutral-900 bg-black/90 backdrop-blur-sm">
         <div className="max-w-5xl mx-auto px-8 h-14 flex items-center justify-between">
-          <Link href="/" className="text-neutral-600 text-xs tracking-widest uppercase font-mono hover:text-white transition-colors">
-            ← Squaloo
+          <Link href="/" className="group inline-flex items-center gap-1.5 text-neutral-600 text-xs tracking-widest uppercase font-mono hover:text-white transition-colors">
+            ← <Wordmark className="h-3.5 opacity-60 group-hover:opacity-100 transition-opacity" />
           </Link>
           <Link href="/solomon" className="text-neutral-500 text-xs tracking-widest uppercase font-mono hover:text-white transition-colors">
             Solomon →
