@@ -56,16 +56,15 @@ export default function MeasuredPage() {
             Our numbers, including the ones that don&apos;t flatter us.
           </h1>
           <p className="text-neutral-400 text-lg leading-relaxed max-w-2xl mb-6">
-            An eval harness grades Solomon: it runs scripted maintenance questions against the real
-            corpus and scores the answers. The same harness gates every model change. This page
-            publishes what it found, unedited.
-          </p>
-          <p className="text-neutral-400 text-lg leading-relaxed max-w-2xl mb-6">
             When this page first went up, our flagship demo question scored{" "}
             <span style={{ color: AMBER }} className="font-mono">0% correctness</span>, three times out
             of three, and we published the artifact anyway. It now scores{" "}
             <span style={{ color: GREEN }} className="font-mono">100%, {veteranFix.passes} of {veteranFix.scored} scored observations</span>,
             and the original row is still below with its date on it.
+          </p>
+          <p className="text-neutral-400 text-lg leading-relaxed max-w-2xl mb-6">
+            An eval harness runs scripted maintenance questions against the real corpus, scores the
+            answers, and gates every model change. This page publishes what it found, unedited.
           </p>
           <p className="text-neutral-500 text-sm leading-relaxed max-w-2xl">
             Current as of <span className="text-neutral-300 font-mono">{ledgerAsOf}</span>. Latest nightly:{" "}
@@ -85,7 +84,7 @@ export default function MeasuredPage() {
           </div>
           <p className="text-neutral-400 text-sm leading-relaxed max-w-3xl mb-8">
             The ruler does not belong to a model: every model runs through the same harness,
-            unmodified, against the same contract. The figures below name the run they came from. Each
+            unmodified, against the same contract. Each
             machine is measured against its own budget, not a fleet-wide one: a laptop and a
             credit-card-sized computer are not the same promise (amended 2026-09-27).
           </p>
@@ -135,8 +134,7 @@ export default function MeasuredPage() {
             </p>
             <p className="text-neutral-300 text-base leading-relaxed mb-4">
               <span className="text-white">Every gap below is evidence about the coupling, not about
-              Qwen&apos;s capability.</span> &ldquo;Qwen is worse than Phi-3&rdquo; is a claim this
-              experiment did not test.
+              Qwen&apos;s capability.</span>
             </p>
             <p className="text-neutral-300 text-base leading-relaxed">
               <span className="text-white">Nor is 76% near-parity.</span> Four points apart on
