@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { brain, spine, bodies, ruler, fidelity, caption } from "@/data/solomon_layer";
+import { brain, spine, bodies, ruler, fidelity, caption, cutLabel } from "@/data/solomon_layer";
 
 /**
  * The Solomon Layer — public reduction (SQU-271 precision pass over SQU-263 v0).
@@ -28,9 +28,10 @@ import { brain, spine, bodies, ruler, fidelity, caption } from "@/data/solomon_l
 // guessed constant. The band is now derived: wrap at a fixed character budget,
 // then make the band wide enough for that budget at this font size.
 const RULER_FS = 15;
-const RULER_MAX_CHARS = 15;
+const RULER_MAX_CHARS = 17; // longest item ("Speed per machine") fits on one line
 const CHAR_W = 0.58; // conservative advance for the site's sans stack
-const GUTTER_W = Math.ceil(RULER_MAX_CHARS * RULER_FS * CHAR_W) + 30;
+const BULLET_INDENT = 14; // hanging indent: wrapped lines align with the text, not the bullet
+const GUTTER_W = Math.ceil(RULER_MAX_CHARS * RULER_FS * CHAR_W) + 30 + BULLET_INDENT;
 
 function wrap(text: string, max: number): string[] {
   const out: string[] = [];
@@ -107,8 +108,8 @@ export default function SolomonLayerDiagram() {
         <desc id="sl-desc">
           Your brain holds the knowledge and never answers. One sync carries knowledge down into the
           bodies and carries experience home; that link is severable. Three bodies answer offline
-          under the same contract. A ruler spanning the sync and the bodies measures them, and does
-          not reach the brain.
+          under the same contract. A ruler spanning the sync and the bodies measures them (citations
+          checked, speed per machine, run nightly, method published) and does not reach the brain.
         </desc>
 
         <defs>
@@ -143,8 +144,8 @@ export default function SolomonLayerDiagram() {
           {/* ── Stratum 1 · custody. Above the ruler's reach. ── */}
           <rect x={PAD} y={BRAIN_Y} width={STACK_W} height={BRAIN_H} rx="3"
                 fill="rgba(86,136,199,0.10)" stroke={BLUE} strokeWidth="1.5" />
-          <text x={PAD + 20} y={BRAIN_Y + 40} fill="#fff" fontSize="23" fontWeight="600">{brain.title}</text>
-          <text x={PAD + 20} y={BRAIN_Y + 70} fill={DIM} fontSize="18">{brain.note}</text>
+          <text x={CX} y={BRAIN_Y + 40} textAnchor="middle" fill="#fff" fontSize="23" fontWeight="600">{brain.title}</text>
+          <text x={CX} y={BRAIN_Y + 70} textAnchor="middle" fill={DIM} fontSize="18">{brain.note}</text>
 
           {/* ── Connectors: the flow, drawn. Two channels, both gaps. ── */}
           {[[BRAIN_Y + BRAIN_H, SPINE_Y], [SPINE_Y + SPINE_H, BODIES_Y]].map(([y1, y2], i) => (
@@ -163,13 +164,13 @@ export default function SolomonLayerDiagram() {
               read as debris. It is a claim, so it is drawn as one. */}
           <line x1={DOWN_X - 34} y1={SPINE_Y - 16} x2={HOME_X + 34} y2={SPINE_Y - 16}
                 stroke={DIM} strokeWidth="1" strokeDasharray="5 5" />
-          <text x={HOME_X + 42} y={SPINE_Y - 11} fill={DIM} fontSize="13">severable</text>
+          <text x={HOME_X + 42} y={SPINE_Y - 11} fill={DIM} fontSize="13">{cutLabel}</text>
 
           {/* ── Stratum 2 · the sync ── */}
           <rect x={PAD} y={SPINE_Y} width={STACK_W} height={SPINE_H} rx="3"
                 fill="rgba(255,255,255,0.05)" stroke={LINE} strokeWidth="1.5" />
-          <text x={PAD + 20} y={SPINE_Y + 32} fill="#fff" fontSize="20" fontWeight="600">{spine.title}</text>
-          <text x={PAD + 20} y={SPINE_Y + 58} fill={DIM} fontSize="17">{spine.note}</text>
+          <text x={CX} y={SPINE_Y + 32} textAnchor="middle" fill="#fff" fontSize="20" fontWeight="600">{spine.title}</text>
+          <text x={CX} y={SPINE_Y + 58} textAnchor="middle" fill={DIM} fontSize="17">{spine.note}</text>
 
           {/* The pulse rides the arrows it is explaining. */}
           <circle className="sl-p sl-down" cx={DOWN_X} cy={BRAIN_Y + BRAIN_H + 6} r="5.5" fill={BLUE} />
@@ -202,8 +203,9 @@ export default function SolomonLayerDiagram() {
             let ln = 0;
             return ruler.items.map((it) => (
               <g key={it}>
+                <text x={GUTTER_X + 15} y={RULER_TOP + 62 + ln * 21} fill={AMBER} fontSize={RULER_FS} aria-hidden="true">•</text>
                 {wrap(it, RULER_MAX_CHARS).map((l) => (
-                  <text key={l} x={GUTTER_X + 15} y={RULER_TOP + 62 + ln++ * 21} fill={DIM} fontSize={RULER_FS}>{l}</text>
+                  <text key={l} x={GUTTER_X + 15 + BULLET_INDENT} y={RULER_TOP + 62 + ln++ * 21} fill={DIM} fontSize={RULER_FS}>{l}</text>
                 ))}
               </g>
             ));
