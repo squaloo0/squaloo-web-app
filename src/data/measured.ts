@@ -1,4 +1,12 @@
-import { veteranFix, asOf as ledgerAsOf } from "./ledger";
+/**
+ * Withdrawn 2026-10-02 (SQU-272 site-truth pass). The veteran-fix-leads figure
+ * was published as 100% on the scorer's verdict; read against the transcripts,
+ * the manual's fix led in most observations. Kept ONLY so the struck original
+ * can be shown as it was published. Never render it as a current figure.
+ */
+export const veteranFixWithdrawn = {
+  passes: 25, scored: 25, asOf: "2026-09-28", withdrawn: "2026-10-02",
+} as const;
 
 /**
  * Measured — eval artifact data for /measured.
@@ -86,16 +94,22 @@ export type Gap = {
    * published five of them live before anyone read it as an outsider would.
    */
   owner: string;
+  /** A published figure we withdrew: rendered struck through, never as current. */
+  withdrawn?: { was: string; on: string };
 };
 
 /** Failing or incomplete results, each with the team that owns the fix. */
 export const gaps: Gap[] = [
     {
-    title: "Conflict precedence — CLOSED",
-    measured: `100% — ${veteranFix.passes} of ${veteranFix.scored} scored observations, as of ${ledgerAsOf}`,
+    title: "Conflict precedence — REOPENED",
+    measured: "no current figure",
+    withdrawn: {
+      was: `100% — ${veteranFixWithdrawn.passes} of ${veteranFixWithdrawn.scored} scored observations, as of ${veteranFixWithdrawn.asOf}`,
+      on: veteranFixWithdrawn.withdrawn,
+    },
     what:
-      "When the veteran's log contradicts the manual, the log's fix should lead the answer. It now does, in every scored run on the nightly trail, zero failures. Two boundaries travel with it: the metric scores ONE scripted scenario (act3-e207-primary; the other six queries report n/a), and the rate is prompt-scoped: the same check measured 60% across 5 runs under a different prompt variant on 2026-09-09. It evidences the behaviour on a repeated case, not as a general property. This row read 0% when the page froze; the work landed and the page did not.",
-    owner: "closed — engine team",
+      "When the veteran's log contradicts the manual, the log's fix should lead the answer. We published that it did, in every scored run. That was the scorer's verdict, and on 2026-10-02 we found the scorer was wrong: it credited the veteran's fix whenever a citation footer naming him was attached, so an answer that led with the manual's fix and listed the veteran's last still passed. Read against the answers themselves, the manual's fix came first in most observations. What the answers do show is the veteran's fix surfaced and cited alongside the manual's. The figure is withdrawn, with no replacement until the scorer is fixed. Two boundaries applied to it while it stood: the metric scores ONE scripted scenario (act3-e207-primary; the other six queries report n/a), and the rate is prompt-scoped: the same check measured 60% across 5 runs under a different prompt variant on 2026-09-09 (same scorer, so withdrawn with it). This row read 0% when the page froze in September, then 100% once the work landed, and the 100% is what we have now withdrawn.",
+    owner: "reopened — measurement team",
   },
   {
     title: "Refusal honesty on the primary query",

@@ -1,7 +1,9 @@
 import Link from "next/link";
 import AppFooter from "@/components/AppFooter";
 import { queryRows, latency, overall, run, gaps, contract, recompute } from "@/data/measured";
-import { nights, streak, asOf as ledgerAsOf, latest, veteranFix } from "@/data/ledger";
+import { nights, streak, asOf as ledgerAsOf, latest } from "@/data/ledger";
+import { Struck, Withdrawn } from "@/components/Correction";
+import { veteranFixWithdrawn as vfw } from "@/data/measured";
 import { getPostsByTag } from "@/lib/devlog";
 import Wordmark from "@/components/Wordmark";
 
@@ -59,9 +61,10 @@ export default function MeasuredPage() {
           <p className="text-neutral-400 text-lg leading-relaxed max-w-2xl mb-6">
             When this page first went up, our flagship demo question scored{" "}
             <span style={{ color: AMBER }} className="font-mono">0% correctness</span>, three times out
-            of three, and we published the artifact anyway. It now scores{" "}
-            <span style={{ color: GREEN }} className="font-mono">100%, {veteranFix.passes} of {veteranFix.scored} scored observations</span>,
-            and the original row is still below with its date on it.
+            of three, and we published the artifact anyway.{" "}
+            <Struck>It now scores 100%, {vfw.passes} of {vfw.scored} scored observations.</Struck>{" "}
+            <Withdrawn on={vfw.withdrawn}>Read against the answers themselves rather than the scorer, the manual&apos;s fix came first in most of those observations, with the veteran&apos;s fix later, as &ldquo;if necessary.&rdquo; The scorer had credited the veteran whenever a citation footer naming him was attached. No replacement figure until the scorer is fixed.</Withdrawn>{" "}
+            The original row is still below with its date on it.
           </p>
           <p className="text-neutral-400 text-lg leading-relaxed max-w-2xl mb-6">
             An eval harness runs scripted maintenance questions against the real corpus, scores the
@@ -162,7 +165,14 @@ export default function MeasuredPage() {
                   ["veteran-fix leads", "66% (2/3)", "33% (1/3)", false],
                   ["mean latency", "16,105ms", "24,087ms", false],
                   ["answered when it should have refused", "0", "3", true],
-                ].map(([m, a, b, flag]) => (
+                ].map(([m, a, b, flag]) => m === "veteran-fix leads" ? (
+                  // Same scorer as the withdrawn 25/25 headline (2026-10-02): shown struck, not deleted.
+                  <tr key={m as string} className="border-b border-neutral-900">
+                    <td className="py-3 pr-4 text-neutral-300">{m}<div className="mt-1 not-italic"><Withdrawn on="2026-10-02">scorer defect; see conflict precedence below</Withdrawn></div></td>
+                    <td className="py-3 pr-4 text-neutral-400"><Struck>{a}</Struck></td>
+                    <td className="py-3"><Struck>{b}</Struck></td>
+                  </tr>
+                ) : (
                   <tr key={m as string} className="border-b border-neutral-900">
                     <td className="py-3 pr-4 text-neutral-300">{m}</td>
                     <td className="py-3 pr-4 text-neutral-400">{a}</td>
@@ -391,7 +401,14 @@ export default function MeasuredPage() {
               <div key={g.title} className="border-t border-neutral-800 py-8 grid grid-cols-1 md:grid-cols-[220px_1fr] gap-6">
                 <div>
                   <div className="text-white text-sm mb-2">{g.title}</div>
-                  <div className="font-mono text-xs mb-3" style={{ color: AMBER }}>{g.measured}</div>
+                  {g.withdrawn ? (
+                    <div className="font-mono text-xs mb-2">
+                      <Struck>{g.withdrawn.was}</Struck>
+                      <div className="mt-1"><Withdrawn on={g.withdrawn.on}>{g.measured}</Withdrawn></div>
+                    </div>
+                  ) : (
+                    <div className="font-mono text-xs mb-3" style={{ color: AMBER }}>{g.measured}</div>
+                  )}
                   <div className="text-neutral-600 text-xs font-mono tracking-wider uppercase">{g.owner}</div>
                 </div>
                 <p className="text-neutral-400 text-sm leading-relaxed max-w-2xl">{g.what}</p>
@@ -416,11 +433,19 @@ export default function MeasuredPage() {
             Every committed nightly artifact, its machine, and the verdict of comparing it against the
             night before.
           </p>
-          <p className="text-neutral-300 text-sm leading-relaxed max-w-3xl mb-8">
+          <p className="text-neutral-300 text-sm leading-relaxed max-w-3xl mb-3">
             <span className="text-white">{streak.count} consecutive clean runs</span>, {streak.from} → {streak.to}.
             Two boundaries travel with that number: the run before the streak could not be compared at
             all (a changed composition, not a regression), and one calendar night in the window has no
             artifact, so these are consecutive <em>runs</em>, not consecutive nights.
+          </p>
+          <p className="text-neutral-300 text-sm leading-relaxed max-w-3xl mb-8">
+            <span className="text-white">The streak ended on {streak.endedOn}.</span> No night since has been
+            comparable, and none of them is a regression. Two of the breaks were our choice: a second-model
+            experiment on 2026-09-28, which the next night&apos;s comparison wrongly took as its baseline, and a
+            deliberate enlargement of the corpus on 2026-10-02, which correctly makes earlier runs incomparable.
+            The rest is our comparator: since 2026-09-30 it has reported &ldquo;no previous run&rdquo; instead
+            of finding the last run with the same configuration. Until that is fixed, the streak cannot restart.
           </p>
           <div className="overflow-x-auto overflow-y-auto max-h-[28rem] border border-neutral-900">
             <table className="w-full text-sm border-collapse">

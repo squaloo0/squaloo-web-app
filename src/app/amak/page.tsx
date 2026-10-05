@@ -104,6 +104,11 @@ export default function AmakPage() {
                 sovereign AI agent — a companion that learns from you, runs locally, and
                 belongs entirely to you. That conversation is what made him my co-founder.
               </p>
+              <p className="text-neutral-500 text-xs leading-relaxed border-l-2 border-neutral-700 pl-3">
+                Archive note, 2026-10-05: this page is the Amak era (2025 to early 2026), kept as it was
+                written. AJ Khah co-founded Amak. He has not been involved since spring 2026 and is not
+                part of Squaloo. Squaloo and Solomon have one founder, Marshal Aldoph.
+              </p>
               <p>
                 This is the <strong className="text-white">New Collar Thesis</strong> behind{" "}
                 <strong className="text-white">Amak</strong>: sovereign infrastructure that

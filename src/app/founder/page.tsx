@@ -61,7 +61,7 @@ const tracks = [
     label: "Venture & Architecture",
     org: "Squaloo / Solomon",
     description:
-      "Founder and architect of Solomon — the trust and verification layer for edge and agentic AI, aimed first at industrial operations. Built on the One Brain, Two Bodies protocol and a Sovereign Data Lakehouse. Proven live August 2026: cited answers as fast as 7 seconds warm (median 7.5s across 14 runs, measured 2026-09-05), fully offline, each machine held to its own memory budget.",
+      "Founder and architect of Solomon — the trust and verification layer for edge and agentic AI, aimed first at industrial operations. Built on the One Brain, Two Bodies protocol and a Sovereign Data Lakehouse. Proven live August 2026: cited answers as fast as 7 seconds warm (median 7.5s across 14 runs, 2026-09-05, measured in-process by the eval harness on a machine the run did not record; not the ask page or chat), fully offline, each machine held to its own memory budget.",
     href: "/solomon",
     external: false,
     metric: "~7s warm, cited",
@@ -135,8 +135,8 @@ export default function FounderPage() {
           </p>
 
           <p className="text-neutral-400 text-base leading-relaxed max-w-2xl mb-12">
-            I&apos;m a technical founder and systems architect bootstrapping Squaloo from the
-            ground up — no institutional capital, no shortcuts. Squaloo started with a frustration:
+            I&apos;m Squaloo&apos;s sole founder, a technical founder and systems architect bootstrapping it
+            from the ground up — no institutional capital, no shortcuts. Squaloo started with a frustration:
             I couldn&apos;t build a sovereign AI product on rented infrastructure, so I set out to own
             the whole stack. Seven years of enterprise systems experience, a USC capstone team&apos;s
             data foundation, and a summer directing four AI engineering agents later — Solomon works,

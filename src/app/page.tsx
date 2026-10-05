@@ -1,7 +1,9 @@
 import Link from "next/link";
 import AppFooter from "@/components/AppFooter";
 import SolomonLayerDiagram from "@/components/SolomonLayerDiagram";
-import { streak, veteranFix, latest, asOf } from "@/data/ledger";
+import { streak, latest, asOf } from "@/data/ledger";
+import { Struck, Withdrawn } from "@/components/Correction";
+import { veteranFixWithdrawn as vfw } from "@/data/measured";
 import Wordmark from "@/components/Wordmark";
 
 export const metadata = {
@@ -83,7 +85,8 @@ export default function Home() {
               <p className="text-neutral-400 text-sm leading-relaxed">
                 Consecutive clean nightly comparisons, {streak.from} → {streak.to}, counted from the
                 committed artifacts. Consecutive <em>runs</em>, not nights: one calendar night in that
-                window has no artifact.
+                window has no artifact. Ended {streak.endedOn}: nothing since has been comparable, through
+                two changes we chose and a comparator defect. None is a regression.
               </p>
             </div>
             <div className="border border-neutral-800 p-6">
@@ -100,10 +103,12 @@ export default function Home() {
             </div>
             <div className="border border-neutral-800 p-6">
               <div className="text-xs font-mono tracking-widest uppercase text-neutral-500 mb-3">Published ruler</div>
-              <div className="text-2xl font-bold font-mono text-white mb-3 tabular-nums">{veteranFix.passes}/{veteranFix.scored}</div>
+              <div className="text-2xl font-bold font-mono mb-3 tabular-nums"><Struck>{vfw.passes}/{vfw.scored}</Struck></div>
               <p className="text-neutral-400 text-sm leading-relaxed">
-                The veteran&apos;s fix led the answer in every scored run, {veteranFix.from} → {veteranFix.to}
-                {" "}— on one scripted scenario, shipped prompt only.{" "}
+                <Struck>The veteran&apos;s fix led the answer in every scored run, 2026-09-12 → {vfw.asOf}.</Struck>{" "}
+                <Withdrawn on={vfw.withdrawn}>the scorer was wrong. Read against the answers, the manual&apos;s
+                fix came first in most runs; the veteran&apos;s fix is surfaced and cited alongside it, not ahead
+                of it.</Withdrawn>{" "}
                 <Link href="/measured" className="text-[#5688c7] hover:text-white transition-colors">The full ruler →</Link>
               </p>
             </div>

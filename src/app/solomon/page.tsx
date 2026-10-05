@@ -3,6 +3,7 @@ import AppFooter from "@/components/AppFooter";
 import SolomonTranscript from "@/components/SolomonTranscript";
 import VideoEmbed from "@/components/VideoEmbed";
 import Wordmark from "@/components/Wordmark";
+import { Struck, Withdrawn } from "@/components/Correction";
 
 export const metadata = {
   title: "Solomon — by Squaloo",
@@ -24,12 +25,12 @@ const acts = [
   {
     n: "ACT 03",
     title: "Answer — cited, safety-first, offline",
-    text: "A technician asks in plain English. Seconds later: numbered steps, lockout first, citing the manual section AND the veteran's logged fix — including when the veteran's experience overrules the manual's official procedure. No sources found? Solomon says so instead of guessing.",
+    text: "A technician asks in plain English. Seconds later: numbered steps, lockout first, citing the manual section AND the veteran's logged fix, side by side. No sources found? Solomon says so instead of guessing.",
   },
 ];
 
 const metrics = [
-  { value: "~7s", label: "to a cited answer, measured warm — median 7.5s across 14 runs, 2026-09-05" },
+  { value: "~7s", label: "to a cited answer, measured warm by the eval harness calling the engine in-process — median 7.5s across 14 runs, 2026-09-05, machine not recorded. Not the ask page or chat, which add the request path and queueing" },
   { value: "100%", label: "offline — verified with the network disconnected, 2026-09-05" },
   { value: "6GB", label: "the single-board computer's budget. Each machine now has its own — a laptop and a credit-card-sized computer are not the same promise (2026-09-27)" },
   { value: "0", label: "cloud services in the answer path — nothing to reprice, nothing to leak" },
@@ -88,8 +89,13 @@ export default function SolomonPage() {
           </p>
           <SolomonTranscript />
           <p className="text-neutral-600 text-xs mt-3 font-mono">
-            Struck through: the manual&apos;s official answer — a six-hour teardown of the wrong part.
-            Overruled by three sentences a veteran typed ten minutes earlier.
+            Struck through: the manual&apos;s official answer — a six-hour teardown of the wrong part.{" "}
+            <Struck>Overruled by three sentences a veteran typed ten minutes earlier.</Struck>
+          </p>
+          <p className="text-neutral-500 text-xs mt-2 leading-relaxed">
+            <Withdrawn on="2026-10-02">this replay shows the behaviour we are building toward. In most
+            measured runs the answer still leads with the manual&apos;s fix and cites the veteran&apos;s after
+            it. Our scorer had reported the opposite; reading the answers showed it was wrong.</Withdrawn>
           </p>
         </section>
 
