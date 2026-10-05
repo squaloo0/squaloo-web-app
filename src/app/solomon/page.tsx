@@ -3,7 +3,6 @@ import AppFooter from "@/components/AppFooter";
 import SolomonTranscript from "@/components/SolomonTranscript";
 import VideoEmbed from "@/components/VideoEmbed";
 import Wordmark from "@/components/Wordmark";
-import { Struck, Withdrawn } from "@/components/Correction";
 
 export const metadata = {
   title: "Solomon — by Squaloo",
@@ -89,13 +88,7 @@ export default function SolomonPage() {
           </p>
           <SolomonTranscript />
           <p className="text-neutral-600 text-xs mt-3 font-mono">
-            Struck through: the manual&apos;s official answer — a six-hour teardown of the wrong part.{" "}
-            <Struck>Overruled by three sentences a veteran typed ten minutes earlier.</Struck>
-          </p>
-          <p className="text-neutral-500 text-xs mt-2 leading-relaxed">
-            <Withdrawn on="2026-10-02">this replay shows the behaviour we are building toward. In most
-            measured runs the answer still leads with the manual&apos;s fix and cites the veteran&apos;s after
-            it. Our scorer had reported the opposite; reading the answers showed it was wrong.</Withdrawn>
+            An illustration: surfacing the veteran&apos;s logged fix alongside the manual&apos;s procedure, with both cited.
           </p>
         </section>
 

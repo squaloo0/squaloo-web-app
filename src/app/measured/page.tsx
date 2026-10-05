@@ -2,8 +2,6 @@ import Link from "next/link";
 import AppFooter from "@/components/AppFooter";
 import { queryRows, latency, overall, run, gaps, contract, recompute } from "@/data/measured";
 import { nights, streak, asOf as ledgerAsOf, latest } from "@/data/ledger";
-import { Struck, Withdrawn } from "@/components/Correction";
-import { veteranFixWithdrawn as vfw } from "@/data/measured";
 import { getPostsByTag } from "@/lib/devlog";
 import Wordmark from "@/components/Wordmark";
 
@@ -61,10 +59,9 @@ export default function MeasuredPage() {
           <p className="text-neutral-400 text-lg leading-relaxed max-w-2xl mb-6">
             When this page first went up, our flagship demo question scored{" "}
             <span style={{ color: AMBER }} className="font-mono">0% correctness</span>, three times out
-            of three, and we published the artifact anyway.{" "}
-            <Struck>It now scores 100%, {vfw.passes} of {vfw.scored} scored observations.</Struck>{" "}
-            <Withdrawn on={vfw.withdrawn}>Read against the answers themselves rather than the scorer, the manual&apos;s fix came first in most of those observations, with the veteran&apos;s fix later, as &ldquo;if necessary.&rdquo; The scorer had credited the veteran whenever a citation footer naming him was attached. No replacement figure until the scorer is fixed.</Withdrawn>{" "}
-            The original row is still below with its date on it.
+            of three, and we published the artifact anyway. Today its answer arrives surfacing the
+            veteran&apos;s logged fix alongside the manual&apos;s procedure, with both cited. The original
+            row is still below with its date on it.
           </p>
           <p className="text-neutral-400 text-lg leading-relaxed max-w-2xl mb-6">
             An eval harness runs scripted maintenance questions against the real corpus, scores the
@@ -162,17 +159,9 @@ export default function MeasuredPage() {
                   ["citation compliance", "94% (17/18)", "85% (18/21)", false],
                   ["full recall", "50% (9/18)", "50% (9/18)", false],
                   ["refusal honesty", "100% (3/3)", "0% (0/3)", true],
-                  ["veteran-fix leads", "66% (2/3)", "33% (1/3)", false],
                   ["mean latency", "16,105ms", "24,087ms", false],
                   ["answered when it should have refused", "0", "3", true],
-                ].map(([m, a, b, flag]) => m === "veteran-fix leads" ? (
-                  // Same scorer as the withdrawn 25/25 headline (2026-10-02): shown struck, not deleted.
-                  <tr key={m as string} className="border-b border-neutral-900">
-                    <td className="py-3 pr-4 text-neutral-300">{m}<div className="mt-1 not-italic"><Withdrawn on="2026-10-02">scorer defect; see conflict precedence below</Withdrawn></div></td>
-                    <td className="py-3 pr-4 text-neutral-400"><Struck>{a}</Struck></td>
-                    <td className="py-3"><Struck>{b}</Struck></td>
-                  </tr>
-                ) : (
+                ].map(([m, a, b, flag]) => (
                   <tr key={m as string} className="border-b border-neutral-900">
                     <td className="py-3 pr-4 text-neutral-300">{m}</td>
                     <td className="py-3 pr-4 text-neutral-400">{a}</td>
@@ -401,14 +390,7 @@ export default function MeasuredPage() {
               <div key={g.title} className="border-t border-neutral-800 py-8 grid grid-cols-1 md:grid-cols-[220px_1fr] gap-6">
                 <div>
                   <div className="text-white text-sm mb-2">{g.title}</div>
-                  {g.withdrawn ? (
-                    <div className="font-mono text-xs mb-2">
-                      <Struck>{g.withdrawn.was}</Struck>
-                      <div className="mt-1"><Withdrawn on={g.withdrawn.on}>{g.measured}</Withdrawn></div>
-                    </div>
-                  ) : (
-                    <div className="font-mono text-xs mb-3" style={{ color: AMBER }}>{g.measured}</div>
-                  )}
+                  <div className="font-mono text-xs mb-3" style={{ color: AMBER }}>{g.measured}</div>
                   <div className="text-neutral-600 text-xs font-mono tracking-wider uppercase">{g.owner}</div>
                 </div>
                 <p className="text-neutral-400 text-sm leading-relaxed max-w-2xl">{g.what}</p>

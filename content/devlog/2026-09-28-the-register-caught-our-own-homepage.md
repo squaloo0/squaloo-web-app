@@ -4,7 +4,7 @@ date: "2026-09-28"
 summary: "A claim can be well-formed, correctly bounded, repeated for a month, and rest on nothing. It can also be true and out of date in the direction that makes you look worse. We hit both — and they are the reason we measure anything at all."
 author: "Squaloo"
 tags: "measured"
-status: "published"
+status: "draft"
 ---
 
 We build Solomon to answer two questions a technician needs answered before acting on anything: **how do you know that**, and **what did you check?**
