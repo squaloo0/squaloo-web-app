@@ -2,9 +2,10 @@
 import { useEffect, useRef, useState } from "react";
 
 /**
- * Replays the real Solomon demo as a terminal transcript, on loop.
- * The strike-through beat is the product thesis: the manual's official
- * answer gets overruled by the veteran's logged experience — with citations.
+ * An illustration based on the August 2026 verification run, on loop.
+ * Relabelled 2026-10-05: the strike-through beat is a presentation device the
+ * product never renders, and the answers do not reliably lead with the
+ * veteran's fix. A re-render is ticketed.
  */
 
 type Step =
@@ -132,7 +133,7 @@ export default function SolomonTranscript() {
     <div className="border border-neutral-800 bg-black/60 p-6 font-mono text-sm leading-relaxed min-h-[280px]">
       <div className="flex items-center gap-2 mb-4 text-[10px] tracking-[0.25em] uppercase text-neutral-600">
         <span className="w-2 h-2 rounded-full bg-[#63a375]" />
-        live transcript — replayed from the august 2026 verification run
+        illustration based on the August 2026 verification run
       </div>
       <div className="space-y-3">
         {lines.map((l) =>

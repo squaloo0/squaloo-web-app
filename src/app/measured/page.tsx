@@ -1,7 +1,7 @@
 import Link from "next/link";
 import AppFooter from "@/components/AppFooter";
 import { queryRows, latency, overall, run, gaps, contract, recompute } from "@/data/measured";
-import { nights, streak, asOf as ledgerAsOf, latest, veteranFix } from "@/data/ledger";
+import { nights, streak, asOf as ledgerAsOf, latest } from "@/data/ledger";
 import { getPostsByTag } from "@/lib/devlog";
 import Wordmark from "@/components/Wordmark";
 
@@ -59,9 +59,9 @@ export default function MeasuredPage() {
           <p className="text-neutral-400 text-lg leading-relaxed max-w-2xl mb-6">
             When this page first went up, our flagship demo question scored{" "}
             <span style={{ color: AMBER }} className="font-mono">0% correctness</span>, three times out
-            of three, and we published the artifact anyway. It now scores{" "}
-            <span style={{ color: GREEN }} className="font-mono">100%, {veteranFix.passes} of {veteranFix.scored} scored observations</span>,
-            and the original row is still below with its date on it.
+            of three, and we published the artifact anyway. Today its answer arrives surfacing the
+            veteran&apos;s logged fix alongside the manual&apos;s procedure, with both cited. The original
+            row is still below with its date on it.
           </p>
           <p className="text-neutral-400 text-lg leading-relaxed max-w-2xl mb-6">
             An eval harness runs scripted maintenance questions against the real corpus, scores the
@@ -159,7 +159,6 @@ export default function MeasuredPage() {
                   ["citation compliance", "94% (17/18)", "85% (18/21)", false],
                   ["full recall", "50% (9/18)", "50% (9/18)", false],
                   ["refusal honesty", "100% (3/3)", "0% (0/3)", true],
-                  ["veteran-fix leads", "66% (2/3)", "33% (1/3)", false],
                   ["mean latency", "16,105ms", "24,087ms", false],
                   ["answered when it should have refused", "0", "3", true],
                 ].map(([m, a, b, flag]) => (
@@ -416,11 +415,19 @@ export default function MeasuredPage() {
             Every committed nightly artifact, its machine, and the verdict of comparing it against the
             night before.
           </p>
-          <p className="text-neutral-300 text-sm leading-relaxed max-w-3xl mb-8">
+          <p className="text-neutral-300 text-sm leading-relaxed max-w-3xl mb-3">
             <span className="text-white">{streak.count} consecutive clean runs</span>, {streak.from} → {streak.to}.
             Two boundaries travel with that number: the run before the streak could not be compared at
             all (a changed composition, not a regression), and one calendar night in the window has no
             artifact, so these are consecutive <em>runs</em>, not consecutive nights.
+          </p>
+          <p className="text-neutral-300 text-sm leading-relaxed max-w-3xl mb-8">
+            <span className="text-white">The streak ended on {streak.endedOn}.</span> No night since has been
+            comparable, and none of them is a regression. Two of the breaks were our choice: a second-model
+            experiment on 2026-09-28, which the next night&apos;s comparison wrongly took as its baseline, and a
+            deliberate enlargement of the corpus on 2026-10-02, which correctly makes earlier runs incomparable.
+            The rest is our comparator: since 2026-09-30 it has reported &ldquo;no previous run&rdquo; instead
+            of finding the last run with the same configuration. Until that is fixed, the streak cannot restart.
           </p>
           <div className="overflow-x-auto overflow-y-auto max-h-[28rem] border border-neutral-900">
             <table className="w-full text-sm border-collapse">

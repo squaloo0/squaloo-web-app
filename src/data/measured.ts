@@ -1,5 +1,3 @@
-import { veteranFix, asOf as ledgerAsOf } from "./ledger";
-
 /**
  * Measured — eval artifact data for /measured.
  *
@@ -91,11 +89,11 @@ export type Gap = {
 /** Failing or incomplete results, each with the team that owns the fix. */
 export const gaps: Gap[] = [
     {
-    title: "Conflict precedence — CLOSED",
-    measured: `100% — ${veteranFix.passes} of ${veteranFix.scored} scored observations, as of ${ledgerAsOf}`,
+    title: "Conflict precedence — being re-measured",
+    measured: "no current figure",
     what:
-      "When the veteran's log contradicts the manual, the log's fix should lead the answer. It now does, in every scored run on the nightly trail, zero failures. Two boundaries travel with it: the metric scores ONE scripted scenario (act3-e207-primary; the other six queries report n/a), and the rate is prompt-scoped: the same check measured 60% across 5 runs under a different prompt variant on 2026-09-09. It evidences the behaviour on a repeated case, not as a general property. This row read 0% when the page froze; the work landed and the page did not.",
-    owner: "closed — engine team",
+      "When the veteran's log contradicts the manual, Solomon's answer should lead with the veteran's fix. What the answers show today is narrower: surfacing the veteran's logged fix alongside the manual's procedure, with both cited. The scorer that measures which one leads is being fixed; this row carries no figure until it is.",
+    owner: "owned — measurement team",
   },
   {
     title: "Refusal honesty on the primary query",
