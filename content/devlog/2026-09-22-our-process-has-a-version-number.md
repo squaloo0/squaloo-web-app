@@ -3,7 +3,7 @@ title: "Our process has a version number"
 date: "2026-09-22"
 summary: "The rules we build under are a versioned document, and every version was written by something going wrong. Here is the changelog, including the three releases we nearly left out of it and the check that almost lied to us while we assembled it."
 author: "Squaloo"
-status: "published"
+status: "draft"
 ---
 
 Most companies version the product. We version the process too.
