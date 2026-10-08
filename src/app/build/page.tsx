@@ -10,9 +10,9 @@ export const metadata = {
 
 const timeline = [
   {
-    date: "NOW",
+    date: "SEP 2026",
     title: "v1.0 — out of the shadows",
-    text: "The product surface (interactive answer cards, one-command install), the Project G edge hardware (Raspberry Pi 5 + a 40-TOPS NPU), and the first design partner conversations. Solomon's numbers to date, as of 2026-09-28: 192 pull requests merged since the sprint began, cited answers as fast as 7 seconds warm (median 7.5s across 14 runs, measured 2026-09-05), fully offline, and each machine held to its own memory budget rather than one figure for the fleet.",
+    text: "The product surface (interactive answer cards, one-command install), the full stack running offline on a single-board computer (a Raspberry Pi 5, the language model on its CPU), and the first design partner conversations. Solomon's numbers to date, as of 2026-09-28: 192 pull requests merged since the sprint began, cited answers as fast as 7 seconds warm (median 7.5s across 14 runs, measured 2026-09-05), fully offline, and each machine held to its own memory budget rather than one figure for the fleet. (Corrected 2026-10-07: this entry was labelled \"now\" after later gates had closed, and it named an internal codename and a 40-TOPS NPU. The engine does not use an NPU; the model runs on the board's CPU.)",
   },
   {
     date: "THE SYSTEM",

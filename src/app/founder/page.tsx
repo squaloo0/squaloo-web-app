@@ -86,12 +86,12 @@ const tracks = [
   },
   {
     label: "Edge AI Hardware",
-    org: "Project G",
+    org: "Solomon on a single-board computer",
     description:
-      "Solomon's physical body: a Raspberry Pi 5 + 40-TOPS NPU edge node running the full stack — local hybrid search, on-device language models, and differential sync — designed for the factory floors, hulls, and cleanrooms where the cloud can't follow.",
+      "Solomon's edge body: a Raspberry Pi 5 running the full stack offline — local hybrid search, the language model on the board's CPU, and differential sync — measured on that board rather than inferred from a bigger machine. Corrected 2026-10-07: this entry previously carried an internal codename and a 40-TOPS NPU, which the engine does not use.",
     href: "/solomon",
     external: false,
-    metric: "Edge AI Node",
+    metric: "Offline on the board",
   },
 ];
 

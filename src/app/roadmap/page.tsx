@@ -1,6 +1,6 @@
 import Link from "next/link";
 import AppFooter from "@/components/AppFooter";
-import { currentGate, pastGates, cadence, type CriterionStatus } from "@/data/roadmap";
+import { currentGate, pastGates, pageCorrections, cadence, type CriterionStatus } from "@/data/roadmap";
 import Wordmark from "@/components/Wordmark";
 
 export const metadata = {
@@ -121,6 +121,18 @@ export default function RoadmapPage() {
           </div>
 
           <p className="text-neutral-600 text-xs leading-relaxed max-w-2xl mt-6">{cadence}</p>
+          {pageCorrections.map((c) => (
+            <p
+              key={c.date}
+              className="text-sm leading-relaxed max-w-2xl mt-6 pl-4 border-l-2"
+              style={{ borderColor: AMBER, color: "rgba(255,255,255,0.62)" }}
+            >
+              <span className="font-mono text-xs uppercase tracking-widest" style={{ color: AMBER }}>
+                Corrected {c.date} —{" "}
+              </span>
+              {c.text}
+            </p>
+          ))}
         </section>
 
         {/* Track record */}
@@ -136,7 +148,17 @@ export default function RoadmapPage() {
                   <div className="text-white text-sm mb-1">{g.name}</div>
                   <div className="text-neutral-600 text-xs font-mono tracking-widest uppercase">{g.date}</div>
                 </div>
-                <p className="text-neutral-400 text-sm leading-relaxed max-w-2xl">{g.line}</p>
+                <div>
+                  <p className="text-neutral-400 text-sm leading-relaxed max-w-2xl">{g.line}</p>
+                  {g.correction ? (
+                    <p
+                      className="text-sm leading-relaxed max-w-2xl mt-3 pl-4 border-l-2"
+                      style={{ borderColor: AMBER, color: "rgba(255,255,255,0.62)" }}
+                    >
+                      {g.correction}
+                    </p>
+                  ) : null}
+                </div>
               </div>
             ))}
             <div className="border-t border-neutral-800" />

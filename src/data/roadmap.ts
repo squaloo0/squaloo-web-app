@@ -38,70 +38,52 @@ export type Gate = {
 };
 
 export const currentGate: Gate = {
-  name: "Gate C",
-  date: "Verification target: September 19, 2026",
+  name: "Gate E",
+  date: "Opened October 7, 2026 · verification target: the week of November 17, 2026 (proposed)",
   summary:
-    "Make it demonstrable anywhere, measured continuously, and honest on its face. Gate C is the version meant to survive being checked by someone who is not us.",
+    "Turn the ruler into the product's spine. The rules an answer must follow become one written file that both the overnight measurement and the live product read, and every result becomes a dated record anyone can download and re-check.",
   criteria: [
     {
-      title: "When the veteran's notes contradict the manual, the notes win",
+      title: "One rulebook, read by both the nightly test and the live answer",
       detail:
-        "A technician's logbook entry that records what actually fixed the machine should lead the answer, ahead of the manual's official procedure — with the safety step still first. Measured over repeated runs, not judged by eye.",
-      status: "met",
+        "The rules an answer must follow live in one versioned file. The overnight measurement scores against it, and the product enforces it while answering. Proof: the same rule shows up in a nightly result and in a live answer.",
+      status: "open",
     },
     {
-      title: "How much we retrieve is decided by measurement, not opinion",
+      title: "Every result is a dated record, and the measurements page is built from those records",
       detail:
-        "Widening the search changes both answer quality and how reliably sources get labelled. The setting is chosen from a recorded comparison, and we keep the comparison.",
-      status: "met",
+        "Each run, verdict, comparison and correction is stored as a dated record. The measurements page is generated from them rather than typed, and a correction is a new dated record, not an edit.",
+      status: "open",
     },
     {
-      title: "It runs offline on a single-board computer, and a visitor can use it from their own phone",
+      title: "The full record can be downloaded and re-checked",
       detail:
-        "The engine installs and runs on a single-board computer with no internet, proven by a measurement taken on that machine rather than inferred from a bigger one. (We used to price that board at about $200. Memory prices moved sharply in 2026 and we are re-checking against a real receipt before quoting a figure again — a stale price is still a wrong one.) The device then serves its own page: a visitor joins the Wi-Fi it broadcasts, opens the page, asks a question, and watches the sources assemble before the answer arrives — no login, nothing to install.",
-      status: "in-progress",
-      outstanding:
-        "The offline engine on the board is done and measured. The page the visitor reads, and the device broadcasting its own Wi-Fi, are being built now.",
+        "The records export in a standard, documented format. Each one carries a fingerprint and says which site, machine and run it came from.",
+      status: "open",
     },
     {
-      title: "The optional cloud half works end to end, and is written down",
+      title: "Four automatic checks that stop a bad answer, each proven to fire",
       detail:
-        "For customers who want a cloud component, knowledge captured in the cloud reaches the on-site device and back — proven on real infrastructure, with a runbook someone else could follow.",
-      status: "met",
+        "No relevant documents means Solomon says so instead of answering. A source it could not read is reported as a failed read, not as an absence. Every part number, section or value in an answer must appear in its sources. Every machine's time budget is enforced. Each check ships with a test showing it catches what it is for.",
+      status: "open",
     },
     {
-      title: "Cold machine to live demo in five minutes",
+      title: "Three answers a technician can tell apart",
       detail:
-        "From a machine that has been switched off, to answering questions, in under five minutes — and resettable in under two. Written as a checklist, not held in one person's head.",
-      status: "met",
+        "\u201cNot in this device's documents\u201d, \u201ccouldn't check\u201d, and \u201ctwo sources disagree, here are both\u201d each appear in the product as their own answer, never folded into a generic one.",
+      status: "open",
     },
     {
-      title: "The product can show you where your intelligence lives",
+      title: "A first robustness number: the same conflict, asked many ways",
       detail:
-        "A panel inside the product states which model is running locally, what knowledge is on the device, where the data syncs, and what our zero-cloud claim actually rests on. Every line is backed by a check — anything the system cannot verify shows as unknown rather than as reassurance.",
-      status: "met",
+        "Conflicts between sources, reworded, reordered and repeated, at least 200 scored runs, published with the count, the number of repeats and the limits of what it covers.",
+      status: "open",
     },
     {
-      title: "The measurement runs itself overnight, and is never silent",
+      title: "No withdrawn figure anywhere we touch",
       detail:
-        "An unattended agent runs the evaluation nightly and reports. A failed run must produce a loud, dated failure report — silence is treated as a defect, and a truthfully reported failure counts as the system working.",
-      status: "met",
-    },
-    {
-      title: "The evidence is published, including the parts that don't flatter us",
-      detail:
-        "A public page carrying the real evaluation numbers with their dates, a short demo video, and written accounts of what we got wrong and how we found out.",
-      status: "in-progress",
-      outstanding:
-        "The measurements page, the demo video and the first written account are live. A second written account and the investor-facing deck are still to come.",
-    },
-    {
-      title: "The debt we named gets closed, not carried",
-      detail:
-        "Specific known problems written down during earlier work — not a general intention to tidy up. Each one closed or explicitly re-scoped before the gate.",
-      status: "in-progress",
-      outstanding:
-        "Most of the named items are closed. A small number remain open and are tracked by name rather than quietly dropped.",
+        "Every page and document changed during the gate is checked against our list of withdrawn figures before it ships.",
+      status: "open",
     },
   ],
 };
@@ -110,6 +92,8 @@ export type PastGate = {
   name: string;
   date: string;
   line: string;
+  /** A dated correction to what this gate claimed, shown with the entry. */
+  correction?: string;
 };
 
 /** The track record is the roadmap's credibility — kept to one line each. */
@@ -123,6 +107,29 @@ export const pastGates: PastGate[] = [
     name: "v1.0 — Out of the Shadows",
     date: "September 2026",
     line: "The product became self-evident: structured answer cards in chat, a one-command install, and an evaluation harness that gates every model change.",
+  },
+  {
+    name: "Gate C",
+    date: "Closed September 21, 2026",
+    line: "Demonstrable anywhere, measured continuously: the engine ran offline on a single-board computer that a visitor could use from their own phone, the optional cloud half worked end to end, a cold machine reached a live demo in under five minutes, and the measurement ran itself overnight, unattended.",
+    correction:
+      "Corrected October 7, 2026: this gate also counted \u201cwhen the veteran's notes contradict the manual, the notes win\u201d as met. On October 5, 2026 that result was withdrawn: the scorer behind it was found to credit answers that led with the manual's fix. It is being re-measured, and it is not claimed until it is.",
+  },
+  {
+    name: "Gate D",
+    date: "Closed October 5, 2026",
+    line: "A second, unrelated open model ran through the same unmodified measurement; the device began recording which of its documents amend or supersede which; and the founder's own material went through the same pipeline as a technician's notes. Seven items met, one met as a draft, two carried into the next gate with their evidence, none abandoned.",
+  },
+];
+
+/**
+ * Corrections to this page itself, dated. A roadmap that quietly catches up
+ * is the failure the page exists to prevent, so the catching-up is recorded.
+ */
+export const pageCorrections: { date: string; text: string }[] = [
+  {
+    date: "October 7, 2026",
+    text: "Until today this page still showed Gate C as the current gate, more than two weeks after it closed on September 21, and still listed the veteran's-notes result as met after that result was withdrawn on October 5. It now shows Gate E, and Gate C's entry below carries its correction.",
   },
 ];
 
