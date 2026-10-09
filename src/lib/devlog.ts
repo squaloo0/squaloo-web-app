@@ -30,6 +30,10 @@ export type DevlogPost = {
   tags: string[];
   /** Rendered HTML body (frontmatter stripped). */
   html: string;
+  /** The post's markdown source, for the generated llms-full.txt. */
+  markdown: string;
+  /** `hold` keeps the post's text out of llms-full.txt while a claim in it is re-checked. */
+  ingest: string;
 };
 
 type Frontmatter = Record<string, string>;
@@ -84,6 +88,8 @@ function readPost(filename: string): DevlogPost {
     status: data.status || "draft",
     tags: (data.tags || "").split(",").map((t) => t.trim()).filter(Boolean),
     html: marked.parse(body, { async: false }) as string,
+    markdown: body,
+    ingest: data.ingest || "",
   };
 }
 
