@@ -5,6 +5,7 @@ summary: "We changed one instruction to make Solomon trust a veteran's notes ove
 author: "Squaloo"
 tags: "measured"
 status: "published"
+ingest: "hold"
 ---
 
 Before you work on an industrial machine, you cut its power and you lock the switch off with your own padlock. Lockout/Tagout. It exists because machines that look dead can still turn over, and the person who finds out is holding the wrench.
