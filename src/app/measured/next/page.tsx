@@ -4,6 +4,8 @@ import AppFooter from "@/components/AppFooter";
 import Wordmark from "@/components/Wordmark";
 import { snapshot } from "@/data/ruler_export";
 import type { RulerSnapshot } from "@/data/ruler_export";
+import { researchSearch } from "@/data/research_search";
+import { searchSentence } from "@/lib/research_search";
 import {
   assertBoundaries,
   corrections,
@@ -131,12 +133,30 @@ export default function MeasuredStaged() {
               including ours (<a href="#recompute" className="text-[#5688c7] hover:text-white">recompute it</a>).
             </li>
           </ul>
+          <p className="text-neutral-400">
+            Each of these appears somewhere on its own. We could not find the four together.
+          </p>
           <p className="text-neutral-500">
-            Search: the research we have indexed, read October 2026. If you know of work that does this, tell
-            us and we will cite it here. What these do not yet include: real plants, controller data, or
+            {searchSentence(researchSearch)} What these do not yet include: real plants, controller data, or
             customer deployments. Each property links to the rows that evidence it; a property with no rows
             yet says so in its section.
           </p>
+          <details className="text-neutral-500 text-sm">
+            <summary className="cursor-pointer hover:text-white">
+              The {researchSearch.unread.length} collected papers not yet read
+            </summary>
+            <ul className="list-disc pl-5 mt-2 space-y-1">
+              {researchSearch.unread.map((u) => (
+                <li key={u.id}>
+                  <span className="font-mono">arXiv:{u.id}</span> · {u.title}
+                </li>
+              ))}
+            </ul>
+            <p className="mt-2">
+              Two named sources are not in the collection at all: {researchSearch.not_collected.join("; ")}.
+              These counts come from the pod&apos;s reading log ({researchSearch.source}), not from this page&apos;s text.
+            </p>
+          </details>
         </Section>
 
         {/* 2 — consistency */}
