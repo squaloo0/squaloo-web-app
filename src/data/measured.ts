@@ -144,8 +144,8 @@ export const contract: Clause[] = [
     requirement:
       "The system answers from retrieved material or declines. It does not fill gaps from the model's general knowledge.",
     check:
-      "Questions with no supporting material in the corpus are run alongside answerable ones. Refusal is enforced in code when retrieval returns nothing, not left to the model's judgement.",
-    bar: "Refusing a question it could answer is a failure, exactly like answering one it could not.",
+      "Questions with no supporting material in the corpus are run alongside answerable ones. When retrieval returns nothing, the engine refuses without calling the model.",
+    bar: "Refusing a question it could answer is a failure, exactly like answering one it could not. Disclosed limit (2026-10-09): on a device with documents loaded, retrieval always returns its closest passages, however weak, so that coded refusal does not fire on real questions. Refusals today come from the model. A relevance floor that would let the coded refusal fire is being measured, not guessed.",
   },
   {
     name: "Sources are derived, never authored",
@@ -170,7 +170,7 @@ export const contract: Clause[] = [
     check:
       "A scripted scenario in which the log and the manual give different remedies. Scored per run against committed evidence files.",
     bar:
-      "Disclosed limit: this is measured on ONE scenario. It evidences the behaviour on a repeated case, not as a general property — and any model compared on this clause is compared at that same resolution.",
+      "Disclosed limit: this is measured on ONE scenario. It evidences the behaviour on a repeated case, not as a general property — and any model compared on this clause is compared at that same resolution. No current result (2026-10-09): the scorer for this clause credited answers that led with the manual's fix, its results were withdrawn on 2026-10-05, and it is being rebuilt to read the relation between the two documents instead of the answer's formatting.",
   },
   {
     name: "Answers arrive inside the machine's budget",
@@ -178,7 +178,7 @@ export const contract: Clause[] = [
       "Each machine has its own latency budget. A correct answer that misses its budget is reported as a warning, never as a pass.",
     check:
       "A power-on self-test runs a known question on every boot and records latency against that machine's budget.",
-    bar: "Budgets are per-machine, because a credit-card-sized computer and a laptop are not the same promise. Slow and wrong must never share a verdict.",
+    bar: "Budgets are per-machine, because a credit-card-sized computer and a laptop are not the same promise. Slow and wrong must never share a verdict. Disclosed limit (2026-10-09): the warning is shown for the boot self-test. Every other answer is timed against the same per-machine budget and the verdict is recorded on the device, but it is not yet shown to the person asking.",
   },
   {
     name: "It runs in the room, on the hardware named",
