@@ -1,0 +1,17 @@
+# Remora — working notes for Claude
+
+Remora is a **video vending machine** that lives in this corner of the Squaloo site.
+Read `src/remora/README.md` first; it is the plan and the only source of truth.
+
+Rules of the game (short form):
+- Fun first. One phase per sitting. Every phase ends with something runnable.
+- Nothing in `src/remora/core` touches I/O. Relative imports with `.ts` extensions, so
+  `node --experimental-strip-types` can run it and its tests without a bundler.
+- `spawn(bin, [args])` only. Never a shell string.
+- No new dependency without a sentence saying why. Sanctioned: an S3 client (Phase 3),
+  `stripe` (Phase 4).
+- Keep it light. If a proposal reads like Solomon's trenches (trust panels, provenance
+  tiers, corpus ingest), it goes in the README's back-pocket section, not the build.
+
+Commands: `npm run remora -- <cmd>` · `npm run remora:worker` · `npm run remora:test`.
+Branches: `remora/feat/<name>`, one PR per phase, PRs target `main`.

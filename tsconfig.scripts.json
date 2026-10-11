@@ -8,5 +8,5 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true
   },
-  "include": ["src/app/marshal-qr-code/db/seed.ts"]
+  "include": ["src/app/marshal-qr/db/seed.ts"]
 } 
