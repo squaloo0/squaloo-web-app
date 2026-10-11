@@ -4,11 +4,21 @@
  * worker's job goes back on the shelf, and ticks a pulse row so the panel can say
  * READY or OUT OF ORDER truthfully.
  *
- *   npm run remora:worker        locally, against a Neon branch
- *   fly deploy (workers/remora)  the always-on box
+ * Several machines share one queue with no coordination: Postgres hands each coin to
+ * exactly one of them (SKIP LOCKED). Each machine says which providers it will vend
+ * and which it is cooling on, and only claims coins it is good for right now. A bot
+ * wall or a rate limit is a route failure: the coin goes back on the shelf with its
+ * attempt intact, this machine sits that provider out for a while, and another
+ * machine (a Mac at home, say) takes it. Human-scale pacing per provider on top.
+ *
+ *   npm run remora:worker          locally, against a Neon branch
+ *   npm run remora:install         on a Mac, under launchd
+ *   fly deploy (workers/remora)    the always-on box
  *
  * Env: NEON_DATABASE_URL, the REMORA_R2_* set, REMORA_MACHINE_NAME (default hostname),
- * REMORA_TICK_MS (idle poll, default 5000), REMORA_TTL_DAYS (shelf life, default 7).
+ * REMORA_PROVIDERS (comma list, default all), REMORA_PER_HOUR (default 30),
+ * REMORA_YOUTUBE_PER_HOUR (default 12), REMORA_TICK_MS (idle poll, default 5000),
+ * REMORA_TTL_DAYS (shelf life, default 7).
  */
 import "../../src/remora/env.ts"; // .env.local → process.env, first
 import { mkdtemp, rm, stat } from "node:fs/promises";
@@ -16,16 +26,39 @@ import { hostname, tmpdir } from "node:os";
 import { basename, join } from "node:path";
 import { backoffSeconds, isPermanentError, MAX_ATTEMPTS, type Job } from "../../src/remora/core/job.ts";
 import { fraction } from "../../src/remora/core/progress.ts";
+import {
+  availableProviders,
+  isRouteError,
+  parseCapabilities,
+  RateWindow,
+  ROUTE_COOLDOWN_MS,
+  withCooldown,
+  type Cooldowns,
+} from "../../src/remora/core/route.ts";
 import { dbWired } from "../../src/remora/db/client.ts";
-import { addAsset, beat, claimNextJob, complete, expiredAssets, fail, heartbeat, markDeleted, recoverStale } from "../../src/remora/db/queue.ts";
+import {
+  addAsset,
+  beat,
+  claimNextJob,
+  complete,
+  expiredAssets,
+  fail,
+  heartbeat,
+  markDeleted,
+  recoverStale,
+  type Pulse,
+} from "../../src/remora/db/queue.ts";
 import { contentTypeFor, deleteObject, putFile, shelfWired } from "../../src/remora/storage.ts";
 import { ffmpegVersion, sha256File, vend } from "../../src/remora/vend.ts";
 import { ytDlpVersion } from "../../src/remora/ytdlp.ts";
 
-const NAME = process.env.REMORA_MACHINE_NAME || hostname();
+const NAME = process.env.REMORA_MACHINE_NAME || hostname().toLowerCase();
 const TICK_MS = Number(process.env.REMORA_TICK_MS ?? 5000);
 const TTL_DAYS = Number(process.env.REMORA_TTL_DAYS ?? 7);
 const HEARTBEAT_MS = 15_000;
+const CAPABILITIES = parseCapabilities(process.env.REMORA_PROVIDERS);
+const PER_HOUR = Number(process.env.REMORA_PER_HOUR ?? 30);
+const YOUTUBE_PER_HOUR = Number(process.env.REMORA_YOUTUBE_PER_HOUR ?? 12);
 
 const log = (msg: string) => console.log(`${new Date().toISOString()} ${NAME}: ${msg}`);
 
@@ -37,40 +70,58 @@ for (const sig of ["SIGINT", "SIGTERM"] as const) {
   });
 }
 
+/** What this machine is sitting out, and until when. Persisted on every beat. */
+let cooldowns: Cooldowns = {};
+const pace = new RateWindow((provider) => (provider === "youtube" ? YOUTUBE_PER_HOUR : PER_HOUR));
+
 async function main(): Promise<void> {
   if (!dbWired()) throw new Error("NEON_DATABASE_URL is not set; the machine has no queue");
   if (!shelfWired()) throw new Error("the shelf is not wired; set the REMORA_R2_* variables");
+  if (CAPABILITIES.length === 0) throw new Error("REMORA_PROVIDERS names no provider the machine knows");
 
   const tools = { name: NAME, ytDlp: await ytDlpVersion().catch(() => null), ffmpeg: await ffmpegVersion() };
-  log(`plugged in · yt-dlp ${tools.ytDlp ?? "missing"} · ffmpeg ${tools.ffmpeg ?? "missing"} · tick ${TICK_MS}ms · ttl ${TTL_DAYS}d`);
-  await beat(tools);
+  log(
+    `plugged in · yt-dlp ${tools.ytDlp ?? "missing"} · ffmpeg ${tools.ffmpeg ?? "missing"} · vends ${CAPABILITIES.join(",")} · ` +
+      `pace ${PER_HOUR}/h (youtube ${YOUTUBE_PER_HOUR}/h) · tick ${TICK_MS}ms · ttl ${TTL_DAYS}d`,
+  );
+  const pulse = (): Pulse => ({ ...tools, providers: CAPABILITIES, cooldowns });
+  await beat(pulse());
 
+  let lastProviders = "";
   while (running) {
+    const now = new Date();
     const recovered = await recoverStale();
     if (recovered > 0) log(`put ${recovered} stale job(s) back on the shelf`);
 
-    const job = await claimNextJob(NAME);
+    // Only claim what this machine is good for right now: not cooling, not over pace.
+    const providers = availableProviders(CAPABILITIES, cooldowns, now).filter((p) => pace.allow(p, now));
+    const key = providers.join(",");
+    if (key !== lastProviders) {
+      log(providers.length ? `claiming: ${key}` : "claiming nothing: everything is cooling or over pace");
+      lastProviders = key;
+    }
+
+    const job = await claimNextJob(NAME, providers);
     if (job) {
-      await process_(job, tools);
+      await process_(job, pulse);
       continue; // straight to the next coin
     }
 
     await sweep();
-    await beat(tools);
+    await beat(pulse());
     await sleep(TICK_MS);
   }
   log("unplugged");
 }
 
-async function process_(job: Job, tools: { name: string; ytDlp: string | null; ffmpeg: string | null }): Promise<void> {
-  log(`claimed ${job.id} · ${job.provider} · ${job.quality} · attempt ${job.attempts}`);
+async function process_(job: Job, pulse: () => Pulse): Promise<void> {
+  log(`claimed ${job.id} · ${job.provider} · ${job.quality} · attempt ${job.attempts}${job.routeFailures ? ` · ${job.routeFailures} door(s) so far` : ""}`);
   const dir = await mkdtemp(join(tmpdir(), "remora-"));
   let lastBeat = Date.now();
   let title: string | null = null;
-  let ours = true;
 
-  const pulse = async (progress: number | null) => {
-    ours = await heartbeat(job.id, NAME, progress, title);
+  const tick = async (progress: number | null) => {
+    const ours = await heartbeat(job.id, NAME, progress, title);
     lastBeat = Date.now();
     if (!ours) log(`${job.id} is no longer ours (recovered by someone else?); finishing anyway`);
   };
@@ -82,11 +133,11 @@ async function process_(job: Job, tools: { name: string; ytDlp: string | null; f
       dir,
       onEstimate: (meta) => {
         title = meta.title;
-        void pulse(0);
+        void tick(0);
       },
       onTick: (t) => {
         if (t.kind !== "download" || Date.now() - lastBeat < HEARTBEAT_MS) return;
-        void pulse(fraction(t));
+        void tick(fraction(t));
       },
     });
 
@@ -95,7 +146,7 @@ async function process_(job: Job, tools: { name: string; ytDlp: string | null; f
     const receiptName = basename(v.receiptPath);
     const prefix = `vends/${job.id}`;
 
-    await pulse(0.99);
+    await tick(0.99);
     await putFile(`${prefix}/${fileName}`, v.filepath, contentTypeFor(fileName));
     await putFile(`${prefix}/${receiptName}`, v.receiptPath, "application/json");
 
@@ -122,14 +173,23 @@ async function process_(job: Job, tools: { name: string; ytDlp: string | null; f
     });
 
     await complete(job.id, NAME, v.receipt.video.title);
-    await beat(tools, 1);
+    pace.record(job.provider, new Date());
+    await beat(pulse(), 1);
     log(`CLUNK ${job.id} · ${fileName} · ${v.receipt.file.bytes} B · ${v.seconds.toFixed(1)}s`);
   } catch (e) {
     const message = e instanceof Error ? e.message : String(e);
-    const permanent = isPermanentError(message);
-    const again = !permanent && job.attempts < MAX_ATTEMPTS ? ` · again in ${backoffSeconds(job.attempts)}s` : " · giving up";
-    log(`nothing dropped for ${job.id}: ${message.slice(0, 200)}${again}`);
+    let outcome: string;
+    if (isRouteError(message)) {
+      cooldowns = withCooldown(cooldowns, job.provider, new Date());
+      outcome = ` · ${job.provider} door closed to this machine: cooling ${ROUTE_COOLDOWN_MS / 60_000} min, coin back on the shelf for another machine`;
+    } else if (isPermanentError(message) || job.attempts >= MAX_ATTEMPTS) {
+      outcome = " · giving up";
+    } else {
+      outcome = ` · again in ${backoffSeconds(job.attempts)}s`;
+    }
+    log(`nothing dropped for ${job.id}: ${message.slice(0, 160)}${outcome}`);
     await fail(job.id, NAME, message.slice(0, 500));
+    await beat(pulse());
   } finally {
     await rm(dir, { recursive: true, force: true });
   }

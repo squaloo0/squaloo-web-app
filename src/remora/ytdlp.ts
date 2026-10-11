@@ -84,7 +84,8 @@ const OUTPUT_TEMPLATE = "%(title).120B [%(id)s].%(ext)s";
  * merge; we never shell out to it ourselves.
  */
 export function ytDlpDownload(url: string, opts: DownloadOptions): Promise<Download> {
-  const args = ["--no-playlist", "--no-warnings", "--newline", "--progress", "-f", formatSelector(opts.quality)];
+  // --sleep-requests: a human-scale pause between the several requests one download makes.
+  const args = ["--no-playlist", "--no-warnings", "--newline", "--progress", "--sleep-requests", "1", "-f", formatSelector(opts.quality)];
   const container = mergeContainer(opts.quality);
   if (container) {
     args.push("--merge-output-format", container);

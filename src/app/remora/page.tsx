@@ -15,10 +15,11 @@ import { isServiceKey, KEY_COOKIE, keySlotWired } from "@/remora/auth";
 import { peek, type PeekResult } from "@/remora/peek";
 import { thumbProxyPath } from "@/remora/core/oembed";
 import { QUALITIES } from "@/remora/core/format";
-import { isActive, machineLight, pill, shortError, type Job } from "@/remora/core/job";
+import { isActive, machineLight, pill, shortError, type Job, type Machine } from "@/remora/core/job";
+import { machineSummary, waitingReason } from "@/remora/core/route";
 import { prettyBytes } from "@/remora/core/pretty";
 import { dbWired } from "@/remora/db/client";
-import { assetsForJobs, freshestMachine, listJobs, type Asset } from "@/remora/db/queue";
+import { assetsForJobs, freshestMachine, listJobs, liveMachines, type Asset } from "@/remora/db/queue";
 import { presignDownload, shelfWired } from "@/remora/storage";
 import Poller from "./poller";
 
@@ -54,9 +55,10 @@ export default async function RemoraPage({ searchParams }: { searchParams: Promi
   const result = keyed && url ? await peek(url) : null;
 
   const queue = keyed && dbWired();
-  const [jobs, machine] = queue ? await Promise.all([listJobs(12), freshestMachine()]) : [[], null];
+  const now = new Date();
+  const [jobs, machine, live] = queue ? await Promise.all([listJobs(12), freshestMachine(), liveMachines()]) : [[], null, [] as Machine[]];
   const assets = queue ? await assetsForJobs(jobs.filter((j) => j.status === "completed").map((j) => j.id)) : [];
-  const light = machineLight(machine, new Date());
+  const light = machineLight(machine, now);
   const inFlight = jobs.some(isActive);
 
   return (
@@ -91,6 +93,15 @@ export default async function RemoraPage({ searchParams }: { searchParams: Promi
             <span className="text-xs tracking-[0.3em] uppercase text-neutral-400">Remora</span>
             <StatusLight wired={wired} keyed={keyed} queue={queue} on={light.on} text={light.text} />
           </div>
+
+          {/* Who is on */}
+          {queue && live.length > 0 ? (
+            <div className="px-5 py-2 border-b border-neutral-800 flex flex-wrap gap-x-5 gap-y-1 text-[10px] tracking-[0.2em] uppercase text-neutral-600">
+              {live.map((m) => (
+                <span key={m.name}>{machineSummary(m, now)}</span>
+              ))}
+            </div>
+          ) : null}
 
           {/* The glass */}
           <div className="p-5 border-b border-neutral-800 bg-[linear-gradient(180deg,rgba(86,136,199,0.06),transparent_60%)]">
@@ -223,7 +234,7 @@ export default async function RemoraPage({ searchParams }: { searchParams: Promi
             ) : (
               <ul className="divide-y divide-neutral-900 border-t border-neutral-900">
                 {jobs.map((j) => (
-                  <Drop key={j.id} job={j} assets={assets.filter((a) => a.jobId === j.id)} />
+                  <Drop key={j.id} job={j} assets={assets.filter((a) => a.jobId === j.id)} waiting={waitingReason(j, live, now)} />
                 ))}
               </ul>
             )}
@@ -348,7 +359,7 @@ const PILL_TONE = {
   red: "border-red-900 text-red-400",
 } as const;
 
-function Drop({ job, assets }: { job: Job; assets: Asset[] }) {
+function Drop({ job, assets, waiting }: { job: Job; assets: Asset[]; waiting: string | null }) {
   const p = pill(job);
   const links = shelfWired() && job.status === "completed" ? assets.map((a) => ({ a, href: presignDownload(a.objectKey, LINK_SECONDS, a.fileName) })) : [];
   const file = assets.find((a) => a.kind !== "receipt");
@@ -368,9 +379,10 @@ function Drop({ job, assets }: { job: Job; assets: Asset[] }) {
       {job.error && job.status !== "completed" ? (
         <div className="text-[11px] text-neutral-600 break-words" title={job.error}>
           {shortError(job.error)}
-          {job.status === "pending" ? " · will try again" : ""}
+          {job.status === "pending" ? (job.routeFailures > 0 ? ` · turned away ${job.routeFailures}×, another machine will try` : " · will try again") : ""}
         </div>
       ) : null}
+      {waiting ? <div className="text-[10px] tracking-[0.15em] uppercase text-amber-400/80">{waiting}</div> : null}
       {job.status === "completed" ? (
         <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px]">
           {file ? (

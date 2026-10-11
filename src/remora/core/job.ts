@@ -10,6 +10,7 @@
  */
 import type { Quality } from "./format.ts";
 import type { Provider } from "./url.ts";
+import { isRouteError, MAX_ROUTE_FAILURES, ROUTE_RETRY_MS, type Cooldowns } from "./route.ts";
 
 export type JobStatus = "pending" | "processing" | "completed" | "failed";
 
@@ -20,13 +21,18 @@ export type Job = {
   provider: Provider;
   quality: Quality;
   status: JobStatus;
+  /** Real tries. A route failure (bot wall, rate limit) does not count as one. */
   attempts: number;
+  /** Times a machine was turned away at the door. Across machines; capped by MAX_ROUTE_FAILURES. */
+  routeFailures: number;
   /** Worker that holds the claim, while processing. */
   claimedBy: string | null;
   /** ISO. Refreshed by the heartbeat while processing. */
   claimedAt: string | null;
   /** 0..1 while processing, when the worker has said. */
   progress: number | null;
+  /** Not claimable before this instant: a retry pause, or a route failure's shelf time. */
+  notBefore: string | null;
   /** Machine language, when failed. */
   error: string | null;
   title: string | null;
@@ -55,8 +61,11 @@ export type JobEvent =
  * Everything else (network, a 5xx, a timeout) is worth another go, after a pause.
  */
 export function isPermanentError(message: string): boolean {
-  return /Sign in to confirm|not a bot|Private video|Video unavailable|has been removed|This video is not available|is not a URL|live stream|no longer available|members-only|age-restricted|HTTP Error 40[134]/i.test(
-    message,
+  return (
+    !isRouteError(message) &&
+    /Private video|Video unavailable|has been removed|This video is not available|is not a URL|live stream|no longer available|members-only|age-restricted|HTTP Error 40[134]/i.test(
+      message,
+    )
   );
 }
 
@@ -107,10 +116,27 @@ export function reduce(job: Job, event: JobEvent): Job {
       return { ...job, status: "completed", progress: 1, title: event.title ?? job.title, claimedBy: null, updatedAt: event.at };
     case "fail": {
       if (job.status !== "processing") throw new JobTransitionError(job, event);
+      if (isRouteError(event.error)) {
+        // Not the coin's fault: give the attempt back, count the door, shelve briefly.
+        const routeFailures = job.routeFailures + 1;
+        return {
+          ...job,
+          status: routeFailures >= MAX_ROUTE_FAILURES ? "failed" : "pending",
+          attempts: job.attempts - 1,
+          routeFailures,
+          notBefore: new Date(Date.parse(event.at) + ROUTE_RETRY_MS).toISOString(),
+          error: event.error,
+          progress: null,
+          claimedBy: null,
+          claimedAt: null,
+          updatedAt: event.at,
+        };
+      }
       const retry = job.attempts < MAX_ATTEMPTS && !isPermanentError(event.error);
       return {
         ...job,
         status: retry ? "pending" : "failed",
+        notBefore: retry ? new Date(Date.parse(event.at) + backoffSeconds(job.attempts) * 1000).toISOString() : null,
         error: event.error,
         progress: null,
         claimedBy: null,
@@ -162,6 +188,10 @@ export type Machine = {
   ytDlp: string | null;
   ffmpeg: string | null;
   vends: number;
+  /** Providers this machine will vend at all (REMORA_PROVIDERS). */
+  providers: string[];
+  /** Providers it is sitting out right now, and until when. */
+  cooldowns: Cooldowns;
 };
 
 /** The light on the front: green when a worker has checked in recently. */

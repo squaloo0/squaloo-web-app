@@ -6,7 +6,8 @@
  */
 import { randomBytes } from "node:crypto";
 import { sql } from "./client.ts";
-import { backoffSeconds, isPermanentError, MAX_ATTEMPTS, STALE_AFTER_MS, type Job, type JobStatus, type Machine } from "../core/job.ts";
+import { backoffSeconds, isPermanentError, MACHINE_SILENT_AFTER_MS, MAX_ATTEMPTS, STALE_AFTER_MS, type Job, type JobStatus, type Machine } from "../core/job.ts";
+import { isRouteError, MAX_ROUTE_FAILURES, ROUTE_RETRY_MS, type Cooldowns } from "../core/route.ts";
 import type { Quality } from "../core/format.ts";
 import type { Provider } from "../core/url.ts";
 
@@ -22,6 +23,8 @@ type JobRow = {
   quality: string;
   status: string;
   attempts: number;
+  route_failures: number;
+  not_before: string | Date | null;
   claimed_by: string | null;
   claimed_at: string | Date | null;
   progress: number | null;
@@ -44,6 +47,8 @@ function toJob(r: JobRow): Job {
     quality: r.quality as Quality,
     status: r.status as JobStatus,
     attempts: r.attempts,
+    routeFailures: r.route_failures ?? 0,
+    notBefore: r.not_before === null || r.not_before === undefined ? null : iso(r.not_before),
     claimedBy: r.claimed_by,
     claimedAt: r.claimed_at === null ? null : iso(r.claimed_at),
     progress: r.progress,
@@ -67,7 +72,8 @@ export async function enqueue(input: { input: string; canonicalUrl: string; prov
  * Take the oldest pending job, atomically. The subquery locks one row with SKIP LOCKED
  * so two workers never claim the same coin; the UPDATE is the claim event.
  */
-export async function claimNextJob(worker: string): Promise<Job | null> {
+export async function claimNextJob(worker: string, providers: readonly string[]): Promise<Job | null> {
+  if (providers.length === 0) return null;
   const rows = (await sql()`
     UPDATE remora_jobs
        SET status = 'processing',
@@ -80,6 +86,7 @@ export async function claimNextJob(worker: string): Promise<Job | null> {
      WHERE id = (
        SELECT id FROM remora_jobs
         WHERE status = 'pending' AND (not_before IS NULL OR not_before <= now())
+          AND provider = ANY(${[...providers]})
         ORDER BY created_at
         FOR UPDATE SKIP LOCKED
         LIMIT 1
@@ -106,16 +113,24 @@ export async function complete(id: string, worker: string, title: string | null)
 }
 
 /**
- * Back on the shelf while attempts remain and the error is worth retrying, with a
- * growing pause before the next claim; else failed. Same rule as core/job fail.
+ * A route failure (bot wall, rate limit) gives the attempt back, counts the door and
+ * shelves the coin a minute for another machine. Otherwise: back on the shelf while
+ * attempts remain and the error is worth retrying, with a growing pause; else failed.
+ * Same rules as core/job fail.
  */
 export async function fail(id: string, worker: string, error: string): Promise<void> {
+  const route = isRouteError(error);
   const permanent = isPermanentError(error);
   await sql()`
     UPDATE remora_jobs
-       SET status = CASE WHEN attempts < ${MAX_ATTEMPTS} AND NOT ${permanent} THEN 'pending' ELSE 'failed' END,
-           not_before = CASE WHEN attempts < ${MAX_ATTEMPTS} AND NOT ${permanent}
-                             THEN now() + make_interval(secs => 30 * attempts * attempts) ELSE NULL END,
+       SET status = CASE WHEN ${route} THEN (CASE WHEN route_failures + 1 >= ${MAX_ROUTE_FAILURES} THEN 'failed' ELSE 'pending' END)
+                         WHEN attempts < ${MAX_ATTEMPTS} AND NOT ${permanent} THEN 'pending'
+                         ELSE 'failed' END,
+           attempts = CASE WHEN ${route} THEN attempts - 1 ELSE attempts END,
+           route_failures = route_failures + CASE WHEN ${route} THEN 1 ELSE 0 END,
+           not_before = CASE WHEN ${route} THEN now() + make_interval(secs => ${ROUTE_RETRY_MS / 1000})
+                             WHEN attempts < ${MAX_ATTEMPTS} AND NOT ${permanent} THEN now() + make_interval(secs => 30 * attempts * attempts)
+                             ELSE NULL END,
            error = ${error}, progress = NULL, claimed_by = NULL, claimed_at = NULL, updated_at = now()
      WHERE id = ${id} AND status = 'processing' AND claimed_by = ${worker}`;
 }
@@ -221,21 +236,44 @@ export async function markDeleted(id: string): Promise<void> {
 
 // --- the pulse -------------------------------------------------------------------
 
-export async function beat(machine: { name: string; ytDlp: string | null; ffmpeg: string | null }, vended = 0): Promise<void> {
+export type Pulse = { name: string; ytDlp: string | null; ffmpeg: string | null; providers: readonly string[]; cooldowns: Cooldowns };
+
+export async function beat(machine: Pulse, vended = 0): Promise<void> {
   await sql()`
-    INSERT INTO remora_machine (name, last_seen, yt_dlp, ffmpeg, vends)
-    VALUES (${machine.name}, now(), ${machine.ytDlp}, ${machine.ffmpeg}, ${vended})
+    INSERT INTO remora_machine (name, last_seen, yt_dlp, ffmpeg, vends, providers, cooldowns)
+    VALUES (${machine.name}, now(), ${machine.ytDlp}, ${machine.ffmpeg}, ${vended}, ${[...machine.providers]}, ${JSON.stringify(machine.cooldowns)}::jsonb)
     ON CONFLICT (name) DO UPDATE
       SET last_seen = now(), yt_dlp = EXCLUDED.yt_dlp, ffmpeg = EXCLUDED.ffmpeg,
-          vends = remora_machine.vends + ${vended}`;
+          vends = remora_machine.vends + ${vended},
+          providers = EXCLUDED.providers, cooldowns = EXCLUDED.cooldowns`;
+}
+
+type MachineRow = {
+  name: string;
+  last_seen: string | Date;
+  yt_dlp: string | null;
+  ffmpeg: string | null;
+  vends: number;
+  providers: string[] | null;
+  cooldowns: Cooldowns | string | null;
+};
+
+function toMachine(r: MachineRow): Machine {
+  const cooldowns = typeof r.cooldowns === "string" ? (JSON.parse(r.cooldowns) as Cooldowns) : (r.cooldowns ?? {});
+  return { name: r.name, lastSeen: iso(r.last_seen), ytDlp: r.yt_dlp, ffmpeg: r.ffmpeg, vends: r.vends, providers: r.providers ?? [], cooldowns };
 }
 
 /** The worker that checked in most recently. */
 export async function freshestMachine(): Promise<Machine | null> {
-  const rows = (await sql()`SELECT * FROM remora_machine ORDER BY last_seen DESC LIMIT 1`) as
-    { name: string; last_seen: string | Date; yt_dlp: string | null; ffmpeg: string | null; vends: number }[];
-  const r = rows[0];
-  return r ? { name: r.name, lastSeen: iso(r.last_seen), ytDlp: r.yt_dlp, ffmpeg: r.ffmpeg, vends: r.vends } : null;
+  const rows = (await sql()`SELECT * FROM remora_machine ORDER BY last_seen DESC LIMIT 1`) as MachineRow[];
+  return rows[0] ? toMachine(rows[0]) : null;
+}
+
+/** Every worker that has beaten recently, freshest first. */
+export async function liveMachines(): Promise<Machine[]> {
+  const rows = (await sql()`
+    SELECT * FROM remora_machine WHERE last_seen > now() - make_interval(secs => ${MACHINE_SILENT_AFTER_MS / 1000}) ORDER BY last_seen DESC`) as MachineRow[];
+  return rows.map(toMachine);
 }
 
 // --- migrations ------------------------------------------------------------------
