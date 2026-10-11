@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { isActive, isStale, JobTransitionError, machineLight, MAX_ATTEMPTS, pill, reduce, STALE_AFTER_MS, type Job } from "./job.ts";
+import { backoffSeconds, isActive, isPermanentError, isStale, JobTransitionError, machineLight, MAX_ATTEMPTS, pill, reduce, STALE_AFTER_MS, type Job } from "./job.ts";
 
 const T0 = "2026-10-11T00:00:00.000Z";
 const T1 = "2026-10-11T00:01:00.000Z";
@@ -95,4 +95,25 @@ test("the machine light", () => {
   const light = machineLight(silent, new Date(Date.parse(T0) + 10 * 60_000));
   assert.equal(light.on, false);
   assert.match(light.text, /OUT OF ORDER · fly-1 last seen 10 min ago · jobs are safe/);
+});
+
+test("a permanent error fails on the first attempt; a transient one goes back on the shelf", () => {
+  const claimed = reduce(job(), { type: "claim", by: "air", at: T0 });
+  const bot = reduce(claimed, { type: "fail", at: T1, error: "yt-dlp exited 1: ERROR: [youtube] x: Sign in to confirm you’re not a bot." });
+  assert.equal(bot.status, "failed");
+  const net = reduce(claimed, { type: "fail", at: T1, error: "yt-dlp exited 1: ERROR: Unable to download webpage: <urlopen error timed out>" });
+  assert.equal(net.status, "pending");
+});
+
+test("what counts as permanent", () => {
+  for (const m of ["Sign in to confirm you’re not a bot", "Private video", "Video unavailable", "This video has been removed", "that is a live stream", "HTTP Error 403: Forbidden", "members-only content"]) {
+    assert.equal(isPermanentError(m), true, m);
+  }
+  for (const m of ["timed out", "HTTP Error 503: Service Unavailable", "ECONNRESET", "yt-dlp took longer than 1800000 ms"]) {
+    assert.equal(isPermanentError(m), false, m);
+  }
+});
+
+test("backoff grows", () => {
+  assert.deepEqual([1, 2, 3].map(backoffSeconds), [30, 120, 270]);
 });

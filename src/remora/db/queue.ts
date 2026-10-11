@@ -6,7 +6,7 @@
  */
 import { randomBytes } from "node:crypto";
 import { sql } from "./client.ts";
-import { MAX_ATTEMPTS, STALE_AFTER_MS, type Job, type JobStatus, type Machine } from "../core/job.ts";
+import { backoffSeconds, isPermanentError, MAX_ATTEMPTS, STALE_AFTER_MS, type Job, type JobStatus, type Machine } from "../core/job.ts";
 import type { Quality } from "../core/format.ts";
 import type { Provider } from "../core/url.ts";
 
@@ -79,7 +79,7 @@ export async function claimNextJob(worker: string): Promise<Job | null> {
            updated_at = now()
      WHERE id = (
        SELECT id FROM remora_jobs
-        WHERE status = 'pending'
+        WHERE status = 'pending' AND (not_before IS NULL OR not_before <= now())
         ORDER BY created_at
         FOR UPDATE SKIP LOCKED
         LIMIT 1
@@ -105,14 +105,23 @@ export async function complete(id: string, worker: string, title: string | null)
      WHERE id = ${id} AND status = 'processing' AND claimed_by = ${worker}`;
 }
 
-/** Back on the shelf while attempts remain, else failed. Same rule as core/job fail. */
+/**
+ * Back on the shelf while attempts remain and the error is worth retrying, with a
+ * growing pause before the next claim; else failed. Same rule as core/job fail.
+ */
 export async function fail(id: string, worker: string, error: string): Promise<void> {
+  const permanent = isPermanentError(error);
   await sql()`
     UPDATE remora_jobs
-       SET status = CASE WHEN attempts < ${MAX_ATTEMPTS} THEN 'pending' ELSE 'failed' END,
+       SET status = CASE WHEN attempts < ${MAX_ATTEMPTS} AND NOT ${permanent} THEN 'pending' ELSE 'failed' END,
+           not_before = CASE WHEN attempts < ${MAX_ATTEMPTS} AND NOT ${permanent}
+                             THEN now() + make_interval(secs => 30 * attempts * attempts) ELSE NULL END,
            error = ${error}, progress = NULL, claimed_by = NULL, claimed_at = NULL, updated_at = now()
      WHERE id = ${id} AND status = 'processing' AND claimed_by = ${worker}`;
 }
+
+/** Exposed so the worker can log the pause it is about to take. */
+export { backoffSeconds };
 
 /** Claims whose heartbeat stopped: a dead worker. Same rule as core/job stale. */
 export async function recoverStale(): Promise<number> {
