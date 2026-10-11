@@ -163,7 +163,13 @@ in Phase 4 behind the coin slot: a coin is the rate limit, and the receipt is th
   - Validation: a hand-written narrow validator for the ~10 yt-dlp fields we use, like
     `devlog.ts` hand-parses frontmatter. No zod.
   - Process spawning: `child_process.spawn(bin, [args])`. Never a shell string.
-- Phase 3 adds the S3 client for R2; Phase 4 adds `stripe`. Both earn their sentence.
+- Phase 3 was allowed an S3 client for R2 and used none: `core/sigv4.ts` signs the four
+  requests the machine makes in ~120 lines of `node:crypto`, tested against the worked
+  examples in the S3 API reference. Phase 4 adds `stripe`, which earns its sentence.
+- Remora's tables are plain SQL in `src/remora/db/migrations/`, applied by
+  `npm run remora -- migrate` and tracked in `remora_migrations`. `drizzle.config.ts` belongs
+  to marshal-qr and is outside Remora's paths; five statements over Neon's HTTP driver did
+  not need an ORM.
 - DB: the existing Neon database, Drizzle, `neon-http` driver for both Vercel and the
   worker. Tables prefixed `remora_`. Queue claim is a single-statement
   `UPDATE … WHERE id = (SELECT … FOR UPDATE SKIP LOCKED LIMIT 1) RETURNING *`, which is
@@ -273,7 +279,7 @@ Goal: the public part. Parked until the build earns it.
 | Decision        | Default                              | Revisit at |
 |-----------------|--------------------------------------|------------|
 | Worker host     | Fly.io, one always-on machine        | if bandwidth cost bites: Hetzner |
-| Object storage  | Cloudflare R2 (zero egress)          | Phase 3    |
+| Object storage  | Cloudflare R2 (zero egress), hand-signed | Phase 3 (done) |
 | Auth            | single admin token + cookie          | if anyone but you uses it |
 | Public surface  | unlinked route + devlog post         | Phase 5    |
 | Test runner     | `node --test` with strip-types       | if it bites |
