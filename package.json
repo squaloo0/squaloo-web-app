@@ -10,7 +10,10 @@
     "seed": "ts-node --project tsconfig.scripts.json src/app/marshal-qr/db/seed.ts",
     "remora": "node --experimental-strip-types --disable-warning=ExperimentalWarning --disable-warning=MODULE_TYPELESS_PACKAGE_JSON workers/remora/cli.ts",
     "remora:worker": "node --experimental-strip-types --disable-warning=ExperimentalWarning --disable-warning=MODULE_TYPELESS_PACKAGE_JSON workers/remora/worker.ts",
-    "remora:test": "node --experimental-strip-types --disable-warning=ExperimentalWarning --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test \"src/remora/**/*.test.ts\""
+    "remora:test": "node --experimental-strip-types --disable-warning=ExperimentalWarning --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test \"src/remora/**/*.test.ts\"",
+    "remora:install": "sh workers/remora/launchd/remora-launchd.sh install",
+    "remora:uninstall": "sh workers/remora/launchd/remora-launchd.sh uninstall",
+    "remora:status": "sh workers/remora/launchd/remora-launchd.sh status"
   },
   "dependencies": {
     "@neondatabase/serverless": "^0.10.4",
