@@ -129,16 +129,23 @@ export function printReceipt(r: Receipt): string[] {
   const rule = "-".repeat(W);
   const center = (s: string) => s.padStart(Math.floor((W + s.length) / 2)).padEnd(W);
   const kv = (k: string, v: string) => `${k.padEnd(10)}${v.slice(0, W - 10)}`;
-  const wrap = (s: string) =>
-    s
-      .split(" ")
-      .reduce<string[]>((lines, w) => {
-        const last = lines[lines.length - 1];
-        if (last !== undefined && (last + " " + w).length <= W) lines[lines.length - 1] = last + " " + w;
-        else lines.push(w.slice(0, W));
-        return lines;
-      }, [])
-      .filter((l) => l.length > 0);
+  // Soft-wrap on spaces, hard-break anything wider than the paper (URLs, file names).
+  const wrap = (s: string, width = W): string[] => {
+    const lines: string[] = [];
+    let cur = "";
+    for (const word of s.split(" ")) {
+      for (const piece of chunk(word, width)) {
+        if (cur.length === 0) cur = piece;
+        else if (cur.length + 1 + piece.length <= width) cur += " " + piece;
+        else {
+          lines.push(cur);
+          cur = piece;
+        }
+      }
+    }
+    if (cur.length > 0) lines.push(cur);
+    return lines;
+  };
   const date = r.receipt.vendedAt.replace("T", " ").slice(0, 19) + " UTC";
   return [
     rule,
@@ -154,9 +161,11 @@ export function printReceipt(r: Receipt): string[] {
     kv("length", prettyDuration(r.video.duration)),
     kv("uploaded", r.video.uploadDate ?? "—"),
     kv("from", `${r.source.provider}${r.source.id ? ` ${r.source.id}` : ""}`),
-    ...wrap(r.source.canonicalUrl).map((l, i) => (i === 0 ? kv("url", l) : " ".repeat(10) + l)),
+    "url",
+    ...wrap(r.source.canonicalUrl),
     "",
-    kv("file", r.file.name.slice(0, W - 10)),
+    "file",
+    ...wrap(r.file.name),
     kv("size", `${prettyBytes(r.file.bytes)} (${r.file.bytes} B)`),
     kv("quality", r.file.quality),
     "sha256",
@@ -171,4 +180,11 @@ export function printReceipt(r: Receipt): string[] {
     center("thank you, come again"),
     rule,
   ];
+}
+
+function chunk(s: string, width: number): string[] {
+  if (s.length <= width) return [s];
+  const out: string[] = [];
+  for (let i = 0; i < s.length; i += width) out.push(s.slice(i, i + width));
+  return out;
 }

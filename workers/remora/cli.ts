@@ -2,13 +2,23 @@
  * `npm run remora -- <command> [args]`
  *
  * The maintenance hatch on the side of the machine.
- *   peek <url>   offline: what the glass reads off a pasted URL
- *   info <url>   yt-dlp: what is actually behind the glass
+ *   peek <url>              offline: what the glass reads off a pasted URL
+ *   info <url>              yt-dlp: what is actually behind the glass
+ *   get  <url> [--quality]  the VIDEO slot: drop it, hash it, print the receipt
+ *   ls                      the ledger and the scoreboard
+ *   verify <file|receipt>   re-hash a vend against its receipt
+ *   receipt <file|receipt>  print the receipt again
+ *   doctor                  which binaries the machine would use
  */
 import { parseVideoUrl } from "../../src/remora/core/url.ts";
-import { prettyBytes, prettyDuration, prettyHeight } from "../../src/remora/core/pretty.ts";
+import { prettyBytes, prettyDuration, prettyHeight, prettyPercent, prettySpeed, progressBar } from "../../src/remora/core/pretty.ts";
 import type { VideoFormat, VideoMeta } from "../../src/remora/core/meta.ts";
+import { parseQuality, QUALITIES } from "../../src/remora/core/format.ts";
+import { fraction, type PostProcess, type Progress } from "../../src/remora/core/progress.ts";
+import { printReceipt } from "../../src/remora/core/receipt.ts";
+import { scoreboard } from "../../src/remora/core/ledger.ts";
 import { YtDlpError, ytDlpBin, ytDlpInfo, ytDlpVersion } from "../../src/remora/ytdlp.ts";
+import { downloadsDir, ffmpegVersion, ledgerPath, readLedger, vend, VendError, verifyOnDisk } from "../../src/remora/vend.ts";
 
 const BANNER = String.raw`
                  ___
@@ -17,7 +27,10 @@ const BANNER = String.raw`
  /_/    \__//_/_/_/  \___/_/    \_,_/     video vending machine
 `;
 
-const [, , command, ...args] = process.argv;
+const [, , command, ...rawArgs] = process.argv;
+const { args, flags } = splitFlags(rawArgs);
+const BELL = "\u0007";
+const TTY = process.stdout.isTTY === true;
 
 async function main(): Promise<number> {
   switch (command) {
@@ -48,19 +61,112 @@ async function main(): Promise<number> {
         return 0;
       } catch (e) {
         process.stdout.write("\n\n");
-        return printYtDlpError(e);
+        return printError(e);
+      }
+    }
+
+    case "get": {
+      if (!args[0]) {
+        console.error("get: give me a URL");
+        return 2;
+      }
+      const quality = parseQuality(flags.quality ?? flags.q);
+      if (!quality) {
+        console.error(`get: --quality must be one of ${QUALITIES.join(", ")}`);
+        return 2;
+      }
+      console.log(BANNER);
+      console.log(`  slot      ${quality === "audio" ? "AUDIO" : "VIDEO"} · ${quality}`);
+      const needle = new Needle();
+      try {
+        const v = await vend({
+          input: args[0],
+          quality,
+          dir: flags.dir,
+          onStage: (stage, detail) => needle.stage(stage, detail),
+          onEstimate: (meta, est) => {
+            console.log(`  title     ${meta.title}`);
+            console.log(`  by        ${meta.uploader ?? "—"} · ${prettyDuration(meta.duration)}`);
+            if (est) {
+              console.log(`  expect    ${prettyHeight(est.height)} · ${prettyBytes(est.bytes, est.approx)} · formats ${est.formatIds.join("+")}`);
+            }
+          },
+          onTick: (t) => needle.tick(t),
+        });
+        needle.done();
+        console.log(`\n  CLUNK. ${v.seconds.toFixed(1)}s. dropped at ${v.filepath}\n`);
+        for (const line of printReceipt(v.receipt)) {
+          console.log(`  ${line}`);
+        }
+        console.log(`\n  receipt   ${v.receiptPath}`);
+        console.log(`  ledger    ${scoreboard(await readLedger())}`);
+        if (TTY) process.stdout.write(BELL);
+        return 0;
+      } catch (e) {
+        needle.done();
+        console.log("");
+        return printError(e);
+      }
+    }
+
+    case "ls": {
+      const rows = await readLedger();
+      console.log(BANNER);
+      console.log(`  ${scoreboard(rows)}`);
+      console.log(`  ${ledgerPath()}\n`);
+      for (const r of rows.slice(-20)) {
+        console.log(`  ${r.vendedAt.slice(0, 16).replace("T", " ")}  ${r.slot.padEnd(5)} ${r.quality.padEnd(5)} ${prettyBytes(r.bytes).padStart(9)}  ${r.sha256.slice(0, 12)}  ${r.title.slice(0, 48)}`);
+      }
+      return 0;
+    }
+
+    case "verify": {
+      if (!args[0]) {
+        console.error("verify: give me a file or a receipt");
+        return 2;
+      }
+      try {
+        const v = await verifyOnDisk(args[0]);
+        if (v.verification.ok) {
+          console.log(`  VERIFIED  ${v.receipt.file.name}`);
+          console.log(`  sha256    ${v.receipt.file.sha256}`);
+          console.log(`  vended    ${v.receipt.receipt.vendedAt} from ${v.receipt.source.canonicalUrl}`);
+          return 0;
+        }
+        console.log(`  DRIFTED   ${v.receipt.file.name}`);
+        for (const m of v.verification.mismatches) console.log(`            ${m}`);
+        return 1;
+      } catch (e) {
+        return printError(e);
+      }
+    }
+
+    case "receipt": {
+      if (!args[0]) {
+        console.error("receipt: give me a file or a receipt");
+        return 2;
+      }
+      try {
+        const v = await verifyOnDisk(args[0]);
+        for (const line of printReceipt(v.receipt)) console.log(`  ${line}`);
+        console.log(`  ${v.verification.ok ? "bytes on disk still match" : "DRIFTED: " + v.verification.mismatches.join("; ")}`);
+        return v.verification.ok ? 0 : 1;
+      } catch (e) {
+        return printError(e);
       }
     }
 
     case "doctor": {
-      // Which binaries would the machine use, and do they answer?
       console.log(BANNER);
-      console.log(`  node     ${process.version}`);
+      console.log(`  node       ${process.version}`);
       try {
-        console.log(`  yt-dlp   ${await ytDlpVersion()}  (${ytDlpBin()})`);
+        console.log(`  yt-dlp     ${await ytDlpVersion()}  (${ytDlpBin()})`);
       } catch (e) {
-        console.log(`  yt-dlp   ${e instanceof Error ? e.message : String(e)}`);
+        console.log(`  yt-dlp     ${e instanceof Error ? e.message : String(e)}`);
       }
+      console.log(`  ffmpeg     ${(await ffmpegVersion()) ?? "not found (merges will fail)"}`);
+      console.log(`  downloads  ${downloadsDir()}`);
+      console.log(`  ledger     ${ledgerPath()}`);
       return 0;
     }
 
@@ -68,15 +174,73 @@ async function main(): Promise<number> {
     case "help":
       console.log(BANNER);
       console.log("commands:");
-      console.log("  peek <url>     what the glass reads off a URL (offline)    [phase 1]");
-      console.log("  info <url>     what is behind the glass, via yt-dlp         [phase 1]");
-      console.log("  doctor         which binaries the machine would use         [phase 1]");
-      console.log("  get  <url>     the VIDEO slot, local                         [phase 2]");
+      console.log("  peek <url>                what the glass reads off a URL (offline)");
+      console.log("  info <url>                what is behind the glass, via yt-dlp");
+      console.log("  get  <url> [--quality q]  the VIDEO slot: drop, hash, receipt   q = best|2160|1440|1080|720|480|360|audio");
+      console.log("  ls                        the ledger and the scoreboard");
+      console.log("  verify <file|receipt>     re-hash a vend against its receipt");
+      console.log("  receipt <file|receipt>    print a receipt again");
+      console.log("  doctor                    binaries, folders");
+      console.log("\nenv: REMORA_DOWNLOADS, REMORA_LEDGER, REMORA_YTDLP_BIN, REMORA_FFMPEG_BIN");
       return 0;
 
     default:
       console.error(`remora: unknown command "${command}" (try: help)`);
       return 2;
+  }
+}
+
+/** The bar on the front of the machine. Redraws one line on a TTY, logs milestones otherwise. */
+class Needle {
+  private tick_ = 0;
+  private lastFile = "";
+  private lastPercent = -1;
+  private open = false;
+
+  stage(stage: string, detail: string): void {
+    this.close();
+    const label = { peek: "reading", info: "looking", drop: "dropping to", hash: "hashing", receipt: "printing" }[stage] ?? stage;
+    console.log(`  ${label.padEnd(9)} ${detail}`);
+  }
+
+  tick(t: Progress | PostProcess): void {
+    if (t.kind === "postprocess") {
+      this.close();
+      if (t.status === "started" && t.processor !== "MoveFiles") console.log(`  ${t.processor.toLowerCase().slice(0, 9).padEnd(9)} ffmpeg at work`);
+      return;
+    }
+    const f = fraction(t);
+    const file = t.filename.replace(/^.*\//, "");
+    if (file !== this.lastFile) {
+      this.close();
+      this.lastFile = file;
+      this.lastPercent = -1;
+      const part = /\.f(\d+)\./.exec(file)?.[1];
+      console.log(`  part      ${part ? `format ${part}` : file}${t.total ? ` · ${prettyBytes(t.total, t.approx)}` : ""}`);
+    }
+    const line = `  ${progressBar(f, 24, this.tick_++)} ${prettyPercent(f)}  ${prettyBytes(t.downloaded).padStart(9)}  ${prettySpeed(t.speed).padStart(10)}  eta ${t.eta === null ? "—" : prettyDuration(t.eta)}`;
+    if (TTY) {
+      process.stdout.write(`\r${line.padEnd(80)}`);
+      this.open = true;
+    } else {
+      const pct = t.status === "finished" ? 100 : f === null ? -1 : Math.floor(f * 10) * 10;
+      if (pct !== this.lastPercent) {
+        this.lastPercent = pct;
+        console.log(line);
+      }
+    }
+    if (t.status === "finished") this.close();
+  }
+
+  done(): void {
+    this.close();
+  }
+
+  private close(): void {
+    if (this.open) {
+      process.stdout.write("\n");
+      this.open = false;
+    }
   }
 }
 
@@ -105,7 +269,7 @@ function printMeta(provider: string, m: VideoMeta): void {
   }
 }
 
-/** The formats a human wants to see: one per height, best bytes first, plus audio-only. */
+/** The formats a human wants to see: one per height and container, best bytes first, plus audio-only. */
 function pickFormats(formats: VideoFormat[]): VideoFormat[] {
   const byHeight = new Map<string, VideoFormat>();
   for (const f of formats) {
@@ -119,7 +283,11 @@ function pickFormats(formats: VideoFormat[]): VideoFormat[] {
   return [...byHeight.values()].sort((a, b) => (b.height ?? -1) - (a.height ?? -1) || (b.bytes ?? 0) - (a.bytes ?? 0));
 }
 
-function printYtDlpError(e: unknown): number {
+function printError(e: unknown): number {
+  if (e instanceof VendError) {
+    console.error(`  nothing dropped: ${e.message}`);
+    return 1;
+  }
   if (!(e instanceof YtDlpError)) {
     throw e;
   }
@@ -137,6 +305,25 @@ function printYtDlpError(e: unknown): number {
       console.error(`  the glass fogged up: ${e.message}`);
       return 1;
   }
+}
+
+/** `--quality 720`, `--quality=720`, `-q 720`; everything else is a positional. */
+function splitFlags(argv: string[]): { args: string[]; flags: Record<string, string> } {
+  const args: string[] = [];
+  const flags: Record<string, string> = {};
+  for (let i = 0; i < argv.length; i++) {
+    const a = argv[i];
+    if (a.startsWith("--") && a.includes("=")) {
+      const [k, ...v] = a.slice(2).split("=");
+      flags[k] = v.join("=");
+    } else if (a.startsWith("--") || (a.startsWith("-") && a.length === 2)) {
+      flags[a.replace(/^-+/, "")] = argv[i + 1] ?? "";
+      i++;
+    } else {
+      args.push(a);
+    }
+  }
+  return { args, flags };
 }
 
 process.exitCode = await main();

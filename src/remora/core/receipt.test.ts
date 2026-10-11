@@ -83,4 +83,17 @@ test("the printed receipt is 40 columns of thermal paper", () => {
   assert.ok(lines.includes(SHA.slice(0, 32)));
   assert.ok(lines.some((l) => l.includes("unsigned")));
   assert.ok(lines.some((l) => l.includes("Rick Astley")));
+  // nothing is truncated: the URL and the file name come back whole when the paper is re-joined
+  const i = lines.indexOf("url");
+  assert.equal(lines.slice(i + 1, i + 3).join(""), "https://www.youtube.com/watch?v=dQw4w9WgXcQ");
+  const f = lines.indexOf("file");
+  const name = "Rick Astley - Never Gonna Give You Up (Official Video) (4K Remaster) [dQw4w9WgXcQ].mp4";
+  assert.equal(lines.slice(f + 1, f + 4).join(" ").replace(/  +/g, " ").trim(), name);
+});
+
+test("a 200-character token hard-breaks instead of vanishing", () => {
+  const long = "x".repeat(200);
+  const lines = printReceipt(buildReceipt(input({ canonicalUrl: `https://e.com/${long}` })));
+  const i = lines.indexOf("url");
+  assert.equal(lines.slice(i + 1, i + 7).join(""), `https://e.com/${long}`);
 });
