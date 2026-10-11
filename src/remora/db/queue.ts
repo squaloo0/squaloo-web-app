@@ -15,7 +15,7 @@ export function newId(prefix: "j" | "a"): string {
   return `${prefix}_${randomBytes(15).toString("base64url")}`;
 }
 
-type JobRow = {
+export type JobRow = {
   id: string;
   input: string;
   canonical_url: string;
@@ -30,6 +30,7 @@ type JobRow = {
   progress: number | null;
   error: string | null;
   title: string | null;
+  card_id?: string | null;
   created_at: string | Date;
   updated_at: string | Date;
 };
@@ -38,7 +39,7 @@ function iso(v: string | Date): string {
   return v instanceof Date ? v.toISOString() : new Date(v).toISOString();
 }
 
-function toJob(r: JobRow): Job {
+export function toJob(r: JobRow): Job {
   return {
     id: r.id,
     input: r.input,
@@ -54,6 +55,7 @@ function toJob(r: JobRow): Job {
     progress: r.progress,
     error: r.error,
     title: r.title,
+    cardId: r.card_id ?? null,
     createdAt: iso(r.created_at),
     updatedAt: iso(r.updated_at),
   };

@@ -21,6 +21,7 @@ function job(patch: Partial<Job> = {}): Job {
     progress: null,
     error: null,
     title: null,
+    cardId: null,
     createdAt: T0,
     updatedAt: T0,
     ...patch,
