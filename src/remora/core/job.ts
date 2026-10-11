@@ -60,6 +60,18 @@ export function isPermanentError(message: string): boolean {
   );
 }
 
+/**
+ * The panel's version of an error: yt-dlp's prefix gone, first sentence only.
+ * "yt-dlp exited 1: ERROR: [youtube] abc: Sign in to confirm you’re not a bot. Use --cookies…"
+ * → "Sign in to confirm you’re not a bot."
+ */
+export function shortError(message: string | null): string | null {
+  if (message === null) return null;
+  const stripped = message.replace(/^yt-dlp (exited \d+|killed by \w+): /, "").replace(/^ERROR: /, "").replace(/^\[[\w-]+\] [^:]+: /, "");
+  const sentence = /^(.*?[.!?])(\s|$)/.exec(stripped)?.[1] ?? stripped;
+  return sentence.length > 140 ? sentence.slice(0, 137) + "…" : sentence;
+}
+
 /** Seconds to wait before attempt n+1 after attempt n failed: 30 s, 2 min, 4.5 min. */
 export function backoffSeconds(attempts: number): number {
   return 30 * attempts * attempts;

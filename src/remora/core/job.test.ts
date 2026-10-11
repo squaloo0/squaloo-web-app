@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { backoffSeconds, isActive, isPermanentError, isStale, JobTransitionError, machineLight, MAX_ATTEMPTS, pill, reduce, STALE_AFTER_MS, type Job } from "./job.ts";
+import { backoffSeconds, shortError, isActive, isPermanentError, isStale, JobTransitionError, machineLight, MAX_ATTEMPTS, pill, reduce, STALE_AFTER_MS, type Job } from "./job.ts";
 
 const T0 = "2026-10-11T00:00:00.000Z";
 const T1 = "2026-10-11T00:01:00.000Z";
@@ -116,4 +116,15 @@ test("what counts as permanent", () => {
 
 test("backoff grows", () => {
   assert.deepEqual([1, 2, 3].map(backoffSeconds), [30, 120, 270]);
+});
+
+test("the panel shows the first sentence without yt-dlp's prefix", () => {
+  assert.equal(
+    shortError("yt-dlp exited 1: ERROR: [youtube] aqz-KE-bpKQ: Sign in to confirm you’re not a bot. Use --cookies-from-browser or --cookies for the authentication."),
+    "Sign in to confirm you’re not a bot.",
+  );
+  assert.equal(shortError("yt-dlp took longer than 1800000 ms"), "yt-dlp took longer than 1800000 ms");
+  assert.equal(shortError("that is a live stream; the machine vends files"), "that is a live stream; the machine vends files");
+  assert.equal(shortError(null), null);
+  assert.equal(shortError("x".repeat(200))!.length, 138);
 });
