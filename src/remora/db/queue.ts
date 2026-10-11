@@ -297,11 +297,14 @@ export async function migrate(files: { name: string; text: string }[]): Promise<
   return applied;
 }
 
-/** Split on semicolons at end of statement. Our migrations have no strings with ';' in them. */
+/**
+ * Split a migration into statements: strip `--` comments (whole-line and trailing), then
+ * split on semicolons. Our migrations keep ';' and '--' out of string literals.
+ */
 export function splitStatements(text: string): string[] {
   return text
     .split("\n")
-    .filter((l) => !l.trim().startsWith("--"))
+    .map((l) => l.replace(/--.*$/, "").trimEnd())
     .join("\n")
     .split(";")
     .map((s) => s.trim())
