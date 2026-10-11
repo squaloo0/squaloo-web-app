@@ -9,7 +9,14 @@
  *   verify <file|receipt>   re-hash a vend against its receipt
  *   receipt <file|receipt>  print the receipt again
  *   doctor                  which binaries the machine would use
+ *   migrate                 apply src/remora/db/migrations to Neon
+ *   enqueue <url> [--quality]  put a coin in the slot (the worker vends it)
+ *   jobs                    the queue
+ *   machine                 the pulse
  */
+import { readdir, readFile } from "node:fs/promises";
+import { fileURLToPath } from "node:url";
+import { join } from "node:path";
 import { parseVideoUrl } from "../../src/remora/core/url.ts";
 import { prettyBytes, prettyDuration, prettyHeight, prettyPercent, prettySpeed, progressBar } from "../../src/remora/core/pretty.ts";
 import type { VideoFormat, VideoMeta } from "../../src/remora/core/meta.ts";
@@ -19,6 +26,10 @@ import { printReceipt } from "../../src/remora/core/receipt.ts";
 import { scoreboard } from "../../src/remora/core/ledger.ts";
 import { YtDlpError, ytDlpBin, ytDlpInfo, ytDlpVersion } from "../../src/remora/ytdlp.ts";
 import { downloadsDir, ffmpegVersion, ledgerPath, readLedger, vend, VendError, verifyOnDisk } from "../../src/remora/vend.ts";
+import { machineLight, pill } from "../../src/remora/core/job.ts";
+import { dbWired } from "../../src/remora/db/client.ts";
+import { enqueue, freshestMachine, listJobs, migrate } from "../../src/remora/db/queue.ts";
+import { shelfWired } from "../../src/remora/storage.ts";
 
 const BANNER = String.raw`
                  ___
@@ -156,6 +167,65 @@ async function main(): Promise<number> {
       }
     }
 
+    case "migrate": {
+      if (!dbWired()) {
+        console.error("  no queue: set NEON_DATABASE_URL");
+        return 3;
+      }
+      const dir = fileURLToPath(new URL("../../src/remora/db/migrations/", import.meta.url));
+      const names = (await readdir(dir)).filter((n) => n.endsWith(".sql")).sort();
+      const files = await Promise.all(names.map(async (name) => ({ name, text: await readFile(join(dir, name), "utf8") })));
+      const applied = await migrate(files);
+      console.log(applied.length ? `  applied ${applied.join(", ")}` : `  nothing to apply (${names.length} known)`);
+      return 0;
+    }
+
+    case "enqueue": {
+      const parsed = args[0] ? parseVideoUrl(args[0]) : null;
+      if (!parsed || !parsed.canonicalUrl) {
+        console.error("enqueue: give me a URL");
+        return 2;
+      }
+      const quality = parseQuality(flags.quality ?? flags.q);
+      if (!quality) {
+        console.error(`enqueue: --quality must be one of ${QUALITIES.join(", ")}`);
+        return 2;
+      }
+      if (!dbWired()) {
+        console.error("  no queue: set NEON_DATABASE_URL");
+        return 3;
+      }
+      const job = await enqueue({ input: args[0], canonicalUrl: parsed.canonicalUrl, provider: parsed.provider, quality });
+      console.log(`  coin in. ${job.id} · ${job.provider} · ${job.quality} · ${pill(job).text}`);
+      return 0;
+    }
+
+    case "jobs": {
+      if (!dbWired()) {
+        console.error("  no queue: set NEON_DATABASE_URL");
+        return 3;
+      }
+      const jobs = await listJobs(30);
+      console.log(BANNER);
+      for (const j of jobs) {
+        console.log(`  ${j.createdAt.slice(0, 16).replace("T", " ")}  ${j.id.padEnd(23)} ${pill(j).text.padEnd(16)} ${j.quality.padEnd(5)} ${(j.title ?? j.canonicalUrl).slice(0, 50)}${j.error ? `  ! ${j.error.slice(0, 40)}` : ""}`);
+      }
+      if (jobs.length === 0) console.log("  no coins yet");
+      return 0;
+    }
+
+    case "machine": {
+      if (!dbWired()) {
+        console.error("  no queue: set NEON_DATABASE_URL");
+        return 3;
+      }
+      const m = await freshestMachine();
+      const light = machineLight(m, new Date());
+      console.log(`  ${light.on ? "READY" : "OUT OF ORDER"}  ${light.text}`);
+      if (m) console.log(`  last seen  ${m.lastSeen} · yt-dlp ${m.ytDlp ?? "?"} · ffmpeg ${m.ffmpeg ?? "?"}`);
+      return 0;
+    }
+
     case "doctor": {
       console.log(BANNER);
       console.log(`  node       ${process.version}`);
@@ -167,6 +237,8 @@ async function main(): Promise<number> {
       console.log(`  ffmpeg     ${(await ffmpegVersion()) ?? "not found (merges will fail)"}`);
       console.log(`  downloads  ${downloadsDir()}`);
       console.log(`  ledger     ${ledgerPath()}`);
+      console.log(`  queue      ${dbWired() ? "NEON_DATABASE_URL set" : "not wired (NEON_DATABASE_URL)"}`);
+      console.log(`  shelf      ${shelfWired() ? "REMORA_R2_* set" : "not wired (REMORA_R2_*)"}`);
       return 0;
     }
 
@@ -180,8 +252,12 @@ async function main(): Promise<number> {
       console.log("  ls                        the ledger and the scoreboard");
       console.log("  verify <file|receipt>     re-hash a vend against its receipt");
       console.log("  receipt <file|receipt>    print a receipt again");
-      console.log("  doctor                    binaries, folders");
-      console.log("\nenv: REMORA_DOWNLOADS, REMORA_LEDGER, REMORA_YTDLP_BIN, REMORA_FFMPEG_BIN");
+      console.log("  doctor                    binaries, folders, what is wired");
+      console.log("  migrate                   apply db/migrations to Neon");
+      console.log("  enqueue <url> [--quality] put a coin in the slot; the worker vends it");
+      console.log("  jobs                      the queue");
+      console.log("  machine                   the pulse: READY or OUT OF ORDER");
+      console.log("\nenv: NEON_DATABASE_URL, REMORA_R2_*, REMORA_DOWNLOADS, REMORA_LEDGER, REMORA_YTDLP_BIN, REMORA_FFMPEG_BIN");
       return 0;
 
     default:

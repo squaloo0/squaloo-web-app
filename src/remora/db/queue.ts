@@ -1,0 +1,260 @@
+/**
+ * The queue, as five statements. Every transition here mirrors core/job.ts; the SQL is
+ * single statements so it is atomic over Neon's HTTP driver without a transaction.
+ *
+ * I/O edge. Rows come back snake_case from Postgres and leave here as core Job values.
+ */
+import { randomBytes } from "node:crypto";
+import { sql } from "./client.ts";
+import { MAX_ATTEMPTS, STALE_AFTER_MS, type Job, type JobStatus, type Machine } from "../core/job.ts";
+import type { Quality } from "../core/format.ts";
+import type { Provider } from "../core/url.ts";
+
+export function newId(prefix: "j" | "a"): string {
+  return `${prefix}_${randomBytes(15).toString("base64url")}`;
+}
+
+type JobRow = {
+  id: string;
+  input: string;
+  canonical_url: string;
+  provider: string;
+  quality: string;
+  status: string;
+  attempts: number;
+  claimed_by: string | null;
+  claimed_at: string | Date | null;
+  progress: number | null;
+  error: string | null;
+  title: string | null;
+  created_at: string | Date;
+  updated_at: string | Date;
+};
+
+function iso(v: string | Date): string {
+  return v instanceof Date ? v.toISOString() : new Date(v).toISOString();
+}
+
+function toJob(r: JobRow): Job {
+  return {
+    id: r.id,
+    input: r.input,
+    canonicalUrl: r.canonical_url,
+    provider: r.provider as Provider,
+    quality: r.quality as Quality,
+    status: r.status as JobStatus,
+    attempts: r.attempts,
+    claimedBy: r.claimed_by,
+    claimedAt: r.claimed_at === null ? null : iso(r.claimed_at),
+    progress: r.progress,
+    error: r.error,
+    title: r.title,
+    createdAt: iso(r.created_at),
+    updatedAt: iso(r.updated_at),
+  };
+}
+
+export async function enqueue(input: { input: string; canonicalUrl: string; provider: Provider; quality: Quality }): Promise<Job> {
+  const id = newId("j");
+  const rows = (await sql()`
+    INSERT INTO remora_jobs (id, input, canonical_url, provider, quality)
+    VALUES (${id}, ${input.input}, ${input.canonicalUrl}, ${input.provider}, ${input.quality})
+    RETURNING *`) as JobRow[];
+  return toJob(rows[0]);
+}
+
+/**
+ * Take the oldest pending job, atomically. The subquery locks one row with SKIP LOCKED
+ * so two workers never claim the same coin; the UPDATE is the claim event.
+ */
+export async function claimNextJob(worker: string): Promise<Job | null> {
+  const rows = (await sql()`
+    UPDATE remora_jobs
+       SET status = 'processing',
+           attempts = attempts + 1,
+           claimed_by = ${worker},
+           claimed_at = now(),
+           progress = 0,
+           error = NULL,
+           updated_at = now()
+     WHERE id = (
+       SELECT id FROM remora_jobs
+        WHERE status = 'pending'
+        ORDER BY created_at
+        FOR UPDATE SKIP LOCKED
+        LIMIT 1
+     )
+    RETURNING *`) as JobRow[];
+  return rows[0] ? toJob(rows[0]) : null;
+}
+
+/** Refresh the claim and report progress. Returns false if the job is no longer ours. */
+export async function heartbeat(id: string, worker: string, progress: number | null, title: string | null): Promise<boolean> {
+  const rows = (await sql()`
+    UPDATE remora_jobs
+       SET claimed_at = now(), progress = ${progress}, title = COALESCE(${title}, title), updated_at = now()
+     WHERE id = ${id} AND status = 'processing' AND claimed_by = ${worker}
+    RETURNING id`) as { id: string }[];
+  return rows.length === 1;
+}
+
+export async function complete(id: string, worker: string, title: string | null): Promise<void> {
+  await sql()`
+    UPDATE remora_jobs
+       SET status = 'completed', progress = 1, title = COALESCE(${title}, title), claimed_by = NULL, updated_at = now()
+     WHERE id = ${id} AND status = 'processing' AND claimed_by = ${worker}`;
+}
+
+/** Back on the shelf while attempts remain, else failed. Same rule as core/job fail. */
+export async function fail(id: string, worker: string, error: string): Promise<void> {
+  await sql()`
+    UPDATE remora_jobs
+       SET status = CASE WHEN attempts < ${MAX_ATTEMPTS} THEN 'pending' ELSE 'failed' END,
+           error = ${error}, progress = NULL, claimed_by = NULL, claimed_at = NULL, updated_at = now()
+     WHERE id = ${id} AND status = 'processing' AND claimed_by = ${worker}`;
+}
+
+/** Claims whose heartbeat stopped: a dead worker. Same rule as core/job stale. */
+export async function recoverStale(): Promise<number> {
+  const rows = (await sql()`
+    UPDATE remora_jobs
+       SET status = CASE WHEN attempts < ${MAX_ATTEMPTS} THEN 'pending' ELSE 'failed' END,
+           error = CASE WHEN attempts < ${MAX_ATTEMPTS} THEN error ELSE 'the machine stopped mid-vend' END,
+           progress = NULL, claimed_by = NULL, claimed_at = NULL, updated_at = now()
+     WHERE status = 'processing' AND claimed_at < now() - make_interval(secs => ${STALE_AFTER_MS / 1000})
+    RETURNING id`) as { id: string }[];
+  return rows.length;
+}
+
+export async function getJob(id: string): Promise<Job | null> {
+  const rows = (await sql()`SELECT * FROM remora_jobs WHERE id = ${id}`) as JobRow[];
+  return rows[0] ? toJob(rows[0]) : null;
+}
+
+export async function listJobs(limit = 50): Promise<Job[]> {
+  const rows = (await sql()`SELECT * FROM remora_jobs ORDER BY created_at DESC LIMIT ${limit}`) as JobRow[];
+  return rows.map(toJob);
+}
+
+// --- the shelf -------------------------------------------------------------------
+
+export type Asset = {
+  id: string;
+  jobId: string;
+  kind: "video" | "audio" | "receipt";
+  objectKey: string;
+  fileName: string;
+  bytes: number;
+  sha256: string;
+  contentType: string;
+  expiresAt: string;
+  deletedAt: string | null;
+};
+
+type AssetRow = {
+  id: string;
+  job_id: string;
+  kind: string;
+  object_key: string;
+  file_name: string;
+  bytes: string | number;
+  sha256: string;
+  content_type: string;
+  expires_at: string | Date;
+  deleted_at: string | Date | null;
+};
+
+function toAsset(r: AssetRow): Asset {
+  return {
+    id: r.id,
+    jobId: r.job_id,
+    kind: r.kind as Asset["kind"],
+    objectKey: r.object_key,
+    fileName: r.file_name,
+    bytes: Number(r.bytes),
+    sha256: r.sha256,
+    contentType: r.content_type,
+    expiresAt: iso(r.expires_at),
+    deletedAt: r.deleted_at === null ? null : iso(r.deleted_at),
+  };
+}
+
+export async function addAsset(a: Omit<Asset, "id" | "deletedAt">): Promise<Asset> {
+  const id = newId("a");
+  const rows = (await sql()`
+    INSERT INTO remora_assets (id, job_id, kind, object_key, file_name, bytes, sha256, content_type, expires_at)
+    VALUES (${id}, ${a.jobId}, ${a.kind}, ${a.objectKey}, ${a.fileName}, ${a.bytes}, ${a.sha256}, ${a.contentType}, ${a.expiresAt})
+    RETURNING *`) as AssetRow[];
+  return toAsset(rows[0]);
+}
+
+export async function assetsForJobs(jobIds: string[]): Promise<Asset[]> {
+  if (jobIds.length === 0) return [];
+  const rows = (await sql()`SELECT * FROM remora_assets WHERE job_id = ANY(${jobIds}) AND deleted_at IS NULL ORDER BY kind`) as AssetRow[];
+  return rows.map(toAsset);
+}
+
+export async function assetsForJob(jobId: string): Promise<Asset[]> {
+  const rows = (await sql()`SELECT * FROM remora_assets WHERE job_id = ${jobId} AND deleted_at IS NULL ORDER BY kind`) as AssetRow[];
+  return rows.map(toAsset);
+}
+
+/** Assets past their expiry that are still on the shelf. The sweep deletes them from R2 and marks here. */
+export async function expiredAssets(limit = 20): Promise<Asset[]> {
+  const rows = (await sql()`
+    SELECT * FROM remora_assets WHERE deleted_at IS NULL AND expires_at < now() ORDER BY expires_at LIMIT ${limit}`) as AssetRow[];
+  return rows.map(toAsset);
+}
+
+export async function markDeleted(id: string): Promise<void> {
+  await sql()`UPDATE remora_assets SET deleted_at = now() WHERE id = ${id}`;
+}
+
+// --- the pulse -------------------------------------------------------------------
+
+export async function beat(machine: { name: string; ytDlp: string | null; ffmpeg: string | null }, vended = 0): Promise<void> {
+  await sql()`
+    INSERT INTO remora_machine (name, last_seen, yt_dlp, ffmpeg, vends)
+    VALUES (${machine.name}, now(), ${machine.ytDlp}, ${machine.ffmpeg}, ${vended})
+    ON CONFLICT (name) DO UPDATE
+      SET last_seen = now(), yt_dlp = EXCLUDED.yt_dlp, ffmpeg = EXCLUDED.ffmpeg,
+          vends = remora_machine.vends + ${vended}`;
+}
+
+/** The worker that checked in most recently. */
+export async function freshestMachine(): Promise<Machine | null> {
+  const rows = (await sql()`SELECT * FROM remora_machine ORDER BY last_seen DESC LIMIT 1`) as
+    { name: string; last_seen: string | Date; yt_dlp: string | null; ffmpeg: string | null; vends: number }[];
+  const r = rows[0];
+  return r ? { name: r.name, lastSeen: iso(r.last_seen), ytDlp: r.yt_dlp, ffmpeg: r.ffmpeg, vends: r.vends } : null;
+}
+
+// --- migrations ------------------------------------------------------------------
+
+/** Apply each (name, text) once, in order. Names are the file names; the table remembers. */
+export async function migrate(files: { name: string; text: string }[]): Promise<string[]> {
+  const applied: string[] = [];
+  await sql()`CREATE TABLE IF NOT EXISTS remora_migrations (name text PRIMARY KEY, applied_at timestamptz NOT NULL DEFAULT now())`;
+  const done = new Set(((await sql()`SELECT name FROM remora_migrations`) as { name: string }[]).map((r) => r.name));
+  for (const f of files) {
+    if (done.has(f.name)) continue;
+    // Neon's HTTP driver runs one statement per call; a migration file is many.
+    for (const statement of splitStatements(f.text)) {
+      await sql()(statement);
+    }
+    await sql()`INSERT INTO remora_migrations (name) VALUES (${f.name})`;
+    applied.push(f.name);
+  }
+  return applied;
+}
+
+/** Split on semicolons at end of statement. Our migrations have no strings with ';' in them. */
+export function splitStatements(text: string): string[] {
+  return text
+    .split("\n")
+    .filter((l) => !l.trim().startsWith("--"))
+    .join("\n")
+    .split(";")
+    .map((s) => s.trim())
+    .filter((s) => s.length > 0);
+}

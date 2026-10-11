@@ -1,0 +1,32 @@
+# The machine never sleeps. One shared-cpu machine, 1 GB, no inbound port: it only
+# makes outbound calls (Neon, R2, the video host).
+#
+#   fly launch --no-deploy --copy-config --name remora-machine   (first time, from repo root)
+#   fly secrets set NEON_DATABASE_URL=... REMORA_R2_ACCOUNT_ID=... REMORA_R2_BUCKET=... \
+#                   REMORA_R2_ACCESS_KEY_ID=... REMORA_R2_SECRET_ACCESS_KEY=...
+#   fly deploy --config workers/remora/fly.toml --dockerfile workers/remora/Dockerfile
+#
+# Build context must be the repo root (the Dockerfile copies src/remora and workers/remora).
+
+app = "remora-machine"
+primary_region = "sjc"
+
+[build]
+  dockerfile = "workers/remora/Dockerfile"
+
+[env]
+  REMORA_MACHINE_NAME = "fly-sjc"
+  REMORA_TICK_MS = "5000"
+  REMORA_TTL_DAYS = "7"
+
+# No [http_service]: nothing listens. Fly keeps the machine up because of the two
+# lines below, and restarts it if the process exits.
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "1gb"
+
+[processes]
+  machine = "node --experimental-strip-types --disable-warning=ExperimentalWarning --disable-warning=MODULE_TYPELESS_PACKAGE_JSON workers/remora/worker.ts"
+
+[[restart]]
+  policy = "always"

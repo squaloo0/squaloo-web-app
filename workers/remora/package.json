@@ -1,0 +1,9 @@
+{
+  "name": "remora-machine",
+  "private": true,
+  "type": "module",
+  "description": "The machine's manifest for the Docker image. The site's package.json is not copied in; keep the dependency list to what workers/remora/worker.ts actually imports.",
+  "dependencies": {
+    "@neondatabase/serverless": "^0.10.4"
+  }
+}
