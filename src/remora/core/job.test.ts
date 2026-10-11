@@ -124,7 +124,7 @@ test("a bot wall is a route failure: the attempt is given back, the door is coun
 });
 
 test("what counts as permanent", () => {
-  for (const m of ["Private video", "Video unavailable", "This video has been removed", "that is a live stream", "HTTP Error 403: Forbidden", "members-only content"]) {
+  for (const m of ["Private video", "Video unavailable", "This video has been removed", "that is a live stream", "HTTP Error 403: Forbidden", "members-only content", "ERROR: [vimeo] 22439234: The web client only works when logged-in. Use --cookies"]) {
     assert.equal(isPermanentError(m), true, m);
   }
   for (const m of ["Sign in to confirm you’re not a bot", "timed out", "HTTP Error 503: Service Unavailable", "ECONNRESET", "yt-dlp took longer than 1800000 ms"]) {

@@ -63,7 +63,7 @@ export type JobEvent =
 export function isPermanentError(message: string): boolean {
   return (
     !isRouteError(message) &&
-    /Private video|Video unavailable|has been removed|This video is not available|is not a URL|live stream|no longer available|members-only|age-restricted|HTTP Error 40[134]/i.test(
+    /Private video|Video unavailable|has been removed|This video is not available|is not a URL|live stream|no longer available|members-only|age-restricted|only works when logged-in|login required|requires? (a )?login|HTTP Error 40[134]/i.test(
       message,
     )
   );
