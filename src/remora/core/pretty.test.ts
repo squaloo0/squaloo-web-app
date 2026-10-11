@@ -26,3 +26,18 @@ test("heights", () => {
   assert.equal(prettyHeight(1080), "1080p");
   assert.equal(prettyHeight(null), "audio");
 });
+
+test("progress bars", async () => {
+  const { progressBar, prettyPercent, prettySpeed } = await import("./pretty.ts");
+  assert.equal(progressBar(0, 8), "░░░░░░░░");
+  assert.equal(progressBar(0.5, 8), "████░░░░");
+  assert.equal(progressBar(1, 8), "████████");
+  assert.equal(progressBar(2, 8), "████████");
+  assert.equal(progressBar(null, 4, 1), "░▓░░");
+  assert.equal(progressBar(null, 4, 5), "░▓░░");
+  assert.equal(prettyPercent(0.071), "  7%");
+  assert.equal(prettyPercent(1), "100%");
+  assert.equal(prettyPercent(null), "  ?%");
+  assert.equal(prettySpeed(2621440), "2.5 MB/s");
+  assert.equal(prettySpeed(null), "—");
+});
