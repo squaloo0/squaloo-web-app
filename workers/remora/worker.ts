@@ -10,6 +10,7 @@
  * Env: NEON_DATABASE_URL, the REMORA_R2_* set, REMORA_MACHINE_NAME (default hostname),
  * REMORA_TICK_MS (idle poll, default 5000), REMORA_TTL_DAYS (shelf life, default 7).
  */
+import "../../src/remora/env.ts"; // .env.local → process.env, first
 import { mkdtemp, rm } from "node:fs/promises";
 import { hostname, tmpdir } from "node:os";
 import { basename, join } from "node:path";
