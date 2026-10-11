@@ -111,6 +111,29 @@ news), human-scale rate limits, no bulk, and the receipt reframes the product as
 proof, not piracy. Boring Company called theirs "Not a Flamethrower." Remora is
 "Not a Downloader." The receipt is what you are buying.
 
+### The wall (observed 2026-10-11, routing shipped same day)
+
+YouTube's "Sign in to confirm you're not a bot" hit two of four videos from a residential
+IP on the first live day, then lifted twelve hours later. It is per-video, per-address
+and per-mood. From a datacenter address expect it more often. The machine's answer is
+**routing, not evasion**: a wall is a route failure (the coin keeps its attempt), the
+machine that hit it cools on that provider for 30 min and says so on the panel, and any
+other machine that is good for the provider takes the coin. Per-machine pacing
+(`REMORA_YOUTUBE_PER_HOUR`, default 12) keeps every box human-scale, and the pace is
+published as a cooldown too. So: a Fly box for uptime and every other provider, a Mac at
+home for YouTube, one queue, no coordination. `core/route.ts` is the spec.
+
+Three things yt-dlp's own docs offer that are **founder calls, not wired**:
+
+| Option | What it is | Why it waits |
+|---|---|---|
+| `--cookies` from a logged-in browser | yt-dlp's documented remedy; ties vends to a Google account | Puts an account at risk; the account would be Squaloo's |
+| A PO-token provider plugin | yt-dlp's supported plugin mechanism; a sidecar service mints tokens | A second service to keep alive; another moving part that breaks on its own schedule |
+| `--extractor-args youtube:player_client=…` | Ask YouTube as a different official client | Grey; it works until it doesn't, and reads like evasion on a page that argues the opposite |
+
+Until one is chosen, YouTube is "best effort, usually from home", and the receipt says
+which machine vended. Every other provider is unaffected.
+
 **Kept in the back pocket (v2 §Ideas):** provenance tiers, trust panel, Solomon ingest.
 They become slots or panel lights only if they make the machine more fun.
 

@@ -14,6 +14,8 @@ function job(patch: Partial<Job> = {}): Job {
     quality: "best",
     status: "pending",
     attempts: 0,
+    routeFailures: 0,
+    notBefore: null,
     claimedBy: null,
     claimedAt: null,
     progress: null,
@@ -89,7 +91,7 @@ test("pills", () => {
 test("the machine light", () => {
   const now = new Date(T1);
   assert.equal(machineLight(null, now).on, false);
-  const fresh = { name: "fly-1", lastSeen: T1, ytDlp: "x", ffmpeg: "y", vends: 3 };
+  const fresh = { name: "fly-1", lastSeen: T1, ytDlp: "x", ffmpeg: "y", vends: 3, providers: ["youtube"], cooldowns: {} };
   assert.deepEqual(machineLight(fresh, now), { on: true, text: "fly-1 · 3 vends" });
   const silent = { ...fresh, lastSeen: T0 };
   const light = machineLight(silent, new Date(Date.parse(T0) + 10 * 60_000));
@@ -97,19 +99,35 @@ test("the machine light", () => {
   assert.match(light.text, /OUT OF ORDER · fly-1 last seen 10 min ago · jobs are safe/);
 });
 
-test("a permanent error fails on the first attempt; a transient one goes back on the shelf", () => {
+test("a permanent error fails on the first attempt; a transient one goes back on the shelf with a pause", () => {
   const claimed = reduce(job(), { type: "claim", by: "air", at: T0 });
-  const bot = reduce(claimed, { type: "fail", at: T1, error: "yt-dlp exited 1: ERROR: [youtube] x: Sign in to confirm you’re not a bot." });
-  assert.equal(bot.status, "failed");
+  const gone = reduce(claimed, { type: "fail", at: T1, error: "yt-dlp exited 1: ERROR: [youtube] x: Private video" });
+  assert.equal(gone.status, "failed");
   const net = reduce(claimed, { type: "fail", at: T1, error: "yt-dlp exited 1: ERROR: Unable to download webpage: <urlopen error timed out>" });
   assert.equal(net.status, "pending");
+  assert.equal(net.notBefore, new Date(Date.parse(T1) + 30_000).toISOString());
+});
+
+test("a bot wall is a route failure: the attempt is given back, the door is counted, the coin is shelved a minute", () => {
+  const claimed = reduce(job(), { type: "claim", by: "fly", at: T0 });
+  const bot = reduce(claimed, { type: "fail", at: T1, error: "yt-dlp exited 1: ERROR: [youtube] x: Sign in to confirm you’re not a bot." });
+  assert.equal(bot.status, "pending");
+  assert.equal(bot.attempts, 0);
+  assert.equal(bot.routeFailures, 1);
+  assert.equal(bot.notBefore, new Date(Date.parse(T1) + 60_000).toISOString());
+  // too many doors and the coin is declared stuck
+  let j = job({ routeFailures: 7 });
+  j = reduce(j, { type: "claim", by: "fly", at: T0 });
+  j = reduce(j, { type: "fail", at: T1, error: "HTTP Error 429: Too Many Requests" });
+  assert.equal(j.status, "failed");
+  assert.equal(j.routeFailures, 8);
 });
 
 test("what counts as permanent", () => {
-  for (const m of ["Sign in to confirm you’re not a bot", "Private video", "Video unavailable", "This video has been removed", "that is a live stream", "HTTP Error 403: Forbidden", "members-only content"]) {
+  for (const m of ["Private video", "Video unavailable", "This video has been removed", "that is a live stream", "HTTP Error 403: Forbidden", "members-only content"]) {
     assert.equal(isPermanentError(m), true, m);
   }
-  for (const m of ["timed out", "HTTP Error 503: Service Unavailable", "ECONNRESET", "yt-dlp took longer than 1800000 ms"]) {
+  for (const m of ["Sign in to confirm you’re not a bot", "timed out", "HTTP Error 503: Service Unavailable", "ECONNRESET", "yt-dlp took longer than 1800000 ms"]) {
     assert.equal(isPermanentError(m), false, m);
   }
 });

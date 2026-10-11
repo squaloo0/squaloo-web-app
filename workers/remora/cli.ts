@@ -29,7 +29,8 @@ import { YtDlpError, ytDlpBin, ytDlpInfo, ytDlpVersion } from "../../src/remora/
 import { downloadsDir, ffmpegVersion, ledgerPath, readLedger, vend, VendError, verifyOnDisk } from "../../src/remora/vend.ts";
 import { machineLight, pill } from "../../src/remora/core/job.ts";
 import { dbWired } from "../../src/remora/db/client.ts";
-import { enqueue, freshestMachine, listJobs, migrate } from "../../src/remora/db/queue.ts";
+import { enqueue, freshestMachine, listJobs, liveMachines, migrate } from "../../src/remora/db/queue.ts";
+import { machineSummary } from "../../src/remora/core/route.ts";
 import { shelfWired } from "../../src/remora/storage.ts";
 
 const BANNER = String.raw`
@@ -220,10 +221,14 @@ async function main(): Promise<number> {
         console.error("  no queue: set NEON_DATABASE_URL");
         return 3;
       }
-      const m = await freshestMachine();
-      const light = machineLight(m, new Date());
+      const now = new Date();
+      const [m, live] = await Promise.all([freshestMachine(), liveMachines()]);
+      const light = machineLight(m, now);
       console.log(`  ${light.on ? "READY" : "OUT OF ORDER"}  ${light.text}`);
-      if (m) console.log(`  last seen  ${m.lastSeen} · yt-dlp ${m.ytDlp ?? "?"} · ffmpeg ${m.ffmpeg ?? "?"}`);
+      for (const x of live) {
+        console.log(`  ${machineSummary(x, now)} · vends ${x.providers.join(",") || "?"} · yt-dlp ${x.ytDlp ?? "?"} · ffmpeg ${x.ffmpeg ?? "?"} · seen ${x.lastSeen.slice(11, 19)}Z`);
+      }
+      if (live.length === 0 && m) console.log(`  last seen  ${m.lastSeen} · yt-dlp ${m.ytDlp ?? "?"} · ffmpeg ${m.ffmpeg ?? "?"}`);
       return 0;
     }
 
