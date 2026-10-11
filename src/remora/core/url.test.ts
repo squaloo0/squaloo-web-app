@@ -1,32 +1,29 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { parseVideoUrl } from "./url.ts";
+import { URL_FIXTURES } from "./url.fixtures.ts";
 
-const YT = "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
-
-test("youtube watch URL, with tracking junk stripped", () => {
-  const r = parseVideoUrl("https://www.youtube.com/watch?v=dQw4w9WgXcQ&t=42s&si=abc&list=PL123");
-  assert.deepEqual(r, { provider: "youtube", id: "dQw4w9WgXcQ", canonicalUrl: YT });
+test("every fixture has a unique name and input", () => {
+  const names = new Set(URL_FIXTURES.map((f) => f.name));
+  const inputs = new Set(URL_FIXTURES.map((f) => f.input));
+  assert.equal(names.size, URL_FIXTURES.length, "duplicate fixture name");
+  assert.equal(inputs.size, URL_FIXTURES.length, "duplicate fixture input");
 });
 
-test("youtu.be and shorts resolve to the same canonical URL", () => {
-  assert.equal(parseVideoUrl("https://youtu.be/dQw4w9WgXcQ?si=x")?.canonicalUrl, YT);
-  assert.equal(parseVideoUrl("https://m.youtube.com/shorts/dQw4w9WgXcQ")?.canonicalUrl, YT);
-});
+for (const f of URL_FIXTURES) {
+  test(`url: ${f.name}`, () => {
+    assert.deepEqual(parseVideoUrl(f.input), f.expect, `input: ${JSON.stringify(f.input)}`);
+  });
+}
 
-test("vimeo", () => {
-  assert.equal(parseVideoUrl("https://vimeo.com/76979871")?.provider, "vimeo");
-  assert.equal(parseVideoUrl("https://player.vimeo.com/video/76979871")?.id, "76979871");
-});
-
-test("direct file", () => {
-  const r = parseVideoUrl("https://example.com/clips/a.MP4#t=3");
-  assert.equal(r?.provider, "direct");
-  assert.equal(r?.canonicalUrl, "https://example.com/clips/a.MP4");
-});
-
-test("not a URL, wrong scheme, or a bad id", () => {
-  assert.equal(parseVideoUrl("hello"), null);
-  assert.equal(parseVideoUrl("ftp://x/y.mp4"), null);
-  assert.equal(parseVideoUrl("https://youtu.be/short")?.provider, "unknown");
+test("every known provider resolves to one canonical spelling", () => {
+  // The same video pasted three ways must land on byte-identical canonical URLs,
+  // because Phase 3 keys the job queue on them.
+  const spellings = [
+    "https://www.youtube.com/watch?v=dQw4w9WgXcQ&si=a",
+    "https://youtu.be/dQw4w9WgXcQ?t=1",
+    "https://m.youtube.com/shorts/dQw4w9WgXcQ",
+    "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ",
+  ].map((u) => parseVideoUrl(u)?.canonicalUrl);
+  assert.equal(new Set(spellings).size, 1);
 });
