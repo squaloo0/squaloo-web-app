@@ -37,8 +37,8 @@ const connectionString = process.env.NEON_DATABASE_URL || '';
 const dbCredentials = parseConnectionString(connectionString);
 
 export default {
-  schema: './src/app/marshal-qr-code/db/schema.ts',
-  out: './src/app/marshal-qr-code/db/migrations',
+  schema: './src/app/marshal-qr/db/schema.ts',
+  out: './src/app/marshal-qr/db/migrations',
   dialect: 'postgresql',
   dbCredentials,
 } satisfies Config; 
