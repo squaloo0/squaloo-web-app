@@ -14,7 +14,7 @@ import { parseVideoUrl } from "./core/url.ts";
 import { estimate, type Estimate, type Quality } from "./core/format.ts";
 import type { VideoMeta } from "./core/meta.ts";
 import type { PostProcess, Progress } from "./core/progress.ts";
-import { buildReceipt, parseReceipt, receiptFileName, receiptText, verifyReceipt, type Receipt, type Verification } from "./core/receipt.ts";
+import { buildReceipt, parseReceipt, pemFromEnv, receiptFileName, receiptText, signReceipt, verifyReceipt, type Receipt, type Verification } from "./core/receipt.ts";
 import { ledgerLine, ledgerRow, parseLedgerLine, type LedgerRow } from "./core/ledger.ts";
 import { ytDlpDownload, ytDlpInfo, ytDlpVersion } from "./ytdlp.ts";
 
@@ -32,6 +32,12 @@ export type VendOptions = {
   quality: Quality;
   /** Defaults to downloadsDir(). */
   dir?: string;
+  /** The punch card that paid (public handle), for the receipt. */
+  card?: string | null;
+  /** Which machine is vending, for the receipt. */
+  machine?: string;
+  /** Ed25519 private key PEM; defaults to REMORA_RECEIPT_PRIVATE_KEY. Unsigned when absent. */
+  signingKey?: string | null;
   onStage?: (stage: Stage, detail: string) => void;
   onEstimate?: (meta: VideoMeta, estimate: Estimate | null) => void;
   onTick?: (tick: Progress | PostProcess) => void;
@@ -93,7 +99,7 @@ export async function vend(opts: VendOptions): Promise<Vend> {
   const [sha256, size, ytDlp, ffmpeg] = await Promise.all([sha256File(filepath), stat(filepath), ytDlpVersion(), ffmpegVersion()]);
 
   opts.onStage?.("receipt", receiptFileName(basename(filepath)));
-  const receipt = buildReceipt({
+  const unsigned = buildReceipt({
     input: opts.input,
     canonicalUrl: parsed.canonicalUrl,
     provider: parsed.provider,
@@ -107,8 +113,12 @@ export async function vend(opts: VendOptions): Promise<Vend> {
     ytDlp,
     ffmpeg,
     node: process.version,
+    machine: opts.machine,
+    card: opts.card ?? null,
     now: new Date(),
   });
+  const key = opts.signingKey === undefined ? pemFromEnv(process.env.REMORA_RECEIPT_PRIVATE_KEY) : opts.signingKey;
+  const receipt = key ? signReceipt(unsigned, key) : unsigned;
   const receiptPath = join(dirname(filepath), receiptFileName(basename(filepath)));
   await writeFile(receiptPath, receiptText(receipt), "utf8");
 
