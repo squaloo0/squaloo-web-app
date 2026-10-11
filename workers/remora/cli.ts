@@ -14,6 +14,7 @@
  *   jobs                    the queue
  *   machine                 the pulse
  */
+import "../../src/remora/env.ts"; // .env.local → process.env, first
 import { readdir, readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { join } from "node:path";

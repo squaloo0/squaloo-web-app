@@ -15,7 +15,7 @@ import { isServiceKey, KEY_COOKIE, keySlotWired } from "@/remora/auth";
 import { peek, type PeekResult } from "@/remora/peek";
 import { thumbProxyPath } from "@/remora/core/oembed";
 import { QUALITIES } from "@/remora/core/format";
-import { isActive, machineLight, pill, type Job } from "@/remora/core/job";
+import { isActive, machineLight, pill, shortError, type Job } from "@/remora/core/job";
 import { prettyBytes } from "@/remora/core/pretty";
 import { dbWired } from "@/remora/db/client";
 import { assetsForJobs, freshestMachine, listJobs, type Asset } from "@/remora/db/queue";
@@ -365,7 +365,12 @@ function Drop({ job, assets }: { job: Job; assets: Asset[] }) {
           <div className="h-full bg-[#1400bf]" style={{ width: `${Math.round(job.progress * 100)}%` }} />
         </div>
       ) : null}
-      {job.error && job.status !== "completed" ? <div className="text-[11px] text-neutral-600 break-words">{job.error}</div> : null}
+      {job.error && job.status !== "completed" ? (
+        <div className="text-[11px] text-neutral-600 break-words" title={job.error}>
+          {shortError(job.error)}
+          {job.status === "pending" ? " · will try again" : ""}
+        </div>
+      ) : null}
       {job.status === "completed" ? (
         <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px]">
           {file ? (

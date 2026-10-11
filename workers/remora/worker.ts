@@ -10,15 +10,16 @@
  * Env: NEON_DATABASE_URL, the REMORA_R2_* set, REMORA_MACHINE_NAME (default hostname),
  * REMORA_TICK_MS (idle poll, default 5000), REMORA_TTL_DAYS (shelf life, default 7).
  */
-import { mkdtemp, rm } from "node:fs/promises";
+import "../../src/remora/env.ts"; // .env.local → process.env, first
+import { mkdtemp, rm, stat } from "node:fs/promises";
 import { hostname, tmpdir } from "node:os";
 import { basename, join } from "node:path";
-import type { Job } from "../../src/remora/core/job.ts";
+import { backoffSeconds, isPermanentError, MAX_ATTEMPTS, type Job } from "../../src/remora/core/job.ts";
 import { fraction } from "../../src/remora/core/progress.ts";
 import { dbWired } from "../../src/remora/db/client.ts";
 import { addAsset, beat, claimNextJob, complete, expiredAssets, fail, heartbeat, markDeleted, recoverStale } from "../../src/remora/db/queue.ts";
 import { contentTypeFor, deleteObject, putFile, shelfWired } from "../../src/remora/storage.ts";
-import { ffmpegVersion, vend } from "../../src/remora/vend.ts";
+import { ffmpegVersion, sha256File, vend } from "../../src/remora/vend.ts";
 import { ytDlpVersion } from "../../src/remora/ytdlp.ts";
 
 const NAME = process.env.REMORA_MACHINE_NAME || hostname();
@@ -108,13 +109,14 @@ async function process_(job: Job, tools: { name: string; ytDlp: string | null; f
       contentType: contentTypeFor(fileName),
       expiresAt,
     });
+    const [receiptBytes, receiptSha] = await Promise.all([stat(v.receiptPath).then((s) => s.size), sha256File(v.receiptPath)]);
     await addAsset({
       jobId: job.id,
       kind: "receipt",
       objectKey: `${prefix}/${receiptName}`,
       fileName: receiptName,
-      bytes: Buffer.byteLength(JSON.stringify(v.receipt, null, 2) + "\n"),
-      sha256: "",
+      bytes: receiptBytes,
+      sha256: receiptSha,
       contentType: "application/json",
       expiresAt,
     });
@@ -124,7 +126,9 @@ async function process_(job: Job, tools: { name: string; ytDlp: string | null; f
     log(`CLUNK ${job.id} · ${fileName} · ${v.receipt.file.bytes} B · ${v.seconds.toFixed(1)}s`);
   } catch (e) {
     const message = e instanceof Error ? e.message : String(e);
-    log(`nothing dropped for ${job.id}: ${message}`);
+    const permanent = isPermanentError(message);
+    const again = !permanent && job.attempts < MAX_ATTEMPTS ? ` · again in ${backoffSeconds(job.attempts)}s` : " · giving up";
+    log(`nothing dropped for ${job.id}: ${message.slice(0, 200)}${again}`);
     await fail(job.id, NAME, message.slice(0, 500));
   } finally {
     await rm(dir, { recursive: true, force: true });
