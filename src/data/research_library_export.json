@@ -1,0 +1,183 @@
+{
+  "queried_at": "2026-10-10",
+  "queried_by": "comms-agent, Notion connector (notion-query-data-sources, SQL mode)",
+  "box": "MacBook Pro (comms seat worktree)",
+  "data_source": "collection://7ad5aa31-8ef3-464b-8f94-6b1ec232540d (Gate E Research Library)",
+  "query": "SELECT \"userDefined:ID\" AS id, \"Kind\" AS kind, \"Status\" AS status, \"Name\" AS name FROM \"collection://7ad5aa31-8ef3-464b-8f94-6b1ec232540d\" WHERE \"Kind\" = 'paper' ORDER BY \"userDefined:ID\"",
+  "results": [
+    {
+      "id": "2305.14627",
+      "kind": "paper",
+      "status": "Reviewed",
+      "name": "ALCE (Gao et al.)"
+    },
+    {
+      "id": "2403.08319",
+      "kind": "paper",
+      "status": "Reviewed",
+      "name": "Knowledge Conflicts for LLMs: A Survey (Xu et al.)"
+    },
+    {
+      "id": "2407.18418",
+      "kind": "paper",
+      "status": "Reviewed",
+      "name": "Know Your Limits: A Survey of Abstention"
+    },
+    {
+      "id": "2408.04568",
+      "kind": "paper",
+      "status": "Reviewed",
+      "name": "Learning Fine-Grained Grounded Citations (G3 / FRONT)"
+    },
+    {
+      "id": "2409.00088",
+      "kind": "paper",
+      "status": "Unclaimed",
+      "name": "On-Device Language Models: A Comprehensive Review"
+    },
+    {
+      "id": "2409.15790",
+      "kind": "paper",
+      "status": "Reviewed",
+      "name": "Small Language Models: Survey, Measurements, and Insights (Lu et al.)"
+    },
+    {
+      "id": "2410.14209",
+      "kind": "paper",
+      "status": "Unclaimed",
+      "name": "Agents4PLC"
+    },
+    {
+      "id": "2410.20011",
+      "kind": "paper",
+      "status": "Unclaimed",
+      "name": "A Survey of Small Language Models"
+    },
+    {
+      "id": "2411.15594",
+      "kind": "paper",
+      "status": "Reviewed",
+      "name": "A Survey on LLM-as-a-Judge"
+    },
+    {
+      "id": "2502.15604",
+      "kind": "paper",
+      "status": "Unclaimed",
+      "name": "Cross-Format RAG in XR for Maintenance"
+    },
+    {
+      "id": "2503.16416",
+      "kind": "paper",
+      "status": "Reviewed",
+      "name": "A Survey on Evaluation of LLM-based Agents"
+    },
+    {
+      "id": "2507.16731",
+      "kind": "paper",
+      "status": "Unclaimed",
+      "name": "Collaborative Inference and Learning between Edge SLMs and Cloud LLMs (CSUR 2026)"
+    },
+    {
+      "id": "2509.21557",
+      "kind": "paper",
+      "status": "Reviewed",
+      "name": "Generation-Time vs. Post-hoc Citation"
+    },
+    {
+      "id": "2510.12040",
+      "kind": "paper",
+      "status": "Reviewed",
+      "name": "Uncertainty Quantification for Hallucination Detection"
+    },
+    {
+      "id": "2511.22138",
+      "kind": "paper",
+      "status": "Unclaimed",
+      "name": "TinyLLM: SLMs for Agentic Tasks on Edge Devices"
+    },
+    {
+      "id": "2601.08012",
+      "kind": "paper",
+      "status": "Reviewed",
+      "name": "Towards Verifiably Safe Tool Use for LLM Agents (ICSE 2026)"
+    },
+    {
+      "id": "2601.08706",
+      "kind": "paper",
+      "status": "Reviewed",
+      "name": "\"Where is My Troubleshooting Procedure?\" (Rossi et al., Fincantieri CPS)"
+    },
+    {
+      "id": "2602.16666",
+      "kind": "paper",
+      "status": "Reviewed",
+      "name": "Towards a Science of AI Agent Reliability (Rabanser, Kapoor, Narayanan et al., ICML 2026)"
+    },
+    {
+      "id": "2603.21172",
+      "kind": "paper",
+      "status": "Reviewed",
+      "name": "Entropy Alone is Insufficient for Safe Selective Prediction"
+    },
+    {
+      "id": "2604.20193",
+      "kind": "paper",
+      "status": "Reviewed",
+      "name": "LLM-Guided Safety Agent for Edge Robotics (ISO-compliant)"
+    },
+    {
+      "id": "2606.14119",
+      "kind": "paper",
+      "status": "Reviewed",
+      "name": "FactoryLLM"
+    },
+    {
+      "id": "2607.02577",
+      "kind": "paper",
+      "status": "Reviewed",
+      "name": "Benchmarking the Benchmarks: A Validity Audit of Tool-Calling Evaluation (Tool-Veritas)"
+    },
+    {
+      "id": "2607.02599",
+      "kind": "paper",
+      "status": "Reviewed",
+      "name": "AgentLTL: Trace-Verification for Procedural Compliance"
+    },
+    {
+      "id": "2608.26623",
+      "kind": "paper",
+      "status": "Reviewed",
+      "name": "AgentJudgeBench"
+    },
+    {
+      "id": "2609.07370",
+      "kind": "paper",
+      "status": "Reviewed",
+      "name": "CPU Reliability Benchmark for MCP-Style Tool Calling in Sub-2B SLMs"
+    },
+    {
+      "id": "2609.09503",
+      "kind": "paper",
+      "status": "Unclaimed",
+      "name": "Agentic Semantic Commissioning of a Cognitive Digital Twin"
+    },
+    {
+      "id": "2610.02982",
+      "kind": "paper",
+      "status": "Unclaimed",
+      "name": "PLCWorld"
+    },
+    {
+      "id": "4549-Document Upload-….pdf (Drive; no arXiv id)",
+      "kind": "paper",
+      "status": "Unclaimed",
+      "name": "Evaluation Framework for Fault Diagnosis Using Technical Manuals (Lukens et al., PHM 2025)"
+    },
+    {
+      "id": "Statist. Sci. 16(2):101–133, 2001 — not arXiv; PDF via founder or library access",
+      "kind": "paper",
+      "status": "Unclaimed",
+      "name": "Interval Estimation for a Binomial Proportion (Brown, Cai & DasGupta, Statistical Science 2001)"
+    }
+  ]
+}
