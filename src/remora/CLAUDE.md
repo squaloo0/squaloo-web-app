@@ -2,6 +2,8 @@
 
 Remora is a **video vending machine** that lives in this corner of the Squaloo site.
 Read `src/remora/README.md` first; it is the plan and the only source of truth.
+Then read the **last entry of `src/remora/LOG.md`**: it says which machine worked last,
+which branch is live, and what is next.
 
 Rules of the game (short form):
 - Fun first. One phase per sitting. Every phase ends with something runnable.
@@ -15,3 +17,18 @@ Rules of the game (short form):
 
 Commands: `npm run remora -- <cmd>` · `npm run remora:worker` · `npm run remora:test`.
 Branches: `remora/feat/<name>`, one PR per phase, PRs target `main`.
+
+## Session hand-off (two machines, one branch)
+
+Work moves between a Mac mini and a MacBook Air. Git is the only channel.
+
+Start of a sitting:
+1. `git fetch origin` and check out the branch named in the last LOG entry.
+2. `npm install` if `package.json` changed. Run `npm run remora:test`.
+3. Say in one line which machine you are on and what you are about to do.
+
+End of a sitting, before you stop for any reason:
+1. Append a LOG entry: date · machine · phase · what landed · what is next · any
+   machine-local fact (binaries, env files, what is on disk).
+2. Commit and push the branch. Work that exists only on one machine does not exist.
+3. If the phase is done: lint, build, open the PR against `main`.
