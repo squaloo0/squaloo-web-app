@@ -188,6 +188,12 @@ export async function addAsset(a: Omit<Asset, "id" | "deletedAt">): Promise<Asse
   return toAsset(rows[0]);
 }
 
+export async function assetsForJobs(jobIds: string[]): Promise<Asset[]> {
+  if (jobIds.length === 0) return [];
+  const rows = (await sql()`SELECT * FROM remora_assets WHERE job_id = ANY(${jobIds}) AND deleted_at IS NULL ORDER BY kind`) as AssetRow[];
+  return rows.map(toAsset);
+}
+
 export async function assetsForJob(jobId: string): Promise<Asset[]> {
   const rows = (await sql()`SELECT * FROM remora_assets WHERE job_id = ${jobId} AND deleted_at IS NULL ORDER BY kind`) as AssetRow[];
   return rows.map(toAsset);
