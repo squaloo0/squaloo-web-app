@@ -77,7 +77,7 @@ export default async function RemoraPage({ searchParams }: { searchParams: Promi
 
           {/* The glass */}
           <div className="p-5 border-b border-neutral-800 bg-[linear-gradient(180deg,rgba(86,136,199,0.06),transparent_60%)]">
-            <div className="grid grid-cols-4 sm:grid-cols-7 gap-2 mb-5">
+            <div className="grid grid-cols-4 sm:grid-cols-7 gap-1.5 sm:gap-2 mb-5">
               {SLOTS.map((s, i) => (
                 <Slot key={s.label} label={s.label} tag={s.tag} lit={i === 0} />
               ))}
@@ -183,8 +183,8 @@ function Slot({ label, tag, lit }: { label: string; tag: string; lit: boolean })
         lit ? "border-[#1400bf] text-[#5688c7] shadow-[0_0_12px_rgba(20,0,191,0.35)]" : "border-neutral-900 text-neutral-700"
       }`}
     >
-      <span className="text-[10px] tracking-[0.2em] uppercase">{label}</span>
-      <span className={`text-[8px] tracking-[0.2em] uppercase ${lit ? "text-neutral-400" : "text-neutral-800"}`}>{tag}</span>
+      <span className="text-[9px] sm:text-[10px] tracking-[0.1em] sm:tracking-[0.2em] uppercase">{label}</span>
+      <span className={`text-[8px] tracking-[0.1em] sm:tracking-[0.2em] uppercase ${lit ? "text-neutral-400" : "text-neutral-800"}`}>{tag}</span>
     </div>
   );
 }
