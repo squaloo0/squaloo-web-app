@@ -93,8 +93,13 @@ async function main(): Promise<void> {
     const recovered = await recoverStale();
     if (recovered > 0) log(`put ${recovered} stale job(s) back on the shelf`);
 
+    // Pace is a cooldown too, published like one, so the panel and other machines see it.
+    for (const p of CAPABILITIES) {
+      const retryAt = pace.retryAt(p, now);
+      if (retryAt && !(p in cooldowns)) cooldowns = { ...cooldowns, [p]: retryAt.toISOString() };
+    }
     // Only claim what this machine is good for right now: not cooling, not over pace.
-    const providers = availableProviders(CAPABILITIES, cooldowns, now).filter((p) => pace.allow(p, now));
+    const providers = availableProviders(CAPABILITIES, cooldowns, now);
     const key = providers.join(",");
     if (key !== lastProviders) {
       log(providers.length ? `claiming: ${key}` : "claiming nothing: everything is cooling or over pace");
