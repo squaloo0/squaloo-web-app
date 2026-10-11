@@ -12,7 +12,8 @@ app = "remora-machine"
 primary_region = "sjc"
 
 [build]
-  dockerfile = "workers/remora/Dockerfile"
+  dockerfile = "Dockerfile"
+  ignorefile = ".dockerignore"
 
 [env]
   REMORA_MACHINE_NAME = "fly-sjc"

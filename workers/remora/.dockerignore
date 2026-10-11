@@ -1,0 +1,12 @@
+# Build context for the machine is the repo root (the Dockerfile copies src/remora and
+# workers/remora). Everything else stays on this side of the wire. Passed to Fly with
+# --ignorefile workers/remora/.dockerignore.
+*
+!src/remora/**
+!workers/remora/**
+src/remora/**/*.test.ts
+src/remora/**/*.fixtures.ts
+src/remora/**/*.fixture.ts
+workers/remora/launchd/**
+workers/remora/fly.toml
+workers/remora/.dockerignore

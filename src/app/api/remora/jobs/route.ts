@@ -11,8 +11,9 @@ import { isServiceKey, KEY_COOKIE } from "@/remora/auth";
 import { parseVideoUrl } from "@/remora/core/url";
 import { parseQuality } from "@/remora/core/format";
 import { machineLight } from "@/remora/core/job";
+import { waitingReason } from "@/remora/core/route";
 import { dbWired } from "@/remora/db/client";
-import { enqueue, freshestMachine, listJobs } from "@/remora/db/queue";
+import { enqueue, freshestMachine, listJobs, liveMachines } from "@/remora/db/queue";
 
 async function keyed(): Promise<boolean> {
   return isServiceKey((await cookies()).get(KEY_COOKIE)?.value);
@@ -21,8 +22,17 @@ async function keyed(): Promise<boolean> {
 export async function GET(): Promise<NextResponse> {
   if (!(await keyed())) return NextResponse.json({ error: "insert service key" }, { status: 401 });
   if (!dbWired()) return NextResponse.json({ error: "no queue wired on this deploy" }, { status: 503 });
-  const [jobs, machine] = await Promise.all([listJobs(50), freshestMachine()]);
-  return NextResponse.json({ jobs, machine, light: machineLight(machine, new Date()) }, { headers: { "cache-control": "no-store" } });
+  const now = new Date();
+  const [jobs, machine, live] = await Promise.all([listJobs(50), freshestMachine(), liveMachines()]);
+  return NextResponse.json(
+    {
+      jobs: jobs.map((j) => ({ ...j, waiting: waitingReason(j, live, now) })),
+      machine,
+      machines: live,
+      light: machineLight(machine, now),
+    },
+    { headers: { "cache-control": "no-store" } },
+  );
 }
 
 export async function POST(req: Request): Promise<NextResponse> {
