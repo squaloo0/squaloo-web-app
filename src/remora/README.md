@@ -281,8 +281,9 @@ Goal: the public part. Parked until the build earns it.
 ## Notes
 
 - Personal tooling for content you have rights to. The route stays unlinked and gated.
-- yt-dlp is the only moving part that breaks on its own schedule (2025.06.30 on PATH
-  today). Keep the validator permissive and the version noted in the README.
+- yt-dlp is the only moving part that breaks on its own schedule (2025.06.30 on the mini,
+  2026.08.19 on the Air, 2025.06.30 pinned in the Dockerfile). Keep the validator permissive
+  and the version noted here.
 - The existing `marshal-qr` db client is eager and throws on import. Remora's is lazy.
   Worth fixing the old one too, but not in Remora's PRs.
 
