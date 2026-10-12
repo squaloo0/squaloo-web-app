@@ -345,9 +345,9 @@ function CoinSlot({ visitor: v, cardNote, paid }: { visitor: Visitor; cardNote?:
           disabled={!dbWired()}
           className="h-9 border border-[#1400bf] bg-[#1400bf] text-[10px] tracking-[0.2em] uppercase text-white hover:bg-[#5688c7] hover:border-[#5688c7] transition-colors disabled:opacity-40"
         >
-          Take a card · 1 coin free
+          Take a card
         </button>
-        <span className="text-[10px] text-neutral-700 leading-relaxed">A cookie, not an account. Keep it.</span>
+        <span className="text-[10px] text-neutral-700 leading-relaxed">One coin free. A cookie, not an account. Keep it.</span>
       </form>
     );
   }
