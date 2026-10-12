@@ -20,12 +20,26 @@ export class StripeError extends Error {
   }
 }
 
+/** Dashboards store a pasted value literally; forgive surrounding quotes and whitespace. */
+function env(name: string): string | null {
+  const v = (process.env[name] ?? "").trim().replace(/^["']|["']$/g, "");
+  return v.length > 0 ? v : null;
+}
+
+export function stripeSecretKey(): string | null {
+  return env("STRIPE_SECRET_KEY");
+}
+
+export function stripeWebhookSecret(): string | null {
+  return env("STRIPE_WEBHOOK_SECRET");
+}
+
 export function stripeWired(): boolean {
-  return Boolean(process.env.STRIPE_SECRET_KEY && process.env.STRIPE_WEBHOOK_SECRET);
+  return Boolean(stripeSecretKey() && stripeWebhookSecret());
 }
 
 export function stripeMode(): "test" | "live" | "off" {
-  const k = process.env.STRIPE_SECRET_KEY ?? "";
+  const k = stripeSecretKey() ?? "";
   return k.startsWith("sk_live_") ? "live" : k.startsWith("sk_test_") ? "test" : "off";
 }
 
@@ -36,7 +50,7 @@ export function priceIdFor(sleeve: Sleeve): string | null {
 export type CheckoutSession = { id: string; url: string };
 
 export async function createCheckoutSession(i: Omit<CheckoutInput, "priceId" | "automaticTax">): Promise<CheckoutSession> {
-  const key = process.env.STRIPE_SECRET_KEY;
+  const key = stripeSecretKey();
   if (!key) throw new StripeError("STRIPE_SECRET_KEY is not set; the coin slot is closed");
   const body = formEncode(
     checkoutSessionBody({ ...i, priceId: priceIdFor(i.sleeve), automaticTax: process.env.REMORA_STRIPE_TAX === "1" }),
@@ -50,11 +64,12 @@ export async function createCheckoutSession(i: Omit<CheckoutInput, "priceId" | "
       signal: AbortSignal.timeout(15_000),
     });
   } catch (e) {
-    throw new StripeError(`Stripe unreachable: ${e instanceof Error ? e.message : String(e)}`);
+    throw new StripeError(`Stripe unreachable: ${e instanceof Error ? e.message : String(e)}`, null);
   }
-  const json = (await res.json().catch(() => ({}))) as { id?: string; url?: string; error?: { message?: string } };
+  const json = (await res.json().catch(() => ({}))) as { id?: string; url?: string; error?: { message?: string; type?: string; code?: string } };
   if (!res.ok || !json.id || !json.url) {
-    throw new StripeError(`Stripe said ${res.status}: ${json.error?.message ?? "no session"}`, res.status);
+    const why = json.error?.message ?? "no session in the reply";
+    throw new StripeError(`Stripe said ${res.status}${json.error?.code ? ` (${json.error.code})` : ""}: ${why}`, res.status);
   }
   return { id: json.id, url: json.url };
 }

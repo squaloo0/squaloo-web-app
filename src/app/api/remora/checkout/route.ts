@@ -33,7 +33,10 @@ export async function POST(req: Request): Promise<NextResponse> {
     });
     return isForm ? NextResponse.redirect(session.url, { status: 303 }) : NextResponse.json({ url: session.url, id: session.id });
   } catch (e) {
+    // Not 502: a CDN in front of the site replaces origin 502s with its own page and the
+    // reason is lost. 503 when Stripe was unreachable, 400 when Stripe refused the request.
     const message = e instanceof StripeError ? e.message : "could not open checkout";
-    return fail("?coin=stripe-error", message, 502);
+    const status = e instanceof StripeError && e.status !== null ? 400 : 503;
+    return fail(`?coin=stripe-error&why=${encodeURIComponent(message.slice(0, 160))}`, message, status);
   }
 }

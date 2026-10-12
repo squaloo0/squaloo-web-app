@@ -7,11 +7,12 @@
  */
 import { NextResponse } from "next/server";
 import { completedPurchase, verifyWebhook } from "@/remora/core/stripe";
+import { stripeWebhookSecret } from "@/remora/stripe";
 import { dbWired } from "@/remora/db/client";
 import { recordPurchase } from "@/remora/db/coins";
 
 export async function POST(req: Request): Promise<NextResponse> {
-  const secret = process.env.STRIPE_WEBHOOK_SECRET;
+  const secret = stripeWebhookSecret();
   if (!secret) return NextResponse.json({ error: "no webhook secret on this deploy" }, { status: 503 });
   if (!dbWired()) return NextResponse.json({ error: "no queue wired on this deploy" }, { status: 503 });
 
