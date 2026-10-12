@@ -85,12 +85,12 @@ export async function createCheckoutSession(i: Omit<CheckoutInput, "priceId" | "
 
 /**
  * Revenue to date from Stripe's own ledger: every charge in balance_transactions, gross,
- * fees, net. Paginates; capped at 20 pages (2000 charges) which is years away. Null
- * when there is no key. Mode is the key's mode so the tape can say "sandbox".
+ * fees, net. Paginates; capped at 20 pages (2000 charges) which is years away. Mode
+ * "off" with zeros when there is no key; null only when Stripe could not be read.
  */
 export async function revenueToDate(): Promise<Money | null> {
   const key = stripeSecretKey();
-  if (!key) return null;
+  if (!key) return { gross: 0, fees: 0, net: 0, count: 0, mode: "off" };
   const all: BalanceTransaction[] = [];
   let after: string | null = null;
   for (let page = 0; page < 20; page++) {

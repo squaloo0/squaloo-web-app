@@ -57,9 +57,11 @@ export default async function RemoraTapePage() {
               <Counter label="vends to date" value={String(t.vends.total)} />
               <Counter label="bytes vended" value={prettyBytes(t.vends.bytes)} />
               <Counter
-                label={t.money ? (t.money.mode === "test" ? "gross · sandbox" : "gross · stripe") : "gross"}
-                value={t.money ? prettyMoney(t.money.gross) : "—"}
-                sub={t.money ? `net ${prettyMoney(t.money.net)} after ${prettyMoney(t.money.fees)} to Stripe` : "Stripe not reachable"}
+                label={t.money?.mode === "test" ? "gross · sandbox" : t.money?.mode === "live" ? "gross · stripe" : "gross"}
+                value={t.money && t.money.mode !== "off" ? prettyMoney(t.money.gross) : "—"}
+                sub={
+                  !t.money ? "Stripe could not be read just now" : t.money.mode === "off" ? "no Stripe key on this deploy" : `net ${prettyMoney(t.money.net)} after ${prettyMoney(t.money.fees)} to Stripe`
+                }
               />
             </div>
 

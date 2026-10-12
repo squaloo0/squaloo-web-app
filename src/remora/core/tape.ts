@@ -170,17 +170,20 @@ export function printTape(t: Tape): string[] {
     kv("coins spent", String(t.coins.vended)),
     kv("coins returned", String(t.coins.returned)),
   ];
-  if (t.money) {
+  if (t.money && t.money.mode !== "off") {
     lines.push(
       "",
       kv(`gross${t.money.mode === "test" ? " (sandbox)" : ""}`, prettyMoney(t.money.gross)),
       kv("stripe's cut", prettyMoney(t.money.fees)),
       kv("net", prettyMoney(t.money.net)),
     );
+  } else {
+    lines.push("", kv("gross", t.money ? "no stripe key" : "stripe unread"));
   }
   lines.push("");
+  const now = new Date(t.asOf);
   for (const m of t.machines) {
-    lines.push(kv(m.name, `${m.on ? "on" : "off"} · up ${prettyUptime(m.since, new Date(t.asOf))}`));
+    lines.push(kv(m.name, m.on ? `on · up ${prettyUptime(m.since, now)}` : `off · seen ${m.lastSeen.slice(5, 16).replace("T", " ")}`));
   }
   lines.push(rule, center("recent drops"), rule);
   for (const d of t.recent) {

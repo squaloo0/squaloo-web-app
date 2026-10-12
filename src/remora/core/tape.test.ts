@@ -73,4 +73,9 @@ test("the printed tape carries no titles", () => {
   assert.ok(lines.some((l) => l.includes("fly-sjc") && l.includes("19h 25m")));
   assert.ok(lines.some((l) => l.includes("youtube") && l.includes("6c77b6466ee2125e")));
   assert.ok(!JSON.stringify(lines).includes("Rick"), "no titles on the tape, ever");
+
+  const off = printTape({ ...t, money: { gross: 0, fees: 0, net: 0, count: 0, mode: "off" }, machines: [{ ...t.machines[0], on: false, lastSeen: "2026-10-12T19:13:00.000Z" }] });
+  assert.ok(off.some((l) => l.includes("gross") && l.includes("no stripe key")));
+  assert.ok(off.some((l) => l.includes("fly-sjc") && l.includes("off · seen 10-12 19:13")));
+  assert.ok(printTape({ ...t, money: null }).some((l) => l.includes("stripe unread")));
 });
