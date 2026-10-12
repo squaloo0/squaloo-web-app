@@ -157,10 +157,16 @@ export function generateReceiptKeys(): { privateKeyPem: string; publicKeyPem: st
   };
 }
 
-/** Env files flatten PEMs onto one line with literal \n; put the newlines back. */
+/**
+ * Env files flatten PEMs onto one line with literal \n; put the newlines back. Dashboards
+ * store a pasted value literally, so surrounding quotes are forgiven too.
+ */
 export function pemFromEnv(v: string | undefined): string | null {
   if (!v) return null;
-  return v.includes("\\n") ? v.replace(/\\n/g, "\n") : v;
+  const t = v.trim();
+  const quoted = (t.startsWith('"') && t.endsWith('"')) || (t.startsWith("'") && t.endsWith("'"));
+  const s = quoted ? t.slice(1, -1) : v;
+  return s.includes("\\n") ? s.replace(/\\n/g, "\n") : s;
 }
 
 /** The bytes that go on disk and, in Phase 4, under the signature. Stable key order. */

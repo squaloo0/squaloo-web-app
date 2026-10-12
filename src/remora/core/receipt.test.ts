@@ -126,5 +126,7 @@ test("PEMs flattened into an env file come back with their newlines", () => {
   const flat = privateKeyPem.replace(/\n/g, "\\n");
   assert.equal(pemFromEnv(flat), privateKeyPem);
   assert.equal(pemFromEnv(privateKeyPem), privateKeyPem);
+  assert.equal(pemFromEnv(`"${flat}"`), privateKeyPem, "quotes pasted into a dashboard are forgiven");
+  assert.equal(pemFromEnv(` '${flat}' `), privateKeyPem);
   assert.equal(pemFromEnv(undefined), null);
 });
