@@ -1,26 +1,30 @@
 /**
  * /remora — the front panel.
  *
- * Phase 1: look through the glass (oEmbed peek). Phase 3: put a coin in, watch the
- * flap. Unlinked from the nav and keyed with REMORA_ADMIN_TOKEN until the real coin
- * slot exists (Phase 4). Server-rendered end to end: forms are plain GET/POST, the
- * peek and the queue are read on the server, thumbnails come from our own origin, and
- * the only client code is a poller that re-renders while a coin is in flight.
+ * Phase 1: look through the glass (oEmbed peek). Phase 3: put a coin in, watch the flap.
+ * Phase 4: the coin slot is real. Take a card (one coin on the house), buy a sleeve
+ * through Stripe Checkout, vend. The service key still opens the machine for the
+ * founder. Server-rendered end to end: forms are plain GET/POST, the peek and the queue
+ * are read on the server, thumbnails come from our own origin, and the only client code
+ * is a poller that re-renders while a coin is in flight.
  */
 import Link from "next/link";
-import { cookies } from "next/headers";
 import AppFooter from "@/components/AppFooter";
 import Wordmark from "@/components/Wordmark";
-import { isServiceKey, KEY_COOKIE, keySlotWired } from "@/remora/auth";
+import { keySlotWired } from "@/remora/auth";
 import { peek, type PeekResult } from "@/remora/peek";
 import { thumbProxyPath } from "@/remora/core/oembed";
 import { QUALITIES } from "@/remora/core/format";
 import { isActive, machineLight, pill, shortError, type Job, type Machine } from "@/remora/core/job";
 import { machineSummary, waitingReason } from "@/remora/core/route";
 import { prettyBytes } from "@/remora/core/pretty";
+import { feeCents, prettyCoins, SLEEVES } from "@/remora/core/coins";
 import { dbWired } from "@/remora/db/client";
 import { assetsForJobs, freshestMachine, listJobs, liveMachines, type Asset } from "@/remora/db/queue";
+import { listJobsForCard } from "@/remora/db/coins";
 import { presignDownload, shelfWired } from "@/remora/storage";
+import { stripeMode, stripeWired } from "@/remora/stripe";
+import { visitor, type Visitor } from "@/remora/card";
 import Poller from "./poller";
 
 export const metadata = {
@@ -31,7 +35,7 @@ export const metadata = {
 
 export const dynamic = "force-dynamic";
 
-type Search = { url?: string | string[]; denied?: string | string[]; coin?: string | string[] };
+type Search = { url?: string | string[]; denied?: string | string[]; coin?: string | string[]; card?: string | string[]; paid?: string | string[] };
 
 const SLOTS = [
   { label: "VIDEO", tag: "LIVE" },
@@ -50,13 +54,20 @@ export default async function RemoraPage({ searchParams }: { searchParams: Promi
   const url = first(sp.url);
   const denied = first(sp.denied);
   const coin = first(sp.coin);
-  const wired = keySlotWired();
-  const keyed = wired && isServiceKey((await cookies()).get(KEY_COOKIE)?.value);
-  const result = keyed && url ? await peek(url) : null;
+  const cardNote = first(sp.card);
+  const paid = first(sp.paid);
 
-  const queue = keyed && dbWired();
+  const v = await visitor();
+  const keyed = v.kind === "keyed";
+  const carded = v.kind === "card";
+  const queue = dbWired() && (keyed || carded);
+  const canVend = keyed || (carded && v.coins > 0);
+  const result = url && (keyed || carded) ? await peek(url) : null;
+
   const now = new Date();
-  const [jobs, machine, live] = queue ? await Promise.all([listJobs(12), freshestMachine(), liveMachines()]) : [[], null, [] as Machine[]];
+  const [jobs, machine, live] = queue
+    ? await Promise.all([v.kind === "card" ? listJobsForCard(v.card.id, 12) : listJobs(12), freshestMachine(), liveMachines()])
+    : [[], null, [] as Machine[]];
   const assets = queue ? await assetsForJobs(jobs.filter((j) => j.status === "completed").map((j) => j.id)) : [];
   const light = machineLight(machine, now);
   const inFlight = jobs.some(isActive);
@@ -66,10 +77,7 @@ export default async function RemoraPage({ searchParams }: { searchParams: Promi
       <Poller active={inFlight} />
       <nav className="fixed top-0 left-0 right-0 z-50 border-b border-neutral-900 bg-black/90 backdrop-blur-sm">
         <div className="max-w-5xl mx-auto px-8 h-14 flex items-center justify-between">
-          <Link
-            href="/"
-            className="group inline-flex items-center gap-1.5 text-neutral-600 text-xs tracking-widest uppercase hover:text-white transition-colors"
-          >
+          <Link href="/" className="group inline-flex items-center gap-1.5 text-neutral-600 text-xs tracking-widest uppercase hover:text-white transition-colors">
             ← <Wordmark className="h-3.5 opacity-60 group-hover:opacity-100 transition-opacity" />
           </Link>
           <span className="text-neutral-700 text-xs tracking-[0.3em] uppercase">Not a downloader</span>
@@ -83,7 +91,7 @@ export default async function RemoraPage({ searchParams }: { searchParams: Promi
           <p className="text-neutral-500 text-sm leading-relaxed">
             Insert a coin. Pick a slot. Something drops. You keep the receipt.
             <br />
-            Phase 3: the machine is on. Coins are free and the key is the coin.
+            {stripeMode() === "live" ? "Coins cost money. The first one is on the house." : "Test mode: the coin slot takes Stripe test cards only."}
           </p>
         </div>
 
@@ -91,10 +99,9 @@ export default async function RemoraPage({ searchParams }: { searchParams: Promi
           {/* Top plate */}
           <div className="flex items-center justify-between gap-4 px-5 py-3 border-b border-neutral-800">
             <span className="text-xs tracking-[0.3em] uppercase text-neutral-400">Remora</span>
-            <StatusLight wired={wired} keyed={keyed} queue={queue} on={light.on} text={light.text} />
+            <StatusLight visitor={v} queue={queue} on={light.on} text={light.text} />
           </div>
 
-          {/* Who is on */}
           {queue && live.length > 0 ? (
             <div className="px-5 py-2 border-b border-neutral-800 flex flex-wrap gap-x-5 gap-y-1 text-[10px] tracking-[0.2em] uppercase text-neutral-600">
               {live.map((m) => (
@@ -112,13 +119,9 @@ export default async function RemoraPage({ searchParams }: { searchParams: Promi
             </div>
 
             <div className="min-h-40 border border-neutral-800/80 bg-black/40 shadow-[inset_0_0_40px_rgba(0,0,0,0.6)]">
-              {!wired ? (
-                <Notice tone="red" head="OUT OF ORDER">
-                  No key slot is wired on this deploy. Set REMORA_ADMIN_TOKEN.
-                </Notice>
-              ) : !keyed ? (
-                <Notice tone="dim" head="Keyed">
-                  Turn the service key to look inside.
+              {v.kind === "nobody" ? (
+                <Notice tone="dim" head="Take a card">
+                  One coin on the house. No account, just a cookie. Then paste a URL.
                 </Notice>
               ) : result === null ? (
                 <Notice tone="dim" head="Empty">
@@ -147,12 +150,12 @@ export default async function RemoraPage({ searchParams }: { searchParams: Promi
                     spellCheck={false}
                     defaultValue={url ?? ""}
                     placeholder="https://"
-                    disabled={!keyed}
+                    disabled={v.kind === "nobody"}
                     className="flex-1 min-w-0 bg-black border border-neutral-800 px-3 py-2 text-sm text-white placeholder:text-neutral-700 focus:outline-none focus:border-[#5688c7] disabled:opacity-40"
                   />
                   <button
                     type="submit"
-                    disabled={!keyed}
+                    disabled={v.kind === "nobody"}
                     className="px-4 py-2 text-xs tracking-[0.2em] uppercase border border-neutral-700 text-neutral-300 hover:text-white hover:border-[#5688c7] transition-colors disabled:opacity-40"
                   >
                     Look
@@ -174,13 +177,13 @@ export default async function RemoraPage({ searchParams }: { searchParams: Promi
                     spellCheck={false}
                     defaultValue={result?.ok ? result.peek.canonicalUrl : (url ?? "")}
                     placeholder="https://"
-                    disabled={!queue}
+                    disabled={!queue || !canVend}
                     className="flex-1 min-w-0 bg-black border border-neutral-800 px-3 py-2 text-sm text-white placeholder:text-neutral-700 focus:outline-none focus:border-[#5688c7] disabled:opacity-40"
                   />
                   <select
                     name="quality"
                     defaultValue="best"
-                    disabled={!queue}
+                    disabled={!queue || !canVend}
                     aria-label="quality"
                     className="bg-black border border-neutral-800 px-2 py-2 text-xs text-neutral-300 focus:outline-none focus:border-[#5688c7] disabled:opacity-40"
                   >
@@ -192,26 +195,22 @@ export default async function RemoraPage({ searchParams }: { searchParams: Promi
                   </select>
                   <button
                     type="submit"
-                    disabled={!queue}
+                    disabled={!queue || !canVend}
                     className="px-4 py-2 text-xs tracking-[0.2em] uppercase border border-[#1400bf] bg-[#1400bf] text-white hover:bg-[#5688c7] hover:border-[#5688c7] transition-colors disabled:opacity-40 disabled:hover:bg-[#1400bf]"
                   >
-                    Vend
+                    Vend{carded ? " · 1 coin" : ""}
                   </button>
                 </div>
-                {keyed && !dbWired() ? (
+                {(keyed || carded) && !dbWired() ? (
                   <span className="text-[10px] tracking-[0.2em] uppercase text-neutral-700">No queue wired on this deploy (NEON_DATABASE_URL)</span>
                 ) : null}
+                {v.kind === "card" && v.coins <= 0 ? <span className="text-[10px] tracking-[0.2em] uppercase text-amber-400/80">No coins on this card · buy a sleeve</span> : null}
               </form>
             </div>
 
-            <div className="p-5 flex flex-col gap-4 sm:w-56">
-              <div>
-                <div className="text-[10px] tracking-[0.3em] uppercase text-neutral-500 mb-2">Coin</div>
-                <div className="h-9 border border-dashed border-neutral-800 flex items-center justify-center text-[10px] tracking-[0.2em] uppercase text-neutral-700">
-                  Free · Phase 4
-                </div>
-              </div>
-              <KeyHole wired={wired} keyed={keyed} denied={denied} />
+            <div className="p-5 flex flex-col gap-4 sm:w-60">
+              <CoinSlot visitor={v} cardNote={cardNote} paid={paid} />
+              <KeyHole wired={keySlotWired()} keyed={keyed} denied={denied} />
             </div>
           </div>
 
@@ -220,12 +219,12 @@ export default async function RemoraPage({ searchParams }: { searchParams: Promi
             <div className="flex items-baseline justify-between mb-3">
               <span className="text-[10px] tracking-[0.3em] uppercase text-neutral-500">Flap</span>
               <span className="text-[10px] tracking-[0.2em] uppercase text-neutral-700">
-                {queue ? `${jobs.length} recent · links good for ${LINK_SECONDS / 60} min` : "Push · nothing yet"}
+                {queue ? `${jobs.length} recent · links good for ${LINK_SECONDS / 60} min` : "Push"}
               </span>
             </div>
             {!queue ? (
               <div className="border border-dashed border-neutral-900 py-6 text-center text-[10px] tracking-[0.2em] uppercase text-neutral-800">
-                {keyed ? "No queue wired" : "Keyed"}
+                {v.kind === "nobody" ? "Take a card to see your drops" : "No queue wired"}
               </div>
             ) : jobs.length === 0 ? (
               <div className="border border-dashed border-neutral-900 py-6 text-center text-[10px] tracking-[0.2em] uppercase text-neutral-700">
@@ -241,15 +240,21 @@ export default async function RemoraPage({ searchParams }: { searchParams: Promi
           </div>
 
           {/* Printer */}
-          <div className="border-t border-neutral-800 px-5 py-3 text-[10px] tracking-[0.3em] uppercase text-neutral-700">
-            Receipt · printed with every drop · unsigned until Phase 4
+          <div className="border-t border-neutral-800 px-5 py-3 text-[10px] tracking-[0.3em] uppercase text-neutral-700 flex flex-wrap gap-x-4 gap-y-1">
+            <span>Receipt · printed with every drop · ed25519</span>
+            <Link href="/remora/verify" className="text-neutral-500 hover:text-white transition-colors">
+              Verify ↗
+            </Link>
+            <Link href="/remora/terms" className="text-neutral-500 hover:text-white transition-colors">
+              Terms ↗
+            </Link>
           </div>
         </section>
 
         <p className="mt-6 text-neutral-700 text-xs leading-relaxed">
-          The glass asks the provider&apos;s oEmbed endpoint from the server and serves the thumbnail from this origin. Vends
-          run on the machine, never here. Download links are signed and expire. Your browser talks to nothing but
-          squaloo.com on this page, and to the shelf only when you pull a drop.
+          The glass asks the provider&apos;s oEmbed endpoint from the server and serves the thumbnail from this origin. Vends run
+          on the machine, never here. Download links are signed and expire. Your browser talks to nothing but squaloo.com on
+          this page, to the shelf only when you pull a drop, and to Stripe only when you buy a sleeve.
         </p>
       </main>
 
@@ -262,16 +267,9 @@ function first(v: string | string[] | undefined): string | undefined {
   return Array.isArray(v) ? v[0] : v;
 }
 
-function StatusLight({ wired, keyed, queue, on, text }: { wired: boolean; keyed: boolean; queue: boolean; on: boolean; text: string }) {
-  const [color, label] = !wired
-    ? ["bg-red-500", "Out of order"]
-    : !keyed
-      ? ["bg-amber-400", "Keyed"]
-      : !queue
-        ? ["bg-amber-400", "Ready · no queue"]
-        : on
-          ? ["bg-[#63a375]", text]
-          : ["bg-red-500", text];
+function StatusLight({ visitor: v, queue, on, text }: { visitor: Visitor; queue: boolean; on: boolean; text: string }) {
+  const [color, label] =
+    v.kind === "nobody" ? ["bg-amber-400", "Take a card"] : !queue ? ["bg-amber-400", "Ready · no queue"] : on ? ["bg-[#63a375]", text] : ["bg-red-500", text];
   return (
     <span className="inline-flex items-center gap-2 text-[10px] tracking-[0.3em] uppercase text-neutral-500 text-right">
       <span className={`h-2 w-2 shrink-0 rounded-full ${color} shadow-[0_0_8px_currentColor]`} aria-hidden="true" />
@@ -302,11 +300,95 @@ function Notice({ tone, head, children }: { tone: "red" | "dim"; head: string; c
   );
 }
 
+const COIN_NOTES: Record<string, string> = {
+  "not-a-url": "that is not a URL",
+  "bad-quality": "pick a quality",
+  "no-queue": "no queue wired",
+  "no-card": "take a card first",
+  empty: "no coins on this card",
+  cancelled: "checkout cancelled, nothing charged",
+  "slot-closed": "the coin slot is closed on this deploy",
+  "stripe-error": "could not open checkout",
+  "bad-sleeve": "pick a sleeve",
+};
+
 function CoinNote({ coin }: { coin: string }) {
-  const text =
-    coin === "not-a-url" ? "that is not a URL" : coin === "bad-quality" ? "pick a quality" : coin === "no-queue" ? "no queue wired" : `coin in · ${coin}`;
   const bad = !coin.startsWith("j_");
-  return <span className={bad ? "text-amber-400" : "text-[#63a375]"}>· {text}</span>;
+  return <span className={bad ? "text-amber-400" : "text-[#63a375]"}>· {COIN_NOTES[coin] ?? `coin in · ${coin}`}</span>;
+}
+
+/** The slot itself: take a card, see your coins, buy a sleeve, put the card back. */
+function CoinSlot({ visitor: v, cardNote, paid }: { visitor: Visitor; cardNote?: string; paid?: string }) {
+  if (v.kind === "keyed") {
+    return (
+      <div>
+        <div className="text-[10px] tracking-[0.3em] uppercase text-neutral-500 mb-2">Coin</div>
+        <div className="h-9 border border-dashed border-neutral-800 flex items-center justify-center text-[10px] tracking-[0.2em] uppercase text-neutral-600">
+          Service key · free
+        </div>
+      </div>
+    );
+  }
+  if (v.kind === "nobody") {
+    return (
+      <form action="/api/remora/card" method="post" className="flex flex-col gap-2">
+        <div className="text-[10px] tracking-[0.3em] uppercase text-neutral-500">
+          Card{" "}
+          {cardNote === "limit" ? (
+            <span className="text-amber-400">· enough cards for one address today</span>
+          ) : cardNote === "no-queue" ? (
+            <span className="text-amber-400">· no queue</span>
+          ) : null}
+        </div>
+        <button
+          type="submit"
+          disabled={!dbWired()}
+          className="h-9 border border-[#1400bf] bg-[#1400bf] text-[10px] tracking-[0.2em] uppercase text-white hover:bg-[#5688c7] hover:border-[#5688c7] transition-colors disabled:opacity-40"
+        >
+          Take a card
+        </button>
+        <span className="text-[10px] text-neutral-700 leading-relaxed">One coin free. A cookie, not an account. Keep it.</span>
+      </form>
+    );
+  }
+  const open = stripeWired();
+  return (
+    <div className="flex flex-col gap-3">
+      <div>
+        <div className="text-[10px] tracking-[0.3em] uppercase text-neutral-500 mb-1">
+          Card {cardNote?.startsWith("card_") ? <span className="text-[#63a375]">· new</span> : null}
+          {paid ? <span className="text-[#63a375]">· paid, crediting…</span> : null}
+        </div>
+        <div className="text-[10px] tracking-widest text-neutral-600">{v.card.id}</div>
+        <div className="text-lg text-white mt-1">{prettyCoins(v.coins)}</div>
+      </div>
+      <div className="flex flex-col gap-1.5">
+        <div className="text-[10px] tracking-[0.3em] uppercase text-neutral-500">
+          Sleeves {open ? stripeMode() === "test" ? <span className="text-amber-400">· test mode</span> : null : <span className="text-neutral-700">· slot closed</span>}
+        </div>
+        {SLEEVES.map((s) => (
+          <form key={s.coins} action="/api/remora/checkout" method="post">
+            <input type="hidden" name="sleeve" value={s.coins} />
+            <button
+              type="submit"
+              disabled={!open}
+              title={`Stripe keeps $${(feeCents(s.cents) / 100).toFixed(2)} of this`}
+              className="w-full h-9 border border-neutral-800 flex items-center justify-between px-3 text-[10px] tracking-[0.2em] uppercase text-neutral-300 hover:text-white hover:border-[#5688c7] transition-colors disabled:opacity-40"
+            >
+              <span>{s.coins} coins</span>
+              <span className="text-neutral-500">${(s.cents / 100).toFixed(0)}</span>
+            </button>
+          </form>
+        ))}
+      </div>
+      <form action="/api/remora/card" method="post">
+        <input type="hidden" name="eject" value="1" />
+        <button type="submit" className="w-full h-8 border border-neutral-900 text-[10px] tracking-[0.2em] uppercase text-neutral-600 hover:text-white hover:border-neutral-600 transition-colors">
+          Put card back
+        </button>
+      </form>
+    </div>
+  );
 }
 
 function Behind({ result }: { result: PeekResult }) {
@@ -317,7 +399,7 @@ function Behind({ result }: { result: PeekResult }) {
         {result.status === 404 ? (
           <>
             <br />
-            The machine may still vend it: paste it under Vend, or <code className="text-neutral-500">npm run remora -- info &lt;url&gt;</code>
+            The machine may still vend it: paste it under Vend.
           </>
         ) : null}
       </Notice>
@@ -334,9 +416,7 @@ function Behind({ result }: { result: PeekResult }) {
           // eslint-disable-next-line @next/next/no-img-element
           <img src={thumb} alt="" className="h-full w-full object-cover" />
         ) : (
-          <div className="h-full w-full flex items-center justify-center text-[10px] tracking-[0.2em] uppercase text-neutral-700">
-            No picture
-          </div>
+          <div className="h-full w-full flex items-center justify-center text-[10px] tracking-[0.2em] uppercase text-neutral-700">No picture</div>
         )}
       </div>
       <div className="min-w-0">
@@ -380,6 +460,7 @@ function Drop({ job, assets, waiting }: { job: Job; assets: Asset[]; waiting: st
         <div className="text-[11px] text-neutral-600 break-words" title={job.error}>
           {shortError(job.error)}
           {job.status === "pending" ? (job.routeFailures > 0 ? ` · turned away ${job.routeFailures}×, another machine will try` : " · will try again") : ""}
+          {job.status === "failed" && job.cardId ? " · coin returned" : ""}
         </div>
       ) : null}
       {waiting ? <div className="text-[10px] tracking-[0.15em] uppercase text-amber-400/80">{waiting}</div> : null}
@@ -403,16 +484,7 @@ function Drop({ job, assets, waiting }: { job: Job; assets: Asset[]; waiting: st
 }
 
 function KeyHole({ wired, keyed, denied }: { wired: boolean; keyed: boolean; denied?: string }) {
-  if (!wired) {
-    return (
-      <div>
-        <div className="text-[10px] tracking-[0.3em] uppercase text-neutral-500 mb-2">Key</div>
-        <div className="h-9 border border-dashed border-red-900 flex items-center justify-center text-[10px] tracking-[0.2em] uppercase text-red-900">
-          Unwired
-        </div>
-      </div>
-    );
-  }
+  if (!wired) return null;
   if (keyed) {
     return (
       <form action="/api/remora/key" method="post">
@@ -428,23 +500,26 @@ function KeyHole({ wired, keyed, denied }: { wired: boolean; keyed: boolean; den
     );
   }
   return (
-    <form action="/api/remora/key" method="post" className="flex flex-col gap-2">
-      <label htmlFor="key" className="text-[10px] tracking-[0.3em] uppercase text-neutral-500">
-        Key {denied ? <span className="text-amber-400">· doesn&apos;t fit</span> : null}
-      </label>
-      <input
-        id="key"
-        name="key"
-        type="password"
-        autoComplete="off"
-        className="h-9 bg-black border border-neutral-800 px-3 text-sm text-white focus:outline-none focus:border-[#5688c7]"
-      />
-      <button
-        type="submit"
-        className="h-9 border border-neutral-700 text-[10px] tracking-[0.2em] uppercase text-neutral-300 hover:text-white hover:border-[#5688c7] transition-colors"
-      >
-        Turn key
-      </button>
-    </form>
+    <details className="group">
+      <summary className="cursor-pointer list-none text-[10px] tracking-[0.3em] uppercase text-neutral-700 hover:text-neutral-500">
+        Service key {denied ? <span className="text-amber-400">· doesn&apos;t fit</span> : null}
+      </summary>
+      <form action="/api/remora/key" method="post" className="flex flex-col gap-2 mt-2">
+        <input
+          id="key"
+          name="key"
+          type="password"
+          autoComplete="off"
+          aria-label="service key"
+          className="h-9 bg-black border border-neutral-800 px-3 text-sm text-white focus:outline-none focus:border-[#5688c7]"
+        />
+        <button
+          type="submit"
+          className="h-9 border border-neutral-700 text-[10px] tracking-[0.2em] uppercase text-neutral-300 hover:text-white hover:border-[#5688c7] transition-colors"
+        >
+          Turn key
+        </button>
+      </form>
+    </details>
   );
 }

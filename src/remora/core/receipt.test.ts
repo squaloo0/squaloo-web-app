@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { buildReceipt, parseReceipt, printReceipt, receiptFileName, receiptText, verifyReceipt, type ReceiptInput } from "./receipt.ts";
+import { buildReceipt, checkSignature, generateReceiptKeys, parseReceipt, pemFromEnv, printReceipt, receiptFileName, receiptText, signReceipt, verifyReceipt, type ReceiptInput } from "./receipt.ts";
 import { parseYtDlpJson } from "./meta.ts";
 import { YTDLP_YOUTUBE_FIXTURE } from "./meta.fixture.ts";
 
@@ -96,4 +96,35 @@ test("a 200-character token hard-breaks instead of vanishing", () => {
   const lines = printReceipt(buildReceipt(input({ canonicalUrl: `https://e.com/${long}` })));
   const i = lines.indexOf("url");
   assert.equal(lines.slice(i + 1, i + 7).join(""), `https://e.com/${long}`);
+});
+
+test("a signed receipt checks out, and any changed byte does not", () => {
+  const keys = generateReceiptKeys();
+  const other = generateReceiptKeys();
+  const r = signReceipt(buildReceipt(input({ card: "card_abcdef123456", machine: "fly-sjc" })), keys.privateKeyPem);
+  assert.equal(r.signature?.alg, "ed25519");
+  assert.equal(r.signature?.keyId, keys.keyId);
+  assert.deepEqual(checkSignature(r, keys.publicKeyPem), { ok: true, keyId: keys.keyId });
+
+  const tampered = { ...r, file: { ...r.file, sha256: "b".repeat(64) } };
+  assert.equal(checkSignature(tampered, keys.publicKeyPem).ok, false);
+  assert.match((checkSignature(r, other.publicKeyPem) as { reason: string }).reason, /signed by/);
+  assert.equal(checkSignature({ ...r, signature: null }, keys.publicKeyPem).ok, false);
+  assert.equal(checkSignature(r, "not a pem").ok, false);
+
+  // survives the trip to disk and back
+  const back = parseReceipt(JSON.parse(receiptText(r)))!;
+  assert.deepEqual(checkSignature(back, keys.publicKeyPem), { ok: true, keyId: keys.keyId });
+  const lines = printReceipt(back);
+  assert.ok(lines.some((l) => l.includes(`signed · ed25519 · ${keys.keyId}`)));
+  assert.ok(lines.some((l) => l.startsWith("card      card_abcdef123456")));
+  assert.ok(lines.some((l) => l.startsWith("machine   fly-sjc")));
+});
+
+test("PEMs flattened into an env file come back with their newlines", () => {
+  const { privateKeyPem } = generateReceiptKeys();
+  const flat = privateKeyPem.replace(/\n/g, "\\n");
+  assert.equal(pemFromEnv(flat), privateKeyPem);
+  assert.equal(pemFromEnv(privateKeyPem), privateKeyPem);
+  assert.equal(pemFromEnv(undefined), null);
 });

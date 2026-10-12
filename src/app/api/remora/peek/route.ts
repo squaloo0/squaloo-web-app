@@ -5,20 +5,18 @@
  * where `thumbnail` is a same-origin proxy path, so the browser contacts nothing
  * third-party. No yt-dlp here: Vercel never runs the machine.
  *
- *   401  no service key (Phase 1-3: the machine is keyed)
+ *   401  no card and no service key
  *   400  not a URL · 404 no window for that provider, or nothing there
  *   502  provider misbehaved · 504 provider slow
  */
-import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-import { isServiceKey, KEY_COOKIE } from "@/remora/auth";
+import { visitor } from "@/remora/card";
 import { peek } from "@/remora/peek";
 import { thumbProxyPath } from "@/remora/core/oembed";
 
 export async function GET(req: Request): Promise<NextResponse> {
-  const jar = await cookies();
-  if (!isServiceKey(jar.get(KEY_COOKIE)?.value)) {
-    return NextResponse.json({ error: "insert service key" }, { status: 401 });
+  if ((await visitor()).kind === "nobody") {
+    return NextResponse.json({ error: "take a card or turn the key" }, { status: 401 });
   }
 
   const url = new URL(req.url).searchParams.get("url");

@@ -1,10 +1,11 @@
 /**
  * The receipt. The file is the by-product; this is the product.
  *
- * What it was, where it came from, when, the SHA-256 of the bytes on disk, and which
- * tools did it. Unsigned until Phase 4 wires Remora's Ed25519 key; the `signature`
- * field is already there so the shape does not change under anyone. Pure.
+ * What it was, where it came from, when, the SHA-256 of the bytes on disk, which
+ * tools did it, and Remora's Ed25519 signature over all of that, so anyone with the
+ * public key can check it at /remora/verify. Pure; keys are inputs.
  */
+import { createHash, createPrivateKey, createPublicKey, generateKeyPairSync, sign, verify, type KeyObject } from "node:crypto";
 import type { Provider } from "./url.ts";
 import type { VideoMeta } from "./meta.ts";
 import type { Quality } from "./format.ts";
@@ -51,9 +52,21 @@ export type Receipt = {
     ytDlp: string;
     ffmpeg: string | null;
     node: string;
+    /** Which machine vended. */
+    machine?: string;
   };
-  /** Phase 4: Ed25519 over receiptText() with this field null. */
-  signature: null;
+  /** The public handle of the punch card that paid, or null for a keyed vend. */
+  card: string | null;
+  /** Ed25519 over receiptBytes(); null until the machine has a key. */
+  signature: Signature | null;
+};
+
+export type Signature = {
+  alg: "ed25519";
+  /** First 12 hex of SHA-256 of the public key's DER: which key signed. */
+  keyId: string;
+  /** base64 of the 64-byte signature. */
+  sig: string;
 };
 
 export type ReceiptInput = {
@@ -70,6 +83,8 @@ export type ReceiptInput = {
   ytDlp: string;
   ffmpeg: string | null;
   node: string;
+  machine?: string;
+  card?: string | null;
   /** Injected so the builder stays pure and the tests stay still. */
   now: Date;
 };
@@ -86,9 +101,66 @@ export function buildReceipt(i: ReceiptInput): Receipt {
       webpageUrl: i.meta.webpageUrl,
     },
     file: { name: i.fileName, bytes: i.bytes, sha256: i.sha256, quality: i.quality, formatIds: i.formatIds },
-    tools: { ytDlp: i.ytDlp, ffmpeg: i.ffmpeg, node: i.node },
+    tools: { ytDlp: i.ytDlp, ffmpeg: i.ffmpeg, node: i.node, ...(i.machine ? { machine: i.machine } : {}) },
+    card: i.card ?? null,
     signature: null,
   };
+}
+
+/** The bytes under the signature: the receipt with `signature` null, in receiptText() form. */
+export function receiptBytes(r: Receipt): string {
+  return receiptText({ ...r, signature: null });
+}
+
+export function keyIdOf(publicKey: KeyObject): string {
+  return createHash("sha256").update(publicKey.export({ type: "spki", format: "der" })).digest("hex").slice(0, 12);
+}
+
+/** Sign with an Ed25519 private key (PEM, PKCS#8). Returns a new receipt. */
+export function signReceipt(r: Receipt, privateKeyPem: string): Receipt {
+  const priv = createPrivateKey(privateKeyPem);
+  const pub = createPublicKey(priv);
+  const sig = sign(null, Buffer.from(receiptBytes(r), "utf8"), priv).toString("base64");
+  return { ...r, signature: { alg: "ed25519", keyId: keyIdOf(pub), sig } };
+}
+
+export type SignatureCheck = { ok: true; keyId: string } | { ok: false; reason: string };
+
+/** Does this receipt carry a valid signature from this public key (PEM, SPKI)? */
+export function checkSignature(r: Receipt, publicKeyPem: string): SignatureCheck {
+  if (r.signature === null) return { ok: false, reason: "unsigned" };
+  if (r.signature.alg !== "ed25519") return { ok: false, reason: `unknown algorithm ${String(r.signature.alg)}` };
+  let pub: KeyObject;
+  try {
+    pub = createPublicKey(publicKeyPem);
+  } catch {
+    return { ok: false, reason: "bad public key" };
+  }
+  const keyId = keyIdOf(pub);
+  if (r.signature.keyId !== keyId) return { ok: false, reason: `signed by ${r.signature.keyId}, this key is ${keyId}` };
+  let good = false;
+  try {
+    good = verify(null, Buffer.from(receiptBytes(r), "utf8"), pub, Buffer.from(r.signature.sig, "base64"));
+  } catch {
+    good = false;
+  }
+  return good ? { ok: true, keyId } : { ok: false, reason: "signature does not match these bytes" };
+}
+
+/** A fresh Ed25519 pair as PEM, for `remora keygen`. */
+export function generateReceiptKeys(): { privateKeyPem: string; publicKeyPem: string; keyId: string } {
+  const { privateKey, publicKey } = generateKeyPairSync("ed25519");
+  return {
+    privateKeyPem: privateKey.export({ type: "pkcs8", format: "pem" }) as string,
+    publicKeyPem: publicKey.export({ type: "spki", format: "pem" }) as string,
+    keyId: keyIdOf(publicKey),
+  };
+}
+
+/** Env files flatten PEMs onto one line with literal \n; put the newlines back. */
+export function pemFromEnv(v: string | undefined): string | null {
+  if (!v) return null;
+  return v.includes("\\n") ? v.replace(/\\n/g, "\n") : v;
 }
 
 /** The bytes that go on disk and, in Phase 4, under the signature. Stable key order. */
@@ -110,7 +182,8 @@ export function parseReceipt(json: unknown): Receipt | null {
   if (r.receipt?.version !== RECEIPT_VERSION || r.receipt.machine !== "remora") return null;
   if (typeof r.file?.name !== "string" || typeof r.file.bytes !== "number" || !/^[0-9a-f]{64}$/.test(r.file.sha256 ?? "")) return null;
   if (typeof r.video?.title !== "string" || typeof r.source?.canonicalUrl !== "string") return null;
-  return r;
+  if (r.signature !== null && r.signature !== undefined && (typeof r.signature !== "object" || typeof r.signature.sig !== "string" || typeof r.signature.keyId !== "string")) return null;
+  return { ...r, card: r.card ?? null, signature: r.signature ?? null };
 }
 
 export type Verification = { ok: boolean; mismatches: string[] };
@@ -175,8 +248,10 @@ export function printReceipt(r: Receipt): string[] {
     kv("yt-dlp", r.tools.ytDlp),
     kv("ffmpeg", r.tools.ffmpeg ?? "—"),
     kv("node", r.tools.node),
+    ...(r.tools.machine ? [kv("machine", r.tools.machine)] : []),
+    kv("card", r.card ?? "service key"),
     rule,
-    center(r.signature === null ? "unsigned · phase 4" : "signed"),
+    center(r.signature === null ? "unsigned" : `signed · ed25519 · ${r.signature.keyId}`),
     center("thank you, come again"),
     rule,
   ];

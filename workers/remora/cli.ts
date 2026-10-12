@@ -23,7 +23,7 @@ import { prettyBytes, prettyDuration, prettyHeight, prettyPercent, prettySpeed, 
 import type { VideoFormat, VideoMeta } from "../../src/remora/core/meta.ts";
 import { parseQuality, QUALITIES } from "../../src/remora/core/format.ts";
 import { fraction, type PostProcess, type Progress } from "../../src/remora/core/progress.ts";
-import { printReceipt } from "../../src/remora/core/receipt.ts";
+import { generateReceiptKeys, printReceipt } from "../../src/remora/core/receipt.ts";
 import { scoreboard } from "../../src/remora/core/ledger.ts";
 import { YtDlpError, ytDlpBin, ytDlpInfo, ytDlpVersion } from "../../src/remora/ytdlp.ts";
 import { downloadsDir, ffmpegVersion, ledgerPath, readLedger, vend, VendError, verifyOnDisk } from "../../src/remora/vend.ts";
@@ -232,6 +232,16 @@ async function main(): Promise<number> {
       return 0;
     }
 
+    case "keygen": {
+      // The machine's signing key. Private half to the worker (Fly secret, .env.local),
+      // public half to Vercel so /remora/verify can check receipts.
+      const k = generateReceiptKeys();
+      console.log(`# Remora receipt key · id ${k.keyId} · generated ${new Date().toISOString()}`);
+      console.log(`REMORA_RECEIPT_PRIVATE_KEY="${k.privateKeyPem.trim().replace(/\n/g, "\\n")}"`);
+      console.log(`REMORA_RECEIPT_PUBLIC_KEY="${k.publicKeyPem.trim().replace(/\n/g, "\\n")}"`);
+      return 0;
+    }
+
     case "doctor": {
       console.log(BANNER);
       console.log(`  node       ${process.version}`);
@@ -263,6 +273,7 @@ async function main(): Promise<number> {
       console.log("  enqueue <url> [--quality] put a coin in the slot; the worker vends it");
       console.log("  jobs                      the queue");
       console.log("  machine                   the pulse: READY or OUT OF ORDER");
+      console.log("  keygen                    a fresh Ed25519 pair for signing receipts (env lines)");
       console.log("\nenv: NEON_DATABASE_URL, REMORA_R2_*, REMORA_DOWNLOADS, REMORA_LEDGER, REMORA_YTDLP_BIN, REMORA_FFMPEG_BIN");
       return 0;
 

@@ -49,6 +49,8 @@ import {
   type Pulse,
 } from "../../src/remora/db/queue.ts";
 import { contentTypeFor, deleteObject, putFile, shelfWired } from "../../src/remora/storage.ts";
+import { returnCoin } from "../../src/remora/db/coins.ts";
+import { pemFromEnv } from "../../src/remora/core/receipt.ts";
 import { ffmpegVersion, sha256File, vend } from "../../src/remora/vend.ts";
 import { ytDlpVersion } from "../../src/remora/ytdlp.ts";
 
@@ -80,6 +82,8 @@ async function main(): Promise<void> {
   if (CAPABILITIES.length === 0) throw new Error("REMORA_PROVIDERS names no provider the machine knows");
 
   const tools = { name: NAME, ytDlp: await ytDlpVersion().catch(() => null), ffmpeg: await ffmpegVersion() };
+  const signs = pemFromEnv(process.env.REMORA_RECEIPT_PRIVATE_KEY) !== null;
+  log(`receipts ${signs ? "signed" : "UNSIGNED (no REMORA_RECEIPT_PRIVATE_KEY)"}`);
   log(
     `plugged in · yt-dlp ${tools.ytDlp ?? "missing"} · ffmpeg ${tools.ffmpeg ?? "missing"} · vends ${CAPABILITIES.join(",")} · ` +
       `pace ${PER_HOUR}/h (youtube ${YOUTUBE_PER_HOUR}/h) · tick ${TICK_MS}ms · ttl ${TTL_DAYS}d`,
@@ -136,6 +140,8 @@ async function process_(job: Job, pulse: () => Pulse): Promise<void> {
       input: job.input,
       quality: job.quality,
       dir,
+      card: job.cardId,
+      machine: NAME,
       onEstimate: (meta) => {
         title = meta.title;
         void tick(0);
@@ -194,6 +200,7 @@ async function process_(job: Job, pulse: () => Pulse): Promise<void> {
     }
     log(`nothing dropped for ${job.id}: ${message.slice(0, 160)}${outcome}`);
     await fail(job.id, NAME, message.slice(0, 500));
+    if (job.cardId && (await returnCoin(job.id))) log(`coin returned to ${job.cardId}`);
     await beat(pulse());
   } finally {
     await rm(dir, { recursive: true, force: true });

@@ -36,6 +36,8 @@ export type Job = {
   /** Machine language, when failed. */
   error: string | null;
   title: string | null;
+  /** The punch card that paid, or null for a keyed vend. */
+  cardId: string | null;
   createdAt: string;
   updatedAt: string;
 };

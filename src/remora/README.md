@@ -134,6 +134,25 @@ Three things yt-dlp's own docs offer that are **founder calls, not wired**:
 Until one is chosen, YouTube is "best effort, usually from home", and the receipt says
 which machine vended. Every other provider is unaffected.
 
+### The coin slot, as built (2026-10-11)
+
+- **No `stripe` package.** Checkout is one form POST to `/v1/checkout/sessions`; the
+  webhook check is one HMAC over `t.body`. Both live in `core/stripe.ts`, pure, tested
+  against a signer that mirrors Stripe's. The sentence the dependency would have earned
+  went unspent.
+- **The card code is never printed.** The README said "printed on the receipt"; receipts
+  sit on R2 behind links people will share, and the code is the whole secret. The receipt
+  carries the card's public handle (`card_` + 12 hex of the code's hash). Recovery is
+  the email Stripe captured, as a magic link later.
+- **The promo coin's only guard** is three cards per address per day (`created_ip`).
+  Good enough while coins are free of abuse value; revisit if someone scripts it.
+- **Test mode until the paperwork exists.** `STRIPE_SECRET_KEY=sk_test_…` makes the panel
+  say so. Going live is: terms (done), privacy line (done), business details in Stripe,
+  Stripe Tax on, `sk_live_`, and the webhook endpoint pointed at the live site.
+- **Worker versions matter now.** A worker on pre-Phase-4 code vends carded coins fine
+  but never returns one on failure and signs nothing. Deploy Fly and restart the Mac
+  workers together after a Remora merge.
+
 **Kept in the back pocket (v2 §Ideas):** provenance tiers, trust panel, Solomon ingest.
 They become slots or panel lights only if they make the machine more fun.
 
@@ -188,7 +207,8 @@ in Phase 4 behind the coin slot: a coin is the rate limit, and the receipt is th
   - Process spawning: `child_process.spawn(bin, [args])`. Never a shell string.
 - Phase 3 was allowed an S3 client for R2 and used none: `core/sigv4.ts` signs the four
   requests the machine makes in ~120 lines of `node:crypto`, tested against the worked
-  examples in the S3 API reference. Phase 4 adds `stripe`, which earns its sentence.
+  examples in the S3 API reference. Phase 4 was allowed `stripe` and used none either:
+  one form POST and one HMAC (`core/stripe.ts`). Dependencies through Phase 4: zero.
 - Remora's tables are plain SQL in `src/remora/db/migrations/`, applied by
   `npm run remora -- migrate` and tracked in `remora_migrations`. `drizzle.config.ts` belongs
   to marshal-qr and is outside Remora's paths; five statements over Neon's HTTP driver did

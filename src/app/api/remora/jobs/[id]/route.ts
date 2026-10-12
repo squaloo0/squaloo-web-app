@@ -1,10 +1,10 @@
 /**
  * GET /api/remora/jobs/:id   one job, its pill, and (when dropped) hour-long download links.
+ * The service key sees any coin; a card sees its own.
  */
-import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-import { isServiceKey, KEY_COOKIE } from "@/remora/auth";
 import { pill } from "@/remora/core/job";
+import { visitor } from "@/remora/card";
 import { dbWired } from "@/remora/db/client";
 import { assetsForJob, getJob } from "@/remora/db/queue";
 import { presignDownload, shelfWired } from "@/remora/storage";
@@ -12,14 +12,14 @@ import { presignDownload, shelfWired } from "@/remora/storage";
 const LINK_SECONDS = 3600;
 
 export async function GET(_req: Request, ctx: { params: Promise<{ id: string }> }): Promise<NextResponse> {
-  if (!isServiceKey((await cookies()).get(KEY_COOKIE)?.value)) {
-    return NextResponse.json({ error: "insert service key" }, { status: 401 });
-  }
+  const v = await visitor();
+  if (v.kind === "nobody") return NextResponse.json({ error: "take a card or turn the key" }, { status: 401 });
   if (!dbWired()) return NextResponse.json({ error: "no queue wired on this deploy" }, { status: 503 });
 
   const { id } = await ctx.params;
   const job = await getJob(id);
-  if (!job) return NextResponse.json({ error: "no such coin" }, { status: 404 });
+  // A card sees its own coins only; a missing coin and someone else's look the same.
+  if (!job || (v.kind === "card" && job.cardId !== v.card.id)) return NextResponse.json({ error: "no such coin" }, { status: 404 });
 
   const assets = job.status === "completed" ? await assetsForJob(id) : [];
   const drops = assets.map((a) => ({
