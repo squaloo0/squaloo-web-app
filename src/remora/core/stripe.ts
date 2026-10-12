@@ -22,7 +22,15 @@ export type CheckoutInput = {
   automaticTax?: boolean;
   /** Prefill the email box when the card already has one. */
   email?: string | null;
+  /**
+   * Stripe product tax code for the inline price. Required when the account uses
+   * Managed Payments (Stripe as merchant of record), which new accounts get by default.
+   * txcd_10000000 is "Electronically Supplied Services", the general digital-goods code.
+   */
+  taxCode?: string;
 };
+
+export const DEFAULT_TAX_CODE = "txcd_10000000";
 
 /** Form-encoded body for POST /v1/checkout/sessions, as an ordered list of pairs. */
 export function checkoutSessionBody(i: CheckoutInput): [string, string][] {
@@ -43,6 +51,7 @@ export function checkoutSessionBody(i: CheckoutInput): [string, string][] {
       ["line_items[0][price_data][unit_amount]", String(i.sleeve.cents)],
       ["line_items[0][price_data][product_data][name]", i.sleeve.name],
       ["line_items[0][price_data][product_data][description]", `${i.sleeve.coins} vends on the Remora video vending machine. Digital goods, delivered on the spot.`],
+      ["line_items[0][price_data][product_data][tax_code]", i.taxCode ?? DEFAULT_TAX_CODE],
     );
   }
   if (i.automaticTax) pairs.push(["automatic_tax[enabled]", "true"]);

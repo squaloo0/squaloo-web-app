@@ -14,11 +14,14 @@ test("checkout body: inline price by default, a dashboard price when given", () 
   assert.equal(inline["line_items[0][price_data][currency]"], "usd");
   assert.equal(inline["metadata[card_id]"], "card_abc");
   assert.equal(inline["metadata[coins]"], "5");
+  assert.equal(inline["line_items[0][price_data][product_data][tax_code]"], "txcd_10000000", "Managed Payments wants a tax code");
+  assert.equal(Object.fromEntries(checkoutSessionBody({ ...base, taxCode: "txcd_10401000" }))["line_items[0][price_data][product_data][tax_code]"], "txcd_10401000");
   assert.equal(inline["automatic_tax[enabled]"], undefined);
 
   const priced = Object.fromEntries(checkoutSessionBody({ ...base, priceId: "price_123", automaticTax: true, email: "a@b.c" }));
   assert.equal(priced["line_items[0][price]"], "price_123");
   assert.equal(priced["line_items[0][price_data][unit_amount]"], undefined);
+  assert.equal(priced["line_items[0][price_data][product_data][tax_code]"], undefined, "a dashboard price carries its own tax code");
   assert.equal(priced["automatic_tax[enabled]"], "true");
   assert.equal(priced["customer_email"], "a@b.c");
 
