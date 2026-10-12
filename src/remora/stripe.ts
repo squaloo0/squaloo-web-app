@@ -65,7 +65,9 @@ export async function createCheckoutSession(i: Omit<CheckoutInput, "priceId" | "
   try {
     res = await fetch("https://api.stripe.com/v1/checkout/sessions", {
       method: "POST",
-      headers: { authorization: `Bearer ${key}`, "content-type": "application/x-www-form-urlencoded", "stripe-version": "2024-06-20" },
+      // No Stripe-Version pin: the account's default (2025-03-31.basil or newer on an
+      // account opened in 2026) is what Managed Payments requires. Pinning older broke it.
+      headers: { authorization: `Bearer ${key}`, "content-type": "application/x-www-form-urlencoded" },
       body,
       signal: AbortSignal.timeout(15_000),
     });
