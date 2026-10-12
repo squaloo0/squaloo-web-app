@@ -159,6 +159,19 @@ which machine vended. Every other provider is unaffected.
   but never returns one on failure and signs nothing. Deploy Fly and restart the Mac
   workers together after a Remora merge.
 
+### The tape, as built (2026-10-12)
+
+- `/remora/tape` and `GET /api/remora/tape`, public, cached a minute. Vends today and to
+  date, bytes, a 14-day sparkline in UTC, coins by kind, which machines are on and for how
+  long, and the recent drops by hash with a link to verify-by-hash.
+- **Revenue is Stripe's number.** `revenueToDate()` pages `balance_transactions` and sums
+  the charges (gross, Stripe's cut, net). Refunds and payouts are not revenue. On a test
+  key the tape says "sandbox". No key: "no Stripe key". Unreadable: "Stripe unread".
+- **No titles, no URLs, no cards, ever.** Founder's call on 2026-10-12: a customer's taste
+  is theirs. The tape identifies a drop by its hash, provider, size, time and quality.
+  `core/tape.ts` is the spec and its test asserts no title leaks.
+- The devlog ("Tell it") stays tabled.
+
 **Kept in the back pocket (v2 §Ideas):** provenance tiers, trust panel, Solomon ingest.
 They become slots or panel lights only if they make the machine more fun.
 
