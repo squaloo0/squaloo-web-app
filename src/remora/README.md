@@ -148,7 +148,13 @@ which machine vended. Every other provider is unaffected.
   Good enough while coins are free of abuse value; revisit if someone scripts it.
 - **Test mode until the paperwork exists.** `STRIPE_SECRET_KEY=sk_test_…` makes the panel
   say so. Going live is: terms (done), privacy line (done), business details in Stripe,
-  Stripe Tax on, `sk_live_`, and the webhook endpoint pointed at the live site.
+  `sk_live_`, and a live webhook endpoint.
+- **Managed Payments, not Stripe Tax.** The Squaloo Stripe account (opened 2026-10-11)
+  came with Managed Payments on by default: Stripe is merchant of record, calculates and
+  remits sales tax itself, and requires a product tax code on every line item. We send
+  `txcd_10000000` (electronically supplied services) with the inline price. So the
+  README's "Stripe Tax on from day one" is satisfied by Stripe's own default, and the
+  `REMORA_STRIPE_TAX` switch stays off.
 - **Worker versions matter now.** A worker on pre-Phase-4 code vends carded coins fine
   but never returns one on failure and signs nothing. Deploy Fly and restart the Mac
   workers together after a Remora merge.

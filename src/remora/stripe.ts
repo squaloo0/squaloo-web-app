@@ -6,7 +6,8 @@
  *   STRIPE_SECRET_KEY          sk_test_… until the paperwork exists, then sk_live_…
  *   STRIPE_WEBHOOK_SECRET      whsec_… for /api/remora/stripe
  *   REMORA_STRIPE_PRICE_5|12|30   optional dashboard price ids; else inline prices
- *   REMORA_STRIPE_TAX=1        enable Stripe Tax on sessions (the account must have it on)
+ *   REMORA_STRIPE_TAX=1        enable Stripe Tax on sessions (not needed under Managed Payments)
+ *   REMORA_STRIPE_TAX_CODE     product tax code for inline prices; default txcd_10000000
  */
 import { checkoutSessionBody, formEncode, type CheckoutInput } from "./core/stripe.ts";
 import type { Sleeve } from "./core/coins.ts";
@@ -53,7 +54,12 @@ export async function createCheckoutSession(i: Omit<CheckoutInput, "priceId" | "
   const key = stripeSecretKey();
   if (!key) throw new StripeError("STRIPE_SECRET_KEY is not set; the coin slot is closed");
   const body = formEncode(
-    checkoutSessionBody({ ...i, priceId: priceIdFor(i.sleeve), automaticTax: process.env.REMORA_STRIPE_TAX === "1" }),
+    checkoutSessionBody({
+      ...i,
+      priceId: priceIdFor(i.sleeve),
+      automaticTax: process.env.REMORA_STRIPE_TAX === "1",
+      taxCode: env("REMORA_STRIPE_TAX_CODE") ?? undefined,
+    }),
   );
   let res: Response;
   try {
