@@ -35,7 +35,7 @@ export const metadata = {
 
 export const dynamic = "force-dynamic";
 
-type Search = { url?: string | string[]; denied?: string | string[]; coin?: string | string[]; card?: string | string[]; paid?: string | string[] };
+type Search = { url?: string | string[]; denied?: string | string[]; coin?: string | string[]; card?: string | string[]; paid?: string | string[]; why?: string | string[] };
 
 const SLOTS = [
   { label: "VIDEO", tag: "LIVE" },
@@ -56,6 +56,7 @@ export default async function RemoraPage({ searchParams }: { searchParams: Promi
   const coin = first(sp.coin);
   const cardNote = first(sp.card);
   const paid = first(sp.paid);
+  const why = first(sp.why);
 
   const v = await visitor();
   const keyed = v.kind === "keyed";
@@ -165,7 +166,7 @@ export default async function RemoraPage({ searchParams }: { searchParams: Promi
 
               <form action="/api/remora/jobs" method="post" className="flex flex-col gap-2">
                 <label htmlFor="vend-url" className="text-[10px] tracking-[0.3em] uppercase text-neutral-500">
-                  Vend {coin ? <CoinNote coin={coin} /> : null}
+                  Vend {coin ? <CoinNote coin={coin} why={why} /> : null}
                 </label>
                 <div className="flex gap-2">
                   <input
@@ -312,9 +313,14 @@ const COIN_NOTES: Record<string, string> = {
   "bad-sleeve": "pick a sleeve",
 };
 
-function CoinNote({ coin }: { coin: string }) {
+function CoinNote({ coin, why }: { coin: string; why?: string }) {
   const bad = !coin.startsWith("j_");
-  return <span className={bad ? "text-amber-400" : "text-[#63a375]"}>· {COIN_NOTES[coin] ?? `coin in · ${coin}`}</span>;
+  return (
+    <span className={bad ? "text-amber-400" : "text-[#63a375]"}>
+      · {COIN_NOTES[coin] ?? `coin in · ${coin}`}
+      {why ? <span className="normal-case tracking-normal text-neutral-500"> · {why}</span> : null}
+    </span>
+  );
 }
 
 /** The slot itself: take a card, see your coins, buy a sleeve, put the card back. */
