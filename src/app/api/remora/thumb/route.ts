@@ -7,18 +7,16 @@
  *
  * Allowlisted hosts only (core/oembed THUMB_HOSTS). Keyed like the rest of the machine.
  */
-import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-import { isServiceKey, KEY_COOKIE } from "@/remora/auth";
+import { visitor } from "@/remora/card";
 import { isThumbUrl } from "@/remora/core/oembed";
 
 const TIMEOUT_MS = 8_000;
 const MAX_BYTES = 2 * 1024 * 1024;
 
 export async function GET(req: Request): Promise<Response> {
-  const jar = await cookies();
-  if (!isServiceKey(jar.get(KEY_COOKIE)?.value)) {
-    return NextResponse.json({ error: "insert service key" }, { status: 401 });
+  if ((await visitor()).kind === "nobody") {
+    return NextResponse.json({ error: "take a card or turn the key" }, { status: 401 });
   }
 
   const u = new URL(req.url).searchParams.get("u");
