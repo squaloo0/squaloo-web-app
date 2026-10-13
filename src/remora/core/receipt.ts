@@ -18,7 +18,7 @@ export type Receipt = {
   receipt: {
     version: typeof RECEIPT_VERSION;
     kind: "vend";
-    slot: "VIDEO" | "AUDIO" | "CLIP" | "GIF";
+    slot: "VIDEO" | "AUDIO" | "CLIP" | "GIF" | "THUMBS";
     /** ISO-8601, UTC. */
     vendedAt: string;
     machine: "remora";
@@ -95,7 +95,7 @@ export type ReceiptInput = {
 
 export function buildReceipt(i: ReceiptInput): Receipt {
   return {
-    receipt: { version: RECEIPT_VERSION, kind: "vend", slot: i.quality === "gif" ? "GIF" : i.clip ? "CLIP" : isAudio(i.quality) ? "AUDIO" : "VIDEO", vendedAt: i.now.toISOString(), machine: "remora" },
+    receipt: { version: RECEIPT_VERSION, kind: "vend", slot: i.quality === "gif" ? "GIF" : i.quality === "thumbs" ? "THUMBS" : i.clip ? "CLIP" : isAudio(i.quality) ? "AUDIO" : "VIDEO", vendedAt: i.now.toISOString(), machine: "remora" },
     source: { input: i.input, canonicalUrl: i.canonicalUrl, provider: i.provider, id: i.id, extractor: i.meta.extractor },
     video: {
       title: i.meta.title,

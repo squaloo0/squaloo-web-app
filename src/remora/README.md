@@ -103,7 +103,7 @@ the same Docker image. The image is the contract, so the move is an afternoon.
 | 3     | **The machine goes live**   | Docker image on Fly, queue in Neon, heartbeat, R2 upload, download link. Free vends, token-gated |
 | 4     | **The coin slot**           | Stripe Checkout, webhook, ledger, punch card, terms page, the printed receipt. Public |
 | 5     | **The tape**                | public counter, uptime, revenue from Stripe. Devlog still tabled |
-| 6+    | **New slots**               | AUDIO, CLIP and GIF (done 2026-10-13), THUMBS, TRANSCRIPT, CHAPTERS, one per sitting |
+| 6+    | **New slots**               | AUDIO, CLIP, GIF and THUMBS (done 2026-10-13), TRANSCRIPT, CHAPTERS, one per sitting |
 
 **The honest risk.** Downloading from YouTube at scale for money invites a letter. The
 machine's answer: wide provider support (direct, Vimeo, TikTok, X, Reddit, Twitch clips,
@@ -201,6 +201,16 @@ which machine vended. Every other provider is unaffected.
   `--postprocessor-args` argument. A 5 s GIF is ~3.6 MB; that is why 15 s is the cap.
 - One coin. Slot GIF on the receipt, with the clip line. The shelf files it as `gif`
   (migration 0006); the tape counts it as a vend.
+
+### The THUMBS slot, as built (2026-10-13)
+
+- Quality `thumbs` is a contact sheet: twelve frames evenly spaced across the video (or
+  the clip, if one is given), 320 px each, tiled 4×3 into one 1280-wide JPEG, ~90 KB.
+- First time Remora calls ffmpeg itself (`src/remora/ffmpeg.ts`), for the tiling yt-dlp
+  does not do. Same rule as always: `spawn(bin, [args])`, through the same runner as
+  yt-dlp, never a shell. yt-dlp still does every download, merge and recode.
+- One coin. Slot THUMBS on the receipt (with the clip line when there is one). Migration
+  0007 lets the shelf file `thumbs`.
 
 **Kept in the back pocket (v2 §Ideas):** provenance tiers, trust panel, Solomon ingest.
 They become slots or panel lights only if they make the machine more fun.

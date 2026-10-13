@@ -142,4 +142,5 @@ test("a clipped receipt says CLIP and prints the range", () => {
   assert.equal(buildReceipt(input({ quality: "audio" })).receipt.slot, "AUDIO");
   assert.equal(buildReceipt(input({ quality: "audio", clip: { start: 0, end: 5 } })).receipt.slot, "CLIP", "a clip is a clip whatever it is made of");
   assert.equal(buildReceipt(input({ quality: "gif", clip: { start: 0, end: 5 } })).receipt.slot, "GIF", "except a GIF, which is its own slot");
+  assert.equal(buildReceipt(input({ quality: "thumbs" })).receipt.slot, "THUMBS");
 });

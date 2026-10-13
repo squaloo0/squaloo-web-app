@@ -11,9 +11,9 @@ import { GIF_FORMAT_SELECTOR, gifPostprocessArgs } from "./gif.ts";
  *   m4a         AAC in an MP4 shell: smaller, Apple-native
  *   audio-raw   the best audio track yt-dlp can find, untouched (usually opus in webm)
  */
-export type Quality = "best" | "2160" | "1440" | "1080" | "720" | "480" | "360" | "audio" | "m4a" | "audio-raw" | "gif";
+export type Quality = "best" | "2160" | "1440" | "1080" | "720" | "480" | "360" | "audio" | "m4a" | "audio-raw" | "gif" | "thumbs";
 
-export const QUALITIES: readonly Quality[] = ["best", "2160", "1440", "1080", "720", "480", "360", "audio", "m4a", "audio-raw", "gif"];
+export const QUALITIES: readonly Quality[] = ["best", "2160", "1440", "1080", "720", "480", "360", "audio", "m4a", "audio-raw", "gif", "thumbs"];
 
 export const AUDIO_QUALITIES: readonly Quality[] = ["audio", "m4a", "audio-raw"];
 
@@ -32,6 +32,7 @@ export function parseQuality(input: string | undefined | null): Quality | null {
   if (s === "m4a" || s === "aac") return "m4a";
   if (s === "audio-raw" || s === "raw" || s === "opus") return "audio-raw";
   if (s === "gif") return "gif";
+  if (s === "thumbs" || s === "contact" || s === "sheet") return "thumbs";
   if (s === "4k" || s === "uhd") return "2160";
   if (s === "2k") return "1440";
   const m = /^(\d{3,4})p?$/.exec(s);
@@ -48,14 +49,14 @@ export function parseQuality(input: string | undefined | null): Quality | null {
  */
 export function formatSelector(q: Quality): string {
   if (q === "best") return "bestvideo*+bestaudio/best";
-  if (q === "gif") return GIF_FORMAT_SELECTOR;
+  if (q === "gif" || q === "thumbs") return GIF_FORMAT_SELECTOR;
   if (isAudio(q)) return "bestaudio/best";
   return `bestvideo*[height<=${q}]+bestaudio/best[height<=${q}]/best`;
 }
 
 /** Container yt-dlp should merge into, or null when nothing is merged. */
 export function mergeContainer(q: Quality): "mp4" | null {
-  return isAudio(q) || q === "gif" ? null : "mp4";
+  return isAudio(q) || q === "gif" || q === "thumbs" ? null : "mp4";
 }
 
 /**
@@ -79,7 +80,7 @@ export function postprocessArgs(q: Quality): string[] {
 
 /** The extension a vend of this quality lands with, when we can know it. */
 export function expectedExt(q: Quality): string | null {
-  return q === "audio" ? "mp3" : q === "m4a" ? "m4a" : q === "gif" ? "gif" : isAudio(q) ? null : "mp4";
+  return q === "audio" ? "mp3" : q === "m4a" ? "m4a" : q === "gif" ? "gif" : q === "thumbs" ? "jpg" : isAudio(q) ? null : "mp4";
 }
 
 export type Estimate = {
@@ -109,7 +110,7 @@ export function estimate(meta: VideoMeta, q: Quality): Estimate | null {
     return a ? { height: null, bytes: a.bytes, approx: a.bytesApprox || q !== "audio-raw", formatIds: [a.formatId] } : null;
   }
 
-  const cap = q === "best" ? Infinity : q === "gif" ? 480 : Number(q);
+  const cap = q === "best" ? Infinity : q === "gif" || q === "thumbs" ? 480 : Number(q);
   const v = best(videoOnly.filter((f) => (f.height ?? 0) <= cap));
   const a = best(audioOnly);
   if (v && a) {
