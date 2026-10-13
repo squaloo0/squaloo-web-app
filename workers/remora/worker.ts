@@ -25,6 +25,7 @@ import { mkdtemp, rm, stat } from "node:fs/promises";
 import { hostname, tmpdir } from "node:os";
 import { basename, join } from "node:path";
 import { backoffSeconds, isPermanentError, MAX_ATTEMPTS, type Job } from "../../src/remora/core/job.ts";
+import { isAudio } from "../../src/remora/core/format.ts";
 import { fraction } from "../../src/remora/core/progress.ts";
 import {
   availableProviders,
@@ -164,7 +165,7 @@ async function process_(job: Job, pulse: () => Pulse): Promise<void> {
 
     await addAsset({
       jobId: job.id,
-      kind: job.quality === "audio" ? "audio" : "video",
+      kind: isAudio(job.quality) ? "audio" : "video",
       objectKey: `${prefix}/${fileName}`,
       fileName,
       bytes: v.receipt.file.bytes,

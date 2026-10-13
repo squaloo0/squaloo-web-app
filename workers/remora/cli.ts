@@ -21,7 +21,7 @@ import { join } from "node:path";
 import { parseVideoUrl } from "../../src/remora/core/url.ts";
 import { prettyBytes, prettyDuration, prettyHeight, prettyPercent, prettySpeed, progressBar } from "../../src/remora/core/pretty.ts";
 import type { VideoFormat, VideoMeta } from "../../src/remora/core/meta.ts";
-import { parseQuality, QUALITIES } from "../../src/remora/core/format.ts";
+import { isAudio, parseQuality, QUALITIES } from "../../src/remora/core/format.ts";
 import { fraction, type PostProcess, type Progress } from "../../src/remora/core/progress.ts";
 import { generateReceiptKeys, printReceipt } from "../../src/remora/core/receipt.ts";
 import { scoreboard } from "../../src/remora/core/ledger.ts";
@@ -91,7 +91,7 @@ async function main(): Promise<number> {
         return 2;
       }
       console.log(BANNER);
-      console.log(`  slot      ${quality === "audio" ? "AUDIO" : "VIDEO"} · ${quality}`);
+      console.log(`  slot      ${isAudio(quality) ? "AUDIO" : "VIDEO"} · ${quality}`);
       const needle = new Needle();
       try {
         const v = await vend({
@@ -276,7 +276,7 @@ async function main(): Promise<number> {
       console.log("commands:");
       console.log("  peek <url>                what the glass reads off a URL (offline)");
       console.log("  info <url>                what is behind the glass, via yt-dlp");
-      console.log("  get  <url> [--quality q]  the VIDEO slot: drop, hash, receipt   q = best|2160|1440|1080|720|480|360|audio");
+      console.log("  get  <url> [--quality q]  VIDEO: best|2160|1440|1080|720|480|360 · AUDIO: audio (mp3)|m4a|audio-raw");
       console.log("  ls                        the ledger and the scoreboard");
       console.log("  verify <file|receipt>     re-hash a vend against its receipt");
       console.log("  receipt <file|receipt>    print a receipt again");
@@ -312,7 +312,10 @@ class Needle {
   tick(t: Progress | PostProcess): void {
     if (t.kind === "postprocess") {
       this.close();
-      if (t.status === "started" && t.processor !== "MoveFiles") console.log(`  ${t.processor.toLowerCase().slice(0, 9).padEnd(9)} ffmpeg at work`);
+      if (t.status === "started" && t.processor !== "MoveFiles") {
+        const label = { Merger: "merging", ExtractAudio: "extracting", FFmpegFixupM4a: "fixing" }[t.processor] ?? t.processor.toLowerCase().slice(0, 9);
+        console.log(`  ${label.padEnd(9)} ffmpeg at work`);
+      }
       return;
     }
     const f = fraction(t);

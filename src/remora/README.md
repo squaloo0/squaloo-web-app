@@ -103,7 +103,7 @@ the same Docker image. The image is the contract, so the move is an afternoon.
 | 3     | **The machine goes live**   | Docker image on Fly, queue in Neon, heartbeat, R2 upload, download link. Free vends, token-gated |
 | 4     | **The coin slot**           | Stripe Checkout, webhook, ledger, punch card, terms page, the printed receipt. Public |
 | 5     | **The tape**                | public counter, uptime, revenue from Stripe. Devlog still tabled |
-| 6+    | **New slots**               | AUDIO, CLIP, GIF, TRANSCRIPT, one per sitting |
+| 6+    | **New slots**               | AUDIO (done 2026-10-13), CLIP, GIF, TRANSCRIPT, one per sitting |
 
 **The honest risk.** Downloading from YouTube at scale for money invites a letter. The
 machine's answer: wide provider support (direct, Vimeo, TikTok, X, Reddit, Twitch clips,
@@ -171,6 +171,16 @@ which machine vended. Every other provider is unaffected.
   is theirs. The tape identifies a drop by its hash, provider, size, time and quality.
   `core/tape.ts` is the spec and its test asserts no title leaks.
 - The devlog ("Tell it") stays tabled.
+
+### The AUDIO slot, as built (2026-10-13)
+
+- Quality `audio` is the slot: mp3 at VBR 0 through yt-dlp's `--extract-audio`, ffmpeg
+  doing the work, never shelled to by us. `m4a` is AAC in an MP4 shell (a remux when the
+  source is already AAC). `audio-raw` is what `audio` used to be: the best track as the host
+  served it, usually opus in webm. One coin each. The receipt's slot line says AUDIO.
+- The NEW tag pulses on the panel and a three-note jingle plays from the browser's own
+  oscillator when an audio quality is vended. No audio file, no third party, and it only
+  plays on a button press, so no browser blocks it.
 
 **Kept in the back pocket (v2 §Ideas):** provenance tiers, trust panel, Solomon ingest.
 They become slots or panel lights only if they make the machine more fun.
