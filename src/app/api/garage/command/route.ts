@@ -9,7 +9,7 @@ import { isGarageKey, KEY_COOKIE } from "@/garage/auth";
 import { ledgerWired } from "@/garage/db/client";
 import { cancelCommand, enqueueCommand } from "@/garage/db/ledger";
 
-const HATS = new Set(["report"]);
+const HATS = new Set(["report", "propose"]);
 
 export async function POST(req: Request): Promise<NextResponse> {
   const back = (q = "") => NextResponse.redirect(new URL(`/garage${q}`, req.url), { status: 303 });

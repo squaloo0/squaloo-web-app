@@ -43,6 +43,12 @@ export default async function RunPage({ params }: { params: Promise<{ id: string
               {r.branch && ` · branch ${r.branch}`}
               {r.diffHash && ` · diff ${r.diffHash.slice(0, 12)}`}
               {r.verdict && ` · ${r.verdict}`}
+              {r.prUrl && (
+                <>
+                  {" · "}
+                  <a href={r.prUrl} className="text-[#5688c7] hover:underline">{r.prUrl}</a>
+                </>
+              )}
             </div>
             {r.error && <div className="border border-red-900 text-red-300 text-xs p-3 mb-6 whitespace-pre-wrap">{r.error}</div>}
             <h2 className="text-xs tracking-[0.3em] uppercase text-neutral-400 mb-2">Events</h2>

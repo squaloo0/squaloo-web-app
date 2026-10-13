@@ -38,6 +38,10 @@ export const ENV_ALLOWLIST: readonly string[] = [
   "CLAUDE_CODE_OAUTH_TOKEN",
   "ANTHROPIC_API_KEY",
   "CLAUDE_CONFIG_DIR",
+  "GIT_AUTHOR_NAME",
+  "GIT_AUTHOR_EMAIL",
+  "GIT_COMMITTER_NAME",
+  "GIT_COMMITTER_EMAIL",
 ];
 
 export function agentEnv(env: Record<string, string | undefined>, app = "squaloo-garage/0.1"): Record<string, string> {

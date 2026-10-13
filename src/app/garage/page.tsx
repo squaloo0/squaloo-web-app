@@ -82,6 +82,7 @@ export default async function GaragePage({ searchParams }: { searchParams: Promi
                   <label className="text-[10px] tracking-[0.3em] uppercase text-neutral-500 self-center">hat</label>
                   <select name="hat" className="bg-black border border-neutral-800 text-sm px-2 py-1 text-neutral-200">
                     <option value="report">report · rung 0 · read and report</option>
+                    <option value="propose">propose · rung 1 · a change on a branch, behind the gate</option>
                   </select>
                   <input name="ticket" placeholder="ticket (optional)" className="bg-black border border-neutral-800 text-sm px-2 py-1 text-neutral-200 flex-1" />
                 </div>
@@ -188,6 +189,11 @@ function RunLine({ r }: { r: RunRow }) {
         {r.turns}t · {r.toolCalls} tools · {r.denials} refused
       </span>
       {r.verdict && <span className="text-neutral-500">{r.verdict}</span>}
+      {r.prUrl && (
+        <a href={r.prUrl} className="text-[#5688c7] hover:underline" target="_blank" rel="noreferrer">
+          PR
+        </a>
+      )}
     </div>
   );
 }
@@ -197,7 +203,10 @@ function GateRow({ r }: { r: RunRow }) {
     <div className="border border-neutral-800 p-3 space-y-2">
       <RunLine r={r} />
       <div className="text-xs text-neutral-500">
-        branch <span className="text-neutral-300">{r.branch ?? "?"}</span> · diff <span className="text-neutral-300">{r.diffHash?.slice(0, 12)}</span>
+        branch <span className="text-neutral-300">{r.branch ?? "?"}</span> · diff <span className="text-neutral-300">{r.diffHash?.slice(0, 12)}</span> ·{" "}
+        <Link href={`/garage/runs/${r.id}`} className="underline-offset-4 hover:underline">
+          read the gate comment
+        </Link>
       </div>
       <form method="POST" action="/api/garage/gate" className="flex gap-2 items-center">
         <input type="hidden" name="run" value={r.id} />

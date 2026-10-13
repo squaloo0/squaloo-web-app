@@ -14,6 +14,7 @@
  *   halt [on|off]           the HALT file; no argument prints its state
  *   hash                    sha256 of the branch's diff against origin/main, for approve
  *   approve <diff-hash> [--note "..."]   the founder's approval row for one exact diff
+ *   publish <run-id>        push an approved run's branch and open its PR (no model involved)
  */
 import "../../src/garage/env.ts"; // .env.local → process.env, first
 import { existsSync, readFileSync, unlinkSync, writeFileSync } from "node:fs";
@@ -21,17 +22,17 @@ import { readdir, readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { dirname, join, resolve } from "node:path";
 import { hostname } from "node:os";
-import { spawnSync } from "node:child_process";
-import { createHash } from "node:crypto";
 import { query } from "@anthropic-ai/claude-agent-sdk";
 import { charterBinding, charterHash, charterVersion } from "../../src/garage/core/charter.ts";
 import { PER_DAY_USD, PER_RUN_USD, prettyUsd } from "../../src/garage/core/budget.ts";
 import { runLine } from "../../src/garage/core/run.ts";
 import { ledgerWired } from "../../src/garage/db/client.ts";
-import { approve, claimCommand, enqueueCommand, finishCommand, getRun, hitsSummary, listCommands, listEvents, listRuns, migrate, neonLedger, type CommandRow } from "../../src/garage/db/ledger.ts";
+import { approve, claimCommand, enqueueCommand, finishCommand, getRun, hitsSummary, listCommands, listEvents, listRuns, migrate, neonLedger, noteRun, setPrUrl, type CommandRow } from "../../src/garage/db/ledger.ts";
 import { hitsLines } from "../../src/garage/core/hits.ts";
 import { CHARTER_FILE, HALT_FILE, runOnce } from "./run.ts";
 import { HATS, type Hat } from "./hats.ts";
+import { commitAll, diffHash, openPr, prepareWorktree, push } from "./git.ts";
+import { branchFor, prBody, prTitle, publishVerdict, slugify } from "../../src/garage/core/propose.ts";
 import { resolveAuth } from "./auth.ts";
 
 const BANNER = String.raw`
@@ -105,7 +106,10 @@ async function main(): Promise<number> {
           if (c) {
             console.log(`  command #${c.id} · ${c.hat}${c.ticket ? ` · ${c.ticket}` : ""} · from ${c.createdBy}`);
             const hat = HATS[c.hat];
-            if (!hat) {
+            if (c.hat === "publish") {
+              const ok = await publishRun(c.prompt ?? "");
+              await finishCommand(c.id, ok ? "done" : "failed", c.prompt && /^[0-9a-f-]{8,36}$/.test(c.prompt) ? (await getRun(c.prompt))?.id ?? null : null);
+            } else if (!hat) {
               await finishCommand(c.id, "failed", null);
               console.log(`  no hat named ${c.hat}; marked failed`);
             } else {
@@ -189,13 +193,20 @@ async function main(): Promise<number> {
       return 0;
     }
     case "hash": {
-      const h = diffHash();
+      const h = await diffHash(REPO);
       if (!h) {
         console.log("no diff against origin/main");
         return 1;
       }
       console.log(h);
       return 0;
+    }
+    case "publish": {
+      if (!args[0]) {
+        console.error("publish: which run?");
+        return 2;
+      }
+      return (await publishRun(args[0])) ? 0 : 1;
     }
     case "approve": {
       const h = args[0];
@@ -209,7 +220,7 @@ async function main(): Promise<number> {
     }
     default: {
       console.log(BANNER);
-      console.log("  garage doctor | migrate | run [hat] | work [--once] | queue | command <hat> | hits [days] | runs [n] | show <id> | halt [on|off] | hash | approve <hash>");
+      console.log("  garage doctor | migrate | run [hat] | work [--once] | queue | command <hat> | hits [days] | runs [n] | show <id> | halt [on|off] | hash | approve <hash> | publish <run>");
       return command ? 2 : 0;
     }
   }
@@ -218,20 +229,29 @@ async function main(): Promise<number> {
 async function oneRun(hatName: string, hat: Hat, o: { prompt: string | null; ticket: string | null; model: string; commandId: number | null }) {
   const auth = resolveAuth(process.env);
   console.log(`  ${MACHINE} · hat ${hatName} · rung ${hat.rung} · ${o.model} · auth ${auth.source}`);
+  // Rung 1 works on its own branch in its own worktree; the primary checkout is a person's.
+  let cwd = REPO;
+  let branch: string | null = null;
+  if (hat.rung >= 1) {
+    branch = branchFor(hat.kind ?? "feat", o.ticket ? `${o.ticket}-${slugify((o.prompt ?? hatName).slice(0, 40))}` : (o.prompt ?? hatName).slice(0, 40));
+    cwd = await prepareWorktree(REPO, branch);
+    console.log(`  branch ${branch} · worktree ${cwd}`);
+  }
   const started = Date.now();
   const r = await runOnce(
     {
       now: () => new Date(),
       machine: MACHINE,
-      cwd: REPO,
+      cwd,
       exists: existsSync,
       readFile: (p) => readFileSync(p, "utf8"),
-      env: { ...process.env, ...auth.patch },
+      env: { ...process.env, ...auth.patch, GIT_AUTHOR_NAME: "wrasse", GIT_AUTHOR_EMAIL: "wrasse-agent@squaloo.com", GIT_COMMITTER_NAME: "wrasse", GIT_COMMITTER_EMAIL: "wrasse-agent@squaloo.com" },
       ledger: neonLedger,
       query,
       log: (line) => console.log(`  · ${line}`),
+      git: { commitAll, diffHash },
     },
-    { hat: hatName, prompt: o.prompt ?? hat.prompt, rung: hat.rung, ticket: o.ticket, model: o.model, maxTurns: hat.maxTurns, diffHash: null, commandId: o.commandId },
+    { hat: hatName, prompt: o.prompt ? `${hat.prompt}\n\n## The command\n\n${o.prompt}` : hat.prompt, rung: hat.rung, ticket: o.ticket, model: o.model, maxTurns: hat.maxTurns, diffHash: null, commandId: o.commandId, branch },
   );
   const secs = Math.round((Date.now() - started) / 1000);
   console.log("");
@@ -245,6 +265,44 @@ async function oneRun(hatName: string, hat: Hat, o: { prompt: string | null; tic
   return r;
 }
 
+/**
+ * The harness half of the gate: re-hash the branch now, compare with the row and the
+ * approval, then push and open the PR with the run's own gate comment. No model involved.
+ */
+async function publishRun(idOrPrefix: string): Promise<boolean> {
+  const r = await getRun(idOrPrefix);
+  if (!r) {
+    console.log(`  publish: no run starting ${idOrPrefix}`);
+    return false;
+  }
+  if (!r.branch) {
+    console.log(`  publish: run ${r.id.slice(0, 8)} has no branch`);
+    return false;
+  }
+  if (r.prUrl) {
+    console.log(`  publish: already published at ${r.prUrl}`);
+    return true;
+  }
+  const cwd = await prepareWorktree(REPO, r.branch);
+  const current = await diffHash(cwd);
+  const v = publishVerdict({ recordedHash: r.diffHash, currentHash: current, approved: await neonLedger.approvedHashes(), verdict: r.verdict });
+  if (!v.ok) {
+    await noteRun(r.id, `publish refused: ${v.reason}`);
+    console.log(`  publish refused: ${v.reason}`);
+    return false;
+  }
+  const pushed = await push(cwd, r.branch);
+  if (pushed.status !== 0) {
+    await noteRun(r.id, `push failed: ${pushed.stderr.trim().slice(0, 300)}`);
+    console.log(`  push failed: ${pushed.stderr.trim()}`);
+    return false;
+  }
+  const url = await openPr(cwd, prTitle(r.report, r.branch), prBody({ runId: r.id, report: r.report, charterVersion: r.charterVersion, charterHash: r.charterHash, costUsd: r.costUsd, diffHash: current! }));
+  await setPrUrl(r.id, url);
+  console.log(`  published ${r.branch} → ${url}`);
+  return true;
+}
+
 function commandLine(c: CommandRow): string {
   return [`#${c.id}`, c.createdAt.slice(0, 16).replace("T", " ") + "Z", c.hat, c.ticket ?? "", c.status, c.pickedBy ? `on ${c.pickedBy}` : "", c.runId ? `run ${c.runId.slice(0, 8)}` : "", c.prompt ? `"${c.prompt.slice(0, 50)}${c.prompt.length > 50 ? "…" : ""}"` : ""]
     .filter((x) => x.length > 0)
@@ -253,13 +311,6 @@ function commandLine(c: CommandRow): string {
 
 function readCharter(): string {
   return readFileSync(join(REPO, CHARTER_FILE), "utf8");
-}
-
-/** sha256 of the branch's diff against origin/main, the thing an approval row names. */
-function diffHash(): string | null {
-  const r = spawnSync("git", ["diff", "origin/main...HEAD"], { cwd: REPO, encoding: "utf8", maxBuffer: 64 * 1024 * 1024 });
-  if (r.status !== 0 || r.stdout.length === 0) return null;
-  return createHash("sha256").update(r.stdout, "utf8").digest("hex");
 }
 
 function splitFlags(list: string[]): { args: string[]; flags: Record<string, string | true> } {

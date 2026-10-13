@@ -34,6 +34,7 @@ test("a run line carries its boundary: machine, rung, cost, turns, charter", () 
     branch: null,
     diffHash: null,
     verdict: null,
+    prUrl: null,
   };
   assert.equal(runLine(row), "3f2a9c1e · 2026-10-13 06:10Z · air · report · rung 0 · halted: budget · $2.00 · 7 turns · 12 tools · 1 refused · charter 0.1 e3b0c442");
 });
@@ -71,6 +72,7 @@ test("the ledger block is the agent's whole memory of itself: lines, then the ne
     branch: null,
     diffHash: null,
     verdict: null,
+    prUrl: null,
   };
   assert.match(ledgerMemory([]), /You are the first/);
   const m = ledgerMemory([{ ...base, id: "aaaaaaaa-1", report: null, status: "failed" }, base]);
