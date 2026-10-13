@@ -118,3 +118,11 @@ files, what is and isn't on disk) belong here because they do not travel with gi
 - **The mini runs yt-dlp 2025.06.30** (the Python-framework install), Air and Fly run 2026.08.19. `brew install yt-dlp` on the mini, then `npm run remora:install` so launchd's PATH picks it up; the receipt records which one vended either way.
 - Uptime bug fixed in the same PR: `started_at` never reset on restart, so the tape said "up 1d 4h" for processes that had restarted. The worker's first beat now resets it. Takes effect per machine on its next restart on the new code: Fly needs a `fly deploy` after merge, the mini a pull + `npm run remora:install`.
 - Next: slots. AUDIO first.
+
+## 2026-10-13 · MacBook Air · the AUDIO slot · DONE
+- Branch `remora/feat/the-audio-slot`. Quality `audio` is now the slot (mp3, VBR 0, via yt-dlp `--extract-audio`), `m4a` is AAC, `audio-raw` is the old behaviour (best track untouched). `core/format.ts` owns `postprocessArgs()` and `isAudio()`; receipts say AUDIO; the worker files the asset as audio. Panel: AUDIO reads NEW and pulses, the quality menu names the containers, `jingle.tsx` plays three oscillator notes on an audio vend (no file, no third party, button-press only). CLI names the ffmpeg step ("extracting ffmpeg at work").
+- Vended locally on this code: mp3 264 kbps VBR 6.7 MB, m4a AAC 338 kbps 8.6 MB, raw opus/webm 3.3 MB; all three receipts say AUDIO; ffprobe agrees.
+- Live check from the panel: mantis took the coin on the **old** code and dropped the raw track as an mp4 (expected; the worker decides the container). After merge: `fly deploy` and, on the mini, pull + `npm run remora:install`, then the slot is live. Rule stands: deploy workers after every Remora merge.
+- Both machines were on with fresh uptimes at the start of the sitting (lantern 2 m, mantis 1 m) after yesterday's code-names deploy and the mini's yt-dlp update.
+- Air facts: nothing new. Local test card `card_dcb19f77f241` minted on production during the check (1 promo coin, spent). Dev server stopped.
+- Next: CLIP (start–end), then GIF.
