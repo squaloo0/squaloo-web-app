@@ -103,7 +103,7 @@ the same Docker image. The image is the contract, so the move is an afternoon.
 | 3     | **The machine goes live**   | Docker image on Fly, queue in Neon, heartbeat, R2 upload, download link. Free vends, token-gated |
 | 4     | **The coin slot**           | Stripe Checkout, webhook, ledger, punch card, terms page, the printed receipt. Public |
 | 5     | **The tape**                | public counter, uptime, revenue from Stripe. Devlog still tabled |
-| 6+    | **New slots**               | AUDIO, CLIP, GIF and THUMBS (done 2026-10-13), TRANSCRIPT, CHAPTERS, one per sitting |
+| 6+    | **New slots**               | AUDIO, CLIP, GIF, THUMBS and TRANSCRIPT (done 2026-10-13), CHAPTERS, one per sitting |
 
 **The honest risk.** Downloading from YouTube at scale for money invites a letter. The
 machine's answer: wide provider support (direct, Vimeo, TikTok, X, Reddit, Twitch clips,
@@ -211,6 +211,25 @@ which machine vended. Every other provider is unaffected.
   yt-dlp, never a shell. yt-dlp still does every download, merge and recode.
 - One coin. Slot THUMBS on the receipt (with the clip line when there is one). Migration
   0007 lets the shelf file `thumbs`.
+
+### The TRANSCRIPT slot, as built (2026-10-13)
+
+- Quality `transcript`: yt-dlp drops a 16 kHz mono WAV, **whisper.cpp** (`whisper-cli`,
+  `ggml-base.bin`) listens, Remora writes a Markdown document: a provenance header (source,
+  author, date, clip, model, language, segment count) and paragraphs that open with
+  `[mm:ss]`, offset to the original video when it was a clip, broken on pauses over 8 s or
+  blocks over 45 s. The WAV is deleted. The receipt says TRANSCRIPT and "heard by".
+- **A machine must have whisper to vend it.** The pulse carries `transcribe`; the claim only
+  hands transcript coins to a machine that can; the panel says "no machine that can
+  transcribe is on" otherwise. Today: the Macs (`brew install whisper-cpp`, model at
+  `~/.remora/models/ggml-base.bin`). Lantern does not: a shared-cpu-1x box would take
+  minutes per minute of audio and the image would grow by ~300 MB. Founder's call later.
+- **Language is guessed** from the first 30 s and a short sung clip can fool it (a 22 s
+  clip of a song came back "fr"). The document and receipt record the guess;
+  `REMORA_WHISPER_LANGUAGE=en` pins it on a machine that mostly vends one language.
+  A transcript is a measurement: model, version and language are on the receipt.
+- One coin, for now. The README said heavier slots may cost two; a 10-minute video is
+  ~1 min of CPU on an M4. Revisit with real traffic.
 
 **Kept in the back pocket (v2 §Ideas):** provenance tiers, trust panel, Solomon ingest.
 They become slots or panel lights only if they make the machine more fun.
