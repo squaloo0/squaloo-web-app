@@ -14,6 +14,8 @@ Every row carries a date and its vantage. This file decays like the claims it po
 | The majority of the site's traffic is agents, not humans. | **needs review** | Founder observation, 2026-10-13, instrument not named. No first-party counter exists to confirm or size it. Wrasse may ask which surface the founder read it from, and should treat "agents are the main visitor" as the working picture until an instrument says otherwise. |
 | Remora could serve agents with budgets as customers, as well as humans. | **not yet true** | Founder-seeded hypothesis, 2026-10-13. The vending machine already has a machine-readable surface (peek, jobs, verify, signed receipts). What an agent would need to pay, and how, is unmeasured and undesigned. |
 | The tape and Stripe are the only instruments. Nothing measures visits, referrers, funnel steps, or `/shop`. | **supported** | Run `c793e6ea`, 2026-10-13, 7 of 30 pages read; charter section 1. |
+| An agent can already take a card, peek, vend, poll, verify a receipt and check its balance over JSON, without a browser. | **supported** | Run `7a2a55a1`, 2026-10-13: `card`, `peek`, `jobs`, `jobs/[id]`, `verify` routes read. Proposed by wrasse; awaiting the founder. |
+| An agent cannot pay today: the only top-up is Stripe Checkout in a browser, the card code lives only in an httpOnly cookie, and the 402 carries no price or pointer. | **supported** | Run `7a2a55a1`, 2026-10-13: `checkout/route.ts`, `card/route.ts`, `jobs/route.ts`. Proposed by wrasse; awaiting the founder. Any change to checkout is a founder call (guideline 3). |
 
 ## Founder's standing guidance (dated; the founder edits this section)
 

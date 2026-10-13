@@ -74,3 +74,37 @@ agent that is the ledger's clock. Rule 16, in its first hour.
 
 **Machine-local facts.** Air: wrasse's token in the Keychain, service `squaloo-garage`,
 account `wrasse`, length 108. Nothing else changed.
+
+## 2026-10-13 · Air · Phase 2, the dashboard
+
+**What landed.** `/garage`, keyed with `GARAGE_ADMIN_TOKEN` or, failing that, Remora's
+service key: spend today against the caps, the gate with approve and deny (writes the
+approval row the gate guard reads, plus a note event), a command box, the queue, the last
+twenty runs, and `/garage/runs/<id>` with every event and the report as written. Commands
+wait in `garage_commands`; a host running `npm run garage -- work` claims one with a single
+`SKIP LOCKED` statement and runs it; `work --once` drains one; `queue` and `command` from the
+CLI. Migration 0002 applied (commands; `branch`, `diff_hash`, `verdict`, `command_id` on runs).
+Every prompt now opens with the ledger block, the last ten run lines and the newest report in
+full, so the agent's memory is the ledger and nothing else; the preamble names its three
+memories (that block, `REGISTER.md`, `LESSONS.md`). The register carries the founder's
+answers from this sitting: Stripe is in test mode; `/shop` is meant to sell; most visitors
+are agents (needs review, instrument unnamed); agents with budgets as customers is a
+founder-seeded hypothesis. 33 tests, types and lint clean, `next build` green.
+
+**Verified.** Dashboard end to end on a local dev server with a session-only test key: the
+key form, the counters, a command queued from the box and cancelled from the queue, and the
+run page. Command #1 queued from the CLI, picked up by `work --once`, became run `7a2a55a1`:
+hat report, ticket GARAGE-2, $0.21, 30 s, 18 turns, 17 tools, 0 refused. Its report is the
+first answer to the founder's question about agents as customers: what the machine already
+offers over JSON, the four things that stop an agent paying (browser-only checkout,
+cookie-only card code, no recovery, a 402 with no pointer), three hypotheses each naming its
+instrument, and one question back: which surface "most visitors are agents" was read from.
+Two register rows proposed from it, awaiting the founder.
+
+**What is next.** Phase 3, the instrument: a first-party, server-side, privacy-respecting
+count that can see the top of the funnel (and can tell an agent from a browser, which is the
+founder's open question), so a baseline exists before any proposal. Then rung 1.
+
+**Machine-local facts.** Air: `work` is run by hand this phase; no launchd yet. The dev
+config `squaloo-garage` in `~/Projects/.claude/launch.json` sets a local-only test key.
+Day's spend so far: $0.38.
