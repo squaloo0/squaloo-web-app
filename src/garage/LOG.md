@@ -314,3 +314,32 @@ next charter-health pass with the `probe` kind.
 
 **Machine-local facts.** Air: no work loop running; the mini is the host. Day's spend:
 $1.35 across eleven runs.
+
+## 2026-10-13 · Air · the library's first seed, and charter 0.5
+
+**What landed.** The Garage Research Library in Notion (database, reports page, research
+brief, predictions page), created through the connector; ten rows seeded by the
+orchestrator with verification notes; 29 rows from CoWork's deep-research batch imported on
+the mini with `library import` (#73), each carrying Lane, Verification, and its scrub flags
+as comma-free options with the prose kept in the page body. Verified from Notion's side:
+39 rows, every imported row with its lane. The mini ran `library pull`; the regenerated
+`LIBRARY.md` lives in the mini's checkout and is the founder's to commit. Charter 0.5: a
+banked prediction carries its stopping rule and is scored on direction before size; revenue
+never stands alone. Six register rows from the batch, all needs review until a person reads
+the primary. `library fetch` now fetches an arXiv abstract page as its PDF; the four arXiv
+rows mirrored as abstract pages should be re-fetched (clear the mirror tag on the row, run
+fetch again).
+
+**What the batch said.** CoWork banked seven predictions before searching and scored them
+after: five held, one half, one two-thirds. The surprises are in the register and the
+charter: a live-mode scoped-token path at Stripe with a $0.50 floor; money and alignment
+pulling apart in the best-measured agent shops; no verified consumer of llms.txt; mild
+deceptive patterns lifting acceptance without backlash; 1.5% breakage at scale.
+
+**What is next.** On the mini: commit the regenerated LIBRARY.md; `library fetch` for the 29
+new rows; the hand hunt (ACM, APA, PNAS paywalls, the x402 spec file, Shirky via the Wayback
+Machine); `library sums`; `library pull`. Then the first standing order: hat study, every 24
+hours, prompt "lane 1 in order: Gelman and Carlin, Deng, Fabijan, Johari; then lane 2".
+
+**Machine-local facts.** Air: no Notion values, so `library pull|fetch|import` run on the
+mini only. The mirrored primaries live under the mini's `~/.garage/library/`.

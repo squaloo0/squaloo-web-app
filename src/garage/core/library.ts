@@ -95,3 +95,12 @@ export function checkMirror(rows: LibraryRow[], sums: Map<string, string>, ids: 
   for (const f of sums.keys()) if (!named.has(f)) c.orphans.push(f);
   return c;
 }
+
+/**
+ * The URL to fetch for a row's primary. An arXiv abstract page is a landing page; the paper
+ * is at /pdf/<id>. Everything else is fetched as written.
+ */
+export function primaryUrl(url: string): string {
+  const m = /^https?:\/\/arxiv\.org\/abs\/([0-9.]+(?:v\d+)?)\/?$/i.exec(url.trim());
+  return m ? `https://arxiv.org/pdf/${m[1]}` : url;
+}
