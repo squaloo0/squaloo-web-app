@@ -249,6 +249,9 @@ export default async function RemoraPage({ searchParams }: { searchParams: Promi
             <Link href="/remora/terms" className="text-neutral-500 hover:text-white transition-colors">
               Terms ↗
             </Link>
+            <Link href="/remora/tape" className="text-neutral-500 hover:text-white transition-colors">
+              Tape ↗
+            </Link>
           </div>
         </section>
 

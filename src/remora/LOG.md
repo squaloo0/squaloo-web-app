@@ -102,3 +102,12 @@ files, what is and isn't on disk) belong here because they do not travel with gi
 - Live state: Vercel has `NEON_DATABASE_URL`, four `REMORA_R2_*`, `REMORA_ADMIN_TOKEN`, `STRIPE_SECRET_KEY` (sk_test_), `STRIPE_WEBHOOK_SECRET`, `REMORA_RECEIPT_PUBLIC_KEY` (no quotes). Fly has the private key and signs. **The mini still runs pre-Phase-4 code with no private key**: pull main, add `REMORA_RECEIPT_PRIVATE_KEY` to its `.env.local`, `npm run remora:install`.
 - Going live (founder, when ready): activate the Stripe account (business details), switch to live, `sk_live_` + a live webhook endpoint at `https://www.squaloo.com/api/remora/stripe`, swap the two Vercel values. Managed Payments covers tax. Then the first real coin.
 - Next: Phase 5, the tape.
+
+## 2026-10-12 · MacBook Air · Phase 5 — the tape · DONE
+- Branch `remora/feat/the-tape` → PR squaloo0/squaloo-web-app#51 against main.
+- Landed: `core/tape` (pure: UTC days, sparkline, money/uptime formatting, Stripe balance_transactions narrowed and summed, 40-col print, a test that asserts no title leaks), `db/tape` aggregates, `stripe.ts` `revenueToDate()` (pages Stripe's ledger; sandbox/no-key/unread stated), `tape.ts` (one-minute cache), `GET /api/remora/tape`, `/remora/tape`, verify-by-hash (`/api/remora/verify?sha256=` and the page), `remora tape`, Tape ↗ on the panel. Founder's call honoured: no titles, URLs or cards on the tape, ever.
+- Verified on Air against production: tests 166/166, lint, build; tape page + API show 1 vend, 10 coins bought, 2 promo, 1 spent, 1 returned, three machines; JSON leak check clean; verify-by-hash finds the mini's vend. Money reads "no Stripe key" locally (the Air has none); on Vercel it will read Stripe's sandbox number.
+- Production ledger has two Phase 4 test artifacts (+5 fake-webhook purchase on `card_7f1fbbe3eb7c`, `coin_return` on fake job `j_test_return`); the tape counts them. Founder decides whether to wipe test rows before going live.
+- **mac-mini was OFF for this whole sitting** (last seen 19:13 UTC, right after "mini updated"). Likely the worker died on restart; check `npm run remora:status` and `~/Library/Logs/remora/worker.log` on the mini. Fly is on and alone.
+- Air facts: nothing new. Dev server and workers stopped. `.env.local` unchanged.
+- Next: slots. AUDIO transcode (ffmpeg, m4a/mp3), then CLIP (start–end), then GIF. Each one sitting, each with a NEW tag and a jingle.

@@ -11,6 +11,7 @@
  */
 import { checkoutSessionBody, formEncode, type CheckoutInput } from "./core/stripe.ts";
 import type { Sleeve } from "./core/coins.ts";
+import { parseBalanceTransactions, sumCharges, type BalanceTransaction, type Money } from "./core/tape.ts";
 
 export class StripeError extends Error {
   readonly status: number | null;
@@ -80,4 +81,29 @@ export async function createCheckoutSession(i: Omit<CheckoutInput, "priceId" | "
     throw new StripeError(`Stripe said ${res.status}${json.error?.code ? ` (${json.error.code})` : ""}: ${why}`, res.status);
   }
   return { id: json.id, url: json.url };
+}
+
+/**
+ * Revenue to date from Stripe's own ledger: every charge in balance_transactions, gross,
+ * fees, net. Paginates; capped at 20 pages (2000 charges) which is years away. Mode
+ * "off" with zeros when there is no key; null only when Stripe could not be read.
+ */
+export async function revenueToDate(): Promise<Money | null> {
+  const key = stripeSecretKey();
+  if (!key) return { gross: 0, fees: 0, net: 0, count: 0, mode: "off" };
+  const all: BalanceTransaction[] = [];
+  let after: string | null = null;
+  for (let page = 0; page < 20; page++) {
+    const u = new URL("https://api.stripe.com/v1/balance_transactions");
+    u.searchParams.set("limit", "100");
+    if (after) u.searchParams.set("starting_after", after);
+    const res = await fetch(u, { headers: { authorization: `Bearer ${key}` }, signal: AbortSignal.timeout(15_000) });
+    if (!res.ok) throw new StripeError(`Stripe said ${res.status} listing balance transactions`, res.status);
+    const parsed = parseBalanceTransactions(await res.json());
+    if (!parsed) throw new StripeError("Stripe's balance_transactions did not parse");
+    all.push(...parsed.data);
+    if (!parsed.hasMore || !parsed.lastId) break;
+    after = parsed.lastId;
+  }
+  return { ...sumCharges(all), mode: stripeMode() };
 }

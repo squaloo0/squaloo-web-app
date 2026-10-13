@@ -31,6 +31,8 @@ import { machineLight, pill } from "../../src/remora/core/job.ts";
 import { dbWired } from "../../src/remora/db/client.ts";
 import { enqueue, freshestMachine, listJobs, liveMachines, migrate } from "../../src/remora/db/queue.ts";
 import { machineSummary } from "../../src/remora/core/route.ts";
+import { printTape } from "../../src/remora/core/tape.ts";
+import { theTape } from "../../src/remora/tape.ts";
 import { shelfWired } from "../../src/remora/storage.ts";
 
 const BANNER = String.raw`
@@ -232,6 +234,16 @@ async function main(): Promise<number> {
       return 0;
     }
 
+    case "tape": {
+      const t = await theTape();
+      if (!t) {
+        console.error("  no queue: set NEON_DATABASE_URL");
+        return 3;
+      }
+      for (const line of printTape(t)) console.log(`  ${line}`);
+      return 0;
+    }
+
     case "keygen": {
       // The machine's signing key. Private half to the worker (Fly secret, .env.local),
       // public half to Vercel so /remora/verify can check receipts.
@@ -274,6 +286,7 @@ async function main(): Promise<number> {
       console.log("  jobs                      the queue");
       console.log("  machine                   the pulse: READY or OUT OF ORDER");
       console.log("  keygen                    a fresh Ed25519 pair for signing receipts (env lines)");
+      console.log("  tape                      the open books, as a thermal strip");
       console.log("\nenv: NEON_DATABASE_URL, REMORA_R2_*, REMORA_DOWNLOADS, REMORA_LEDGER, REMORA_YTDLP_BIN, REMORA_FFMPEG_BIN");
       return 0;
 

@@ -20,7 +20,22 @@ function publicKey(): { pem: string; keyId: string } | null {
   }
 }
 
-export async function GET(): Promise<NextResponse> {
+export async function GET(req: Request): Promise<NextResponse> {
+  const sha = new URL(req.url).searchParams.get("sha256");
+  if (sha) {
+    // A hash alone: did the machine vend these bytes? No title, no card, no URL in the answer.
+    if (!/^[0-9a-f]{64}$/i.test(sha)) return NextResponse.json({ error: "not a sha256" }, { status: 400 });
+    if (!dbWired()) return NextResponse.json({ error: "no queue wired on this deploy" }, { status: 503 });
+    const rows = (await sql()`
+      SELECT a.job_id, a.bytes, a.created_at, j.provider FROM remora_assets a JOIN remora_jobs j ON j.id = a.job_id
+       WHERE a.sha256 = ${sha.toLowerCase()} AND a.kind IN ('video', 'audio') ORDER BY a.created_at LIMIT 1`) as
+      { job_id: string; bytes: string | number; created_at: string | Date; provider: string }[];
+    const r = rows[0];
+    return NextResponse.json(
+      r ? { vended: { at: new Date(r.created_at).toISOString(), job: r.job_id, bytes: Number(r.bytes), provider: r.provider } } : { vended: null },
+      { headers: { "cache-control": "public, max-age=60" } },
+    );
+  }
   const k = publicKey();
   if (!k) return NextResponse.json({ error: "no public key on this deploy" }, { status: 503 });
   return NextResponse.json({ alg: "ed25519", keyId: k.keyId, publicKey: k.pem }, { headers: { "cache-control": "public, max-age=3600" } });

@@ -3,7 +3,17 @@ import { createPublicKey } from "node:crypto";
 import AppFooter from "@/components/AppFooter";
 import Wordmark from "@/components/Wordmark";
 import { keyIdOf, pemFromEnv } from "@/remora/core/receipt";
+import { dbWired, sql } from "@/remora/db/client";
 import VerifyForm from "./verify-form";
+
+async function lookupHash(sha: string): Promise<{ at: string; bytes: number; provider: string } | null> {
+  const rows = (await sql()`
+    SELECT a.bytes, a.created_at, j.provider FROM remora_assets a JOIN remora_jobs j ON j.id = a.job_id
+     WHERE a.sha256 = ${sha} AND a.kind IN ('video', 'audio') ORDER BY a.created_at LIMIT 1`) as
+    { bytes: string | number; created_at: string | Date; provider: string }[];
+  const r = rows[0];
+  return r ? { at: new Date(r.created_at).toISOString(), bytes: Number(r.bytes), provider: r.provider } : null;
+}
 
 export const metadata = {
   title: "Remora — verify a receipt",
@@ -13,7 +23,10 @@ export const metadata = {
 
 export const dynamic = "force-dynamic";
 
-export default function RemoraVerifyPage() {
+export default async function RemoraVerifyPage({ searchParams }: { searchParams: Promise<{ sha256?: string | string[] }> }) {
+  const sp = await searchParams;
+  const sha = Array.isArray(sp.sha256) ? sp.sha256[0] : sp.sha256;
+  const byHash = sha && /^[0-9a-f]{64}$/i.test(sha) && dbWired() ? await lookupHash(sha.toLowerCase()) : null;
   const pem = pemFromEnv(process.env.REMORA_RECEIPT_PUBLIC_KEY);
   let keyId: string | null = null;
   try {
@@ -39,6 +52,16 @@ export default function RemoraVerifyPage() {
           Paste a <code className="text-neutral-400">.receipt.json</code>. The signature is checked against the machine&apos;s public key, and the
           hash is looked up in the shelf record. Nothing you paste leaves squaloo.com.
         </p>
+
+        {sha ? (
+          <div className={`mb-8 border px-4 py-3 ${byHash ? "border-[#63a375] text-[#63a375]" : "border-neutral-800 text-neutral-500"}`}>
+            <div className="text-[10px] tracking-[0.3em] uppercase">{byHash ? "The machine remembers these bytes" : "No record of these bytes"}</div>
+            <div className="text-xs text-neutral-400 mt-1 break-all">
+              sha256 {sha}
+              {byHash ? ` · ${byHash.provider} · ${byHash.bytes} B · shelved ${byHash.at.replace("T", " ").slice(0, 19)} UTC` : ""}
+            </div>
+          </div>
+        ) : null}
 
         <VerifyForm />
 
