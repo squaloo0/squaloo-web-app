@@ -10,6 +10,7 @@ import { backoffSeconds, isPermanentError, MACHINE_SILENT_AFTER_MS, MAX_ATTEMPTS
 import { isRouteError, MAX_ROUTE_FAILURES, ROUTE_RETRY_MS, type Cooldowns } from "../core/route.ts";
 import type { Quality } from "../core/format.ts";
 import type { Provider } from "../core/url.ts";
+import type { Clip } from "../core/clip.ts";
 
 export function newId(prefix: "j" | "a"): string {
   return `${prefix}_${randomBytes(15).toString("base64url")}`;
@@ -21,6 +22,8 @@ export type JobRow = {
   canonical_url: string;
   provider: string;
   quality: string;
+  clip_start?: number | string | null;
+  clip_end?: number | string | null;
   status: string;
   attempts: number;
   route_failures: number;
@@ -46,6 +49,7 @@ export function toJob(r: JobRow): Job {
     canonicalUrl: r.canonical_url,
     provider: r.provider as Provider,
     quality: r.quality as Quality,
+    clip: r.clip_start !== null && r.clip_start !== undefined && r.clip_end !== null && r.clip_end !== undefined ? { start: Number(r.clip_start), end: Number(r.clip_end) } : null,
     status: r.status as JobStatus,
     attempts: r.attempts,
     routeFailures: r.route_failures ?? 0,
@@ -61,11 +65,13 @@ export function toJob(r: JobRow): Job {
   };
 }
 
-export async function enqueue(input: { input: string; canonicalUrl: string; provider: Provider; quality: Quality }): Promise<Job> {
+export type Coin = { input: string; canonicalUrl: string; provider: Provider; quality: Quality; clip?: Clip | null };
+
+export async function enqueue(input: Coin): Promise<Job> {
   const id = newId("j");
   const rows = (await sql()`
-    INSERT INTO remora_jobs (id, input, canonical_url, provider, quality)
-    VALUES (${id}, ${input.input}, ${input.canonicalUrl}, ${input.provider}, ${input.quality})
+    INSERT INTO remora_jobs (id, input, canonical_url, provider, quality, clip_start, clip_end)
+    VALUES (${id}, ${input.input}, ${input.canonicalUrl}, ${input.provider}, ${input.quality}, ${input.clip?.start ?? null}, ${input.clip?.end ?? null})
     RETURNING *`) as JobRow[];
   return toJob(rows[0]);
 }

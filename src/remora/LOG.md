@@ -126,3 +126,10 @@ files, what is and isn't on disk) belong here because they do not travel with gi
 - Both machines were on with fresh uptimes at the start of the sitting (lantern 2 m, mantis 1 m) after yesterday's code-names deploy and the mini's yt-dlp update.
 - Air facts: nothing new. Local test card `card_dcb19f77f241` minted on production during the check (1 promo coin, spent). Dev server stopped.
 - Next: CLIP (start–end), then GIF.
+
+## 2026-10-13 · MacBook Air · the CLIP slot · DONE
+- Branch `remora/feat/the-clip-slot`. `core/clip.ts` (times as typed, 1 s–10 min, yt-dlp `--download-sections "*start-end" --force-keyframes-at-cuts`), migration 0005 (`clip_start`, `clip_end` on jobs, applied to production), clip carried through queue/coin slot/API (`start`, `end`)/page (two fields, range on the flap, CLIP reads NEW, jingle)/CLI (`--clip 1:23-1:45`)/receipt (slot CLIP, a clip line, file name tagged `clip 83-105`).
+- Vended locally on this code: 1:23–1:45 at 720p → 22.000 s mp4 (4.9 MB); 0:10–0:20 as mp3 → 10.000 s (330 KB). Receipts signed, slot CLIP. API rejects reversed/half/over-long clips with the reason.
+- Fly was redeployed at the start of the sitting with the AUDIO code (lantern). After this merges: `fly deploy` again, and on the mini pull + `npm run remora:install`. A worker on older code ignores the clip columns and would vend the whole video, so deploy before advertising the slot.
+- Air facts: nothing new. Dev server stopped. No live vend attempted this sitting.
+- Next: GIF (a clip to an animated GIF via ffmpeg's palette pass, through yt-dlp's `--exec`? or a Remora post-step; decide then), then THUMBS.

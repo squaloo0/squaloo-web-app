@@ -1,6 +1,6 @@
 /**
  * GET  /api/remora/jobs     the queue (all of it for the service key; this card's for a card) + the machines
- * POST /api/remora/jobs     put a coin in: { url, quality } as JSON or a form
+ * POST /api/remora/jobs     put a coin in: { url, quality, start?, end? } as JSON or a form
  *
  * A card spends one coin per vend, atomically with the enqueue. The service key vends
  * free. Nobody else vends. 503 when this deploy has no queue wired.
@@ -8,6 +8,7 @@
 import { NextResponse } from "next/server";
 import { parseVideoUrl } from "@/remora/core/url";
 import { parseQuality } from "@/remora/core/format";
+import { parseClip } from "@/remora/core/clip";
 import { machineLight } from "@/remora/core/job";
 import { codeName } from "@/remora/core/codename";
 import { waitingReason } from "@/remora/core/route";
@@ -44,23 +45,31 @@ export async function POST(req: Request): Promise<NextResponse> {
 
   let url: unknown;
   let quality: unknown;
+  let start: unknown;
+  let end: unknown;
   if (isForm) {
     const form = await req.formData();
     url = form.get("url");
     quality = form.get("quality");
+    start = form.get("start");
+    end = form.get("end");
   } else {
     const body = (await req.json().catch(() => ({}))) as Record<string, unknown>;
     url = body.url;
     quality = body.quality;
+    start = body.start;
+    end = body.end;
   }
 
   const parsed = typeof url === "string" ? parseVideoUrl(url) : null;
   if (!parsed || !parsed.canonicalUrl) return fail("?coin=not-a-url", "that is not a URL", 400);
   const q = parseQuality(typeof quality === "string" ? quality : undefined);
   if (!q) return fail("?coin=bad-quality", "quality must be best, 2160..360 or audio", 400);
+  const clipParse = parseClip(typeof start === "string" || typeof start === "number" ? String(start) : undefined, typeof end === "string" || typeof end === "number" ? String(end) : undefined);
+  if (clipParse && !clipParse.ok) return fail(`?coin=bad-clip&why=${encodeURIComponent(clipParse.reason)}`, clipParse.reason, 400);
   if (!dbWired()) return fail("?coin=no-queue", "no queue wired on this deploy", 503);
 
-  const coin = { input: url as string, canonicalUrl: parsed.canonicalUrl, provider: parsed.provider, quality: q };
+  const coin = { input: url as string, canonicalUrl: parsed.canonicalUrl, provider: parsed.provider, quality: q, clip: clipParse?.clip ?? null };
   const job = v.kind === "keyed" ? await enqueue(coin) : await enqueueWithCoin({ ...coin, cardId: v.card.id });
   if (!job) return fail("?coin=empty", "no coins on this card", 402);
   return isForm ? back(`?coin=${job.id}`) : NextResponse.json(job, { status: 201 });

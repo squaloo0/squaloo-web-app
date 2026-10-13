@@ -9,6 +9,7 @@ import { spawn } from "node:child_process";
 import { parseYtDlpJson, MetaError, type VideoMeta } from "./core/meta.ts";
 import { formatSelector, mergeContainer, postprocessArgs, type Quality } from "./core/format.ts";
 import { parseProgressLine, POSTPROCESS_TEMPLATE, PROGRESS_TEMPLATE, type PostProcess, type Progress } from "./core/progress.ts";
+import { clipArgs, clipTag, type Clip } from "./core/clip.ts";
 
 export type YtDlpErrorKind =
   /** The binary is not on PATH (or REMORA_YTDLP_BIN points nowhere). */
@@ -64,6 +65,8 @@ export type DownloadOptions = YtDlpOptions & {
   /** Directory the file lands in. Created by yt-dlp if missing. */
   dir: string;
   quality: Quality;
+  /** The CLIP slot: cut this range, with keyframes forced at the cuts. */
+  clip?: Clip | null;
   /** Called on every tick. Download ticks come from stdout, postprocessor ticks from stderr. */
   onTick?: (tick: Progress | PostProcess) => void;
 };
@@ -91,9 +94,11 @@ export function ytDlpDownload(url: string, opts: DownloadOptions): Promise<Downl
     args.push("--merge-output-format", container);
   }
   args.push(...postprocessArgs(opts.quality));
+  if (opts.clip) args.push(...clipArgs(opts.clip));
   args.push(
     "-P", opts.dir,
-    "-o", OUTPUT_TEMPLATE,
+    // A clip's name carries its range, so two clips of one video never collide.
+    "-o", opts.clip ? `%(title).120B [%(id)s] ${clipTag(opts.clip)}.%(ext)s` : OUTPUT_TEMPLATE,
     "--progress-template", PROGRESS_TEMPLATE,
     "--progress-template", POSTPROCESS_TEMPLATE,
     "--print", "after_move:filepath",

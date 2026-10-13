@@ -130,3 +130,15 @@ test("PEMs flattened into an env file come back with their newlines", () => {
   assert.equal(pemFromEnv(` '${flat}' `), privateKeyPem);
   assert.equal(pemFromEnv(undefined), null);
 });
+
+test("a clipped receipt says CLIP and prints the range", () => {
+  const r = buildReceipt(input({ clip: { start: 83, end: 105 }, quality: "720" }));
+  assert.equal(r.receipt.slot, "CLIP");
+  assert.deepEqual(r.clip, { start: 83, end: 105 });
+  const lines = printReceipt(r);
+  assert.ok(lines.some((l) => l.startsWith("clip      1:23–1:45 (22s)")), lines.join("\n"));
+  assert.deepEqual(parseReceipt(JSON.parse(receiptText(r))), r, "the clip survives the trip to disk");
+  assert.equal(buildReceipt(input({ quality: "720" })).receipt.slot, "VIDEO");
+  assert.equal(buildReceipt(input({ quality: "audio" })).receipt.slot, "AUDIO");
+  assert.equal(buildReceipt(input({ quality: "audio", clip: { start: 0, end: 5 } })).receipt.slot, "CLIP", "a clip is a clip whatever it is made of");
+});

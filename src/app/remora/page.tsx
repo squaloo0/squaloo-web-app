@@ -17,6 +17,7 @@ import { thumbProxyPath } from "@/remora/core/oembed";
 import { QUALITIES } from "@/remora/core/format";
 import { isActive, machineLight, pill, shortError, type Job, type Machine } from "@/remora/core/job";
 import { machineSummary, waitingReason } from "@/remora/core/route";
+import { prettyClip } from "@/remora/core/clip";
 import { prettyBytes } from "@/remora/core/pretty";
 import { feeCents, prettyCoins, SLEEVES } from "@/remora/core/coins";
 import { dbWired } from "@/remora/db/client";
@@ -40,8 +41,8 @@ type Search = { url?: string | string[]; denied?: string | string[]; coin?: stri
 
 const SLOTS = [
   { label: "VIDEO", tag: "LIVE" },
-  { label: "AUDIO", tag: "NEW" },
-  { label: "CLIP", tag: "SOON" },
+  { label: "AUDIO", tag: "LIVE" },
+  { label: "CLIP", tag: "NEW" },
   { label: "GIF", tag: "SOON" },
   { label: "THUMBS", tag: "SOON" },
   { label: "TRANSCRIPT", tag: "SOON" },
@@ -123,7 +124,7 @@ export default async function RemoraPage({ searchParams }: { searchParams: Promi
           <div className="p-5 border-b border-neutral-800 bg-[linear-gradient(180deg,rgba(86,136,199,0.06),transparent_60%)]">
             <div className="grid grid-cols-4 sm:grid-cols-7 gap-1.5 sm:gap-2 mb-5">
               {SLOTS.map((s, i) => (
-                <Slot key={s.label} label={s.label} tag={s.tag} lit={i < 2} />
+                <Slot key={s.label} label={s.label} tag={s.tag} lit={i < 3} />
               ))}
             </div>
 
@@ -210,6 +211,29 @@ export default async function RemoraPage({ searchParams }: { searchParams: Promi
                   >
                     Vend{carded ? " · 1 coin" : ""}
                   </button>
+                </div>
+                <div className="flex items-center gap-2 text-[10px] tracking-[0.2em] uppercase text-neutral-500">
+                  <span>Clip</span>
+                  <input
+                    name="start"
+                    inputMode="numeric"
+                    autoComplete="off"
+                    placeholder="1:23"
+                    aria-label="clip start"
+                    disabled={!queue || !canVend}
+                    className="w-16 bg-black border border-neutral-800 px-2 py-1 text-xs text-white placeholder:text-neutral-700 focus:outline-none focus:border-[#5688c7] disabled:opacity-40 normal-case tracking-normal"
+                  />
+                  <span className="text-neutral-700">to</span>
+                  <input
+                    name="end"
+                    inputMode="numeric"
+                    autoComplete="off"
+                    placeholder="1:45"
+                    aria-label="clip end"
+                    disabled={!queue || !canVend}
+                    className="w-16 bg-black border border-neutral-800 px-2 py-1 text-xs text-white placeholder:text-neutral-700 focus:outline-none focus:border-[#5688c7] disabled:opacity-40 normal-case tracking-normal"
+                  />
+                  <span className="text-neutral-700 normal-case tracking-normal">optional · up to 10 min · cut on the second</span>
                 </div>
                 {(keyed || carded) && !dbWired() ? (
                   <span className="text-[10px] tracking-[0.2em] uppercase text-neutral-700">No queue wired on this deploy (NEON_DATABASE_URL)</span>
@@ -323,6 +347,7 @@ const COIN_NOTES: Record<string, string> = {
   "slot-closed": "the coin slot is closed on this deploy",
   "stripe-error": "could not open checkout",
   "bad-sleeve": "pick a sleeve",
+  "bad-clip": "that clip",
 };
 
 function CoinNote({ coin, why }: { coin: string; why?: string }) {
@@ -467,6 +492,7 @@ function Drop({ job, assets, waiting }: { job: Job; assets: Asset[]; waiting: st
         <span className={`shrink-0 px-2 py-0.5 border text-[10px] tracking-[0.2em] uppercase ${PILL_TONE[p.tone]}`}>{p.text}</span>
         <span className="text-[10px] tracking-widest text-neutral-700 shrink-0 uppercase">{job.provider}</span>
         <span className="text-[10px] tracking-widest text-neutral-700 shrink-0">{job.quality}</span>
+        {job.clip ? <span className="text-[10px] tracking-widest text-[#5688c7] shrink-0">{prettyClip(job.clip)}</span> : null}
         <span className="text-sm text-neutral-300 truncate">{job.title ?? job.canonicalUrl}</span>
       </div>
       {job.status === "processing" && job.progress !== null ? (

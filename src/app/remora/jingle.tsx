@@ -4,7 +4,7 @@ import { useEffect } from "react";
 
 /**
  * The little jingle a new slot gets. Three notes from the browser's own oscillator,
- * played when the Vend form is submitted with an AUDIO quality. No audio file, no
+ * played when the Vend form is submitted for an AUDIO quality or a CLIP range. No audio file, no
  * third party, and nothing plays until the customer presses a button, so no browser
  * blocks it. Sound on by default, because fun.
  */
@@ -14,7 +14,9 @@ export default function Jingle({ formId }: { formId: string }) {
     if (!(form instanceof HTMLFormElement)) return;
     const onSubmit = () => {
       const q = (form.elements.namedItem("quality") as HTMLSelectElement | null)?.value ?? "";
-      if (!q.startsWith("audio") && q !== "m4a") return;
+      const start = (form.elements.namedItem("start") as HTMLInputElement | null)?.value.trim() ?? "";
+      const newSlot = q.startsWith("audio") || q === "m4a" || start !== "";
+      if (!newSlot) return;
       try {
         const Ctx = window.AudioContext;
         if (!Ctx) return;
