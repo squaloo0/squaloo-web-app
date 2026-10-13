@@ -3,7 +3,27 @@
  * day, a normalized path, a visitor kind, a family name, and a referrer host. Never an
  * address, never a raw user agent, never a query string, never a cookie. Pure.
  */
-export type VisitorKind = "browser" | "agent" | "ai-crawler" | "crawler" | "monitor" | "tool" | "unknown";
+export type VisitorKind = "browser" | "agent" | "ai-crawler" | "crawler" | "monitor" | "tool" | "probe" | "self" | "unknown";
+
+/**
+ * A scanner announces itself by where it looks, not by what it says it is: WordPress and
+ * PHP paths on a site that has neither, dotfiles, package internals. Judged before the user
+ * agent, because the first night's sweep wore a Chrome coat (and, for 134 hits in one hour,
+ * no coat at all).
+ */
+export const PROBE_PATHS: readonly RegExp[] = [
+  /\.php$/i,
+  /(^|\/)wp-/i,
+  /(^|\/)wordpress(\/|$)/i,
+  /(^|\/)\.(git|env|aws|ssh|svn|hg|DS_Store)(\/|$|\.)/i,
+  /(^|\/)(vendor|node_modules|phpmyadmin|pma|adminer|cgi-bin|xmlrpc|wp)(\/|$)/i,
+  /(^|\/)(admin|administrator|login|setup|install|backup|config|shell|cmd)(\.|\/|$)/i,
+  /\.(asp|aspx|jsp|cgi|pl|sql|bak|old|tar|gz|zip|rar)$/i,
+];
+
+export function isProbePath(path: string): boolean {
+  return PROBE_PATHS.some((re) => re.test(path));
+}
 
 export type Hit = {
   path: string;
@@ -113,9 +133,16 @@ export function isCountable(pathname: string): boolean {
   return true;
 }
 
-export function hitOf(req: { pathname: string; method: string; userAgent: string | null; referrer: string | null }): Hit {
+export function hitOf(req: { pathname: string; method: string; userAgent: string | null; referrer: string | null; keyed?: boolean }): Hit {
+  const path = normalizePath(req.pathname);
+  const method = req.method.toUpperCase().slice(0, 8);
+  const refHost = referrerHost(req.referrer);
+  // A browser holding the founder's key is us, whatever else it looks like; the instrument sees
+  // only that the cookie exists, never its value.
+  if (req.keyed) return { path, method, kind: "self", family: "keyed", refHost };
+  if (isProbePath(path)) return { path, method, kind: "probe", family: "scanner", refHost };
   const { kind, family } = classifyVisitor(req.userAgent);
-  return { path: normalizePath(req.pathname), method: req.method.toUpperCase().slice(0, 8), kind, family, refHost: referrerHost(req.referrer) };
+  return { path, method, kind, family, refHost };
 }
 
 /** The summary as lines for the CLI and for wrasse's prompt: every number with its window. */

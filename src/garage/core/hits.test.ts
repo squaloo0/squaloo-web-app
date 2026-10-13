@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { classifyVisitor, hitOf, hitsLines, isCountable, normalizePath, referrerHost } from "./hits.ts";
+import { classifyVisitor, hitOf, hitsLines, isCountable, isProbePath, normalizePath, referrerHost } from "./hits.ts";
 
 const CHROME = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36";
 const SAFARI = "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1";
@@ -92,4 +92,20 @@ test("the summary lines carry their window, and an empty instrument says so", ()
   assert.equal(lines[1], "by kind: agent 6 (60%) · browser 4 (40%)");
   assert.equal(lines[2], "2026-10-13: agent 6 · browser 4");
   assert.match(lines[3], /^top paths: \/llms\.txt agent 5$/);
+});
+
+test("a scanner is known by where it looks, whatever coat it wears", () => {
+  for (const p of ["/wp-login.php", "/admin.php", "/wp-content/themes/index.php", "/.git/config", "/.env", "/vendor/phpunit/phpunit/src/util/php/eval-stdin.php", "/wordpress", "/xmlrpc.php", "/backup.zip", "/administrator/"]) {
+    assert.equal(isProbePath(p), true, p);
+  }
+  for (const p of ["/", "/remora", "/api/remora/jobs", "/llms.txt", "/devlog/the-warning-that-fired", "/garage/runs/:id", "/measured", "/shop/cart"]) {
+    assert.equal(isProbePath(p), false, p);
+  }
+  assert.deepEqual(hitOf({ pathname: "/wp-login.php", method: "GET", userAgent: CHROME, referrer: "https://shop.squaloo.com/wordpress" }), { path: "/wp-login.php", method: "GET", kind: "probe", family: "scanner", refHost: "shop.squaloo.com" });
+  assert.deepEqual(hitOf({ pathname: "/admin.php", method: "GET", userAgent: "", referrer: null }).kind, "probe", "no user agent, probe path: still a probe");
+});
+
+test("a browser holding the founder's key is us", () => {
+  assert.deepEqual(hitOf({ pathname: "/remora", method: "GET", userAgent: CHROME, referrer: null, keyed: true }), { path: "/remora", method: "GET", kind: "self", family: "keyed", refHost: "" });
+  assert.equal(hitOf({ pathname: "/remora", method: "GET", userAgent: CHROME, referrer: null, keyed: false }).kind, "browser");
 });
