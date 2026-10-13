@@ -104,9 +104,10 @@ export function liveMachines(machines: Machine[], now: Date, silentAfterMs: numb
  * Why a pending coin is still on the shelf, in panel words, or null when some live
  * machine can take it. E.g. "no machine can vend youtube right now · fly-sjc cooling 28 min".
  */
-export function waitingReason(job: Pick<Job, "status" | "provider">, live: Machine[], now: Date): string | null {
+export function waitingReason(job: Pick<Job, "status" | "provider"> & { quality?: string }, live: Machine[], now: Date): string | null {
   if (job.status !== "pending") return null;
   if (live.length === 0) return "no machine is on";
+  if (job.quality === "transcript" && !live.some((m) => m.transcribe)) return "no machine that can transcribe is on";
   const able = live.filter((m) => availableProviders(m.providers, m.cooldowns, now).includes(job.provider));
   if (able.length > 0) return null;
   const cooling = live
@@ -120,5 +121,5 @@ export function machineSummary(m: Machine, now: Date): string {
   const cooling = Object.entries(activeCooldowns(m.cooldowns, now)).map(
     ([p, until]) => `${p} cooling ${Math.max(1, Math.ceil((Date.parse(until) - now.getTime()) / 60_000))} min`,
   );
-  return [codeName(m.name), cooling.length ? cooling.join(", ") : "all providers", `${m.vends} vends`].join(" · ");
+  return [codeName(m.name), cooling.length ? cooling.join(", ") : "all providers", ...(m.transcribe ? ["transcribes"] : []), `${m.vends} vends`].join(" · ");
 }

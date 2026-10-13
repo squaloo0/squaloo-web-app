@@ -80,7 +80,7 @@ export async function enqueue(input: Coin): Promise<Job> {
  * Take the oldest pending job, atomically. The subquery locks one row with SKIP LOCKED
  * so two workers never claim the same coin; the UPDATE is the claim event.
  */
-export async function claimNextJob(worker: string, providers: readonly string[]): Promise<Job | null> {
+export async function claimNextJob(worker: string, providers: readonly string[], can: { transcribe: boolean } = { transcribe: false }): Promise<Job | null> {
   if (providers.length === 0) return null;
   const rows = (await sql()`
     UPDATE remora_jobs
@@ -95,6 +95,7 @@ export async function claimNextJob(worker: string, providers: readonly string[])
        SELECT id FROM remora_jobs
         WHERE status = 'pending' AND (not_before IS NULL OR not_before <= now())
           AND provider = ANY(${[...providers]})
+          AND (quality <> 'transcript' OR ${can.transcribe})
         ORDER BY created_at
         FOR UPDATE SKIP LOCKED
         LIMIT 1
@@ -173,7 +174,7 @@ export async function listJobs(limit = 50): Promise<Job[]> {
 export type Asset = {
   id: string;
   jobId: string;
-  kind: "video" | "audio" | "gif" | "thumbs" | "receipt";
+  kind: "video" | "audio" | "gif" | "thumbs" | "transcript" | "receipt";
   objectKey: string;
   fileName: string;
   bytes: number;
@@ -244,18 +245,18 @@ export async function markDeleted(id: string): Promise<void> {
 
 // --- the pulse -------------------------------------------------------------------
 
-export type Pulse = { name: string; ytDlp: string | null; ffmpeg: string | null; providers: readonly string[]; cooldowns: Cooldowns };
+export type Pulse = { name: string; ytDlp: string | null; ffmpeg: string | null; providers: readonly string[]; cooldowns: Cooldowns; transcribe?: boolean };
 
 /** `fresh` on a process's first beat resets started_at, so uptime means this run, not the row's birth. */
 export async function beat(machine: Pulse, vended = 0, opts: { fresh?: boolean } = {}): Promise<void> {
   const fresh = opts.fresh === true;
   await sql()`
-    INSERT INTO remora_machine (name, last_seen, yt_dlp, ffmpeg, vends, providers, cooldowns, started_at)
-    VALUES (${machine.name}, now(), ${machine.ytDlp}, ${machine.ffmpeg}, ${vended}, ${[...machine.providers]}, ${JSON.stringify(machine.cooldowns)}::jsonb, now())
+    INSERT INTO remora_machine (name, last_seen, yt_dlp, ffmpeg, vends, providers, cooldowns, started_at, transcribe)
+    VALUES (${machine.name}, now(), ${machine.ytDlp}, ${machine.ffmpeg}, ${vended}, ${[...machine.providers]}, ${JSON.stringify(machine.cooldowns)}::jsonb, now(), ${machine.transcribe === true})
     ON CONFLICT (name) DO UPDATE
       SET last_seen = now(), yt_dlp = EXCLUDED.yt_dlp, ffmpeg = EXCLUDED.ffmpeg,
           vends = remora_machine.vends + ${vended},
-          providers = EXCLUDED.providers, cooldowns = EXCLUDED.cooldowns,
+          providers = EXCLUDED.providers, cooldowns = EXCLUDED.cooldowns, transcribe = EXCLUDED.transcribe,
           started_at = CASE WHEN ${fresh} THEN now() ELSE remora_machine.started_at END`;
 }
 
@@ -267,11 +268,12 @@ type MachineRow = {
   vends: number;
   providers: string[] | null;
   cooldowns: Cooldowns | string | null;
+  transcribe?: boolean | null;
 };
 
 function toMachine(r: MachineRow): Machine {
   const cooldowns = typeof r.cooldowns === "string" ? (JSON.parse(r.cooldowns) as Cooldowns) : (r.cooldowns ?? {});
-  return { name: r.name, lastSeen: iso(r.last_seen), ytDlp: r.yt_dlp, ffmpeg: r.ffmpeg, vends: r.vends, providers: r.providers ?? [], cooldowns };
+  return { name: r.name, lastSeen: iso(r.last_seen), ytDlp: r.yt_dlp, ffmpeg: r.ffmpeg, vends: r.vends, providers: r.providers ?? [], cooldowns, transcribe: r.transcribe === true };
 }
 
 /** The worker that checked in most recently. */

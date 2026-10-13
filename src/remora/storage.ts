@@ -142,6 +142,9 @@ export function contentTypeFor(fileName: string): string {
       jpg: "image/jpeg",
       jpeg: "image/jpeg",
       png: "image/png",
+      md: "text/markdown; charset=utf-8",
+      txt: "text/plain; charset=utf-8",
+      srt: "application/x-subrip",
       json: "application/json",
     }[ext] ?? "application/octet-stream"
   );

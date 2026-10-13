@@ -20,7 +20,7 @@ const NOW = new Date("2026-10-11T06:00:00.000Z");
 const later = (ms: number) => new Date(NOW.getTime() + ms);
 
 function machine(patch: Partial<Machine> = {}): Machine {
-  return { name: "air", lastSeen: NOW.toISOString(), ytDlp: "x", ffmpeg: "y", vends: 3, providers: [...PROVIDERS], cooldowns: {}, ...patch };
+  return { name: "air", lastSeen: NOW.toISOString(), ytDlp: "x", ffmpeg: "y", vends: 3, providers: [...PROVIDERS], cooldowns: {}, transcribe: false, ...patch };
 }
 
 test("a bot wall or a 429 is a route error; a missing video is not", () => {
@@ -78,6 +78,10 @@ test("live machines and the waiting reason", () => {
   const narrow = machine({ name: "fly-sjc", providers: ["vimeo"] });
   assert.equal(waitingReason(yt, [narrow], NOW), "no machine can vend youtube right now");
   assert.equal(waitingReason({ status: "completed", provider: "youtube" }, [], NOW), null);
+  const tr = { status: "pending" as const, provider: "youtube" as const, quality: "transcript" };
+  assert.equal(waitingReason(tr, [fresh], NOW), "no machine that can transcribe is on");
+  assert.equal(waitingReason(tr, [machine({ transcribe: true })], NOW), null);
+  assert.equal(machineSummary(machine({ transcribe: true }), NOW), "minnow · all providers · transcribes · 3 vends");
 });
 
 test("machine summary", () => {

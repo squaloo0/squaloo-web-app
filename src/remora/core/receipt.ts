@@ -18,7 +18,7 @@ export type Receipt = {
   receipt: {
     version: typeof RECEIPT_VERSION;
     kind: "vend";
-    slot: "VIDEO" | "AUDIO" | "CLIP" | "GIF" | "THUMBS";
+    slot: "VIDEO" | "AUDIO" | "CLIP" | "GIF" | "THUMBS" | "TRANSCRIPT";
     /** ISO-8601, UTC. */
     vendedAt: string;
     machine: "remora";
@@ -41,6 +41,8 @@ export type Receipt = {
   };
   /** The CLIP slot's range, seconds; null for the whole thing. */
   clip?: Clip | null;
+  /** The TRANSCRIPT slot: which model heard it, what language it decided, how many segments. */
+  transcript?: { model: string; language: string | null; segments: number; whisper: string | null } | null;
   file: {
     /** Basename only. The receipt sits next to it. */
     name: string;
@@ -89,13 +91,14 @@ export type ReceiptInput = {
   machine?: string;
   card?: string | null;
   clip?: Clip | null;
+  transcript?: { model: string; language: string | null; segments: number; whisper: string | null } | null;
   /** Injected so the builder stays pure and the tests stay still. */
   now: Date;
 };
 
 export function buildReceipt(i: ReceiptInput): Receipt {
   return {
-    receipt: { version: RECEIPT_VERSION, kind: "vend", slot: i.quality === "gif" ? "GIF" : i.quality === "thumbs" ? "THUMBS" : i.clip ? "CLIP" : isAudio(i.quality) ? "AUDIO" : "VIDEO", vendedAt: i.now.toISOString(), machine: "remora" },
+    receipt: { version: RECEIPT_VERSION, kind: "vend", slot: i.quality === "gif" ? "GIF" : i.quality === "thumbs" ? "THUMBS" : i.quality === "transcript" ? "TRANSCRIPT" : i.clip ? "CLIP" : isAudio(i.quality) ? "AUDIO" : "VIDEO", vendedAt: i.now.toISOString(), machine: "remora" },
     source: { input: i.input, canonicalUrl: i.canonicalUrl, provider: i.provider, id: i.id, extractor: i.meta.extractor },
     video: {
       title: i.meta.title,
@@ -105,6 +108,7 @@ export function buildReceipt(i: ReceiptInput): Receipt {
       webpageUrl: i.meta.webpageUrl,
     },
     ...(i.clip ? { clip: i.clip } : {}),
+    ...(i.transcript ? { transcript: i.transcript } : {}),
     file: { name: i.fileName, bytes: i.bytes, sha256: i.sha256, quality: i.quality, formatIds: i.formatIds },
     tools: { ytDlp: i.ytDlp, ffmpeg: i.ffmpeg, node: i.node, ...(i.machine ? { machine: i.machine } : {}) },
     card: i.card ?? null,
@@ -245,6 +249,7 @@ export function printReceipt(r: Receipt): string[] {
     kv("length", prettyDuration(r.video.duration)),
     kv("uploaded", r.video.uploadDate ?? "—"),
     ...(r.clip ? [kv("clip", prettyClip(r.clip))] : []),
+    ...(r.transcript ? [kv("heard by", `${r.transcript.model}${r.transcript.language ? ` · ${r.transcript.language}` : ""} · ${r.transcript.segments} seg`)] : []),
     kv("from", `${r.source.provider}${r.source.id ? ` ${r.source.id}` : ""}`),
     "url",
     ...wrap(r.source.canonicalUrl),

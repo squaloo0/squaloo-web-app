@@ -93,7 +93,7 @@ test("pills", () => {
 test("the machine light", () => {
   const now = new Date(T1);
   assert.equal(machineLight(null, now).on, false);
-  const fresh = { name: "fly-1", lastSeen: T1, ytDlp: "x", ffmpeg: "y", vends: 3, providers: ["youtube"], cooldowns: {} };
+  const fresh = { name: "fly-1", lastSeen: T1, ytDlp: "x", ffmpeg: "y", vends: 3, providers: ["youtube"], cooldowns: {}, transcribe: false };
   assert.deepEqual(machineLight(fresh, now), { on: true, text: "lantern · 3 vends" });
   const silent = { ...fresh, lastSeen: T0 };
   const light = machineLight(silent, new Date(Date.parse(T0) + 10 * 60_000));
