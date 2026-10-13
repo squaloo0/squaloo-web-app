@@ -103,7 +103,7 @@ the same Docker image. The image is the contract, so the move is an afternoon.
 | 3     | **The machine goes live**   | Docker image on Fly, queue in Neon, heartbeat, R2 upload, download link. Free vends, token-gated |
 | 4     | **The coin slot**           | Stripe Checkout, webhook, ledger, punch card, terms page, the printed receipt. Public |
 | 5     | **The tape**                | public counter, uptime, revenue from Stripe. Devlog still tabled |
-| 6+    | **New slots**               | AUDIO, CLIP, GIF, THUMBS and TRANSCRIPT (done 2026-10-13), CHAPTERS, one per sitting |
+| 6+    | **New slots**               | all seven slots live as of 2026-10-13 (AUDIO, CLIP, GIF, THUMBS, TRANSCRIPT, CHAPTERS) |
 
 **The honest risk.** Downloading from YouTube at scale for money invites a letter. The
 machine's answer: wide provider support (direct, Vimeo, TikTok, X, Reddit, Twitch clips,
@@ -230,6 +230,17 @@ which machine vended. Every other provider is unaffected.
   A transcript is a measurement: model, version and language are on the receipt.
 - One coin, for now. The README said heavier slots may cost two; a 10-minute video is
   ~1 min of CPU on an M4. Revisit with real traffic.
+
+### The CHAPTERS slot, as built (2026-10-13)
+
+- Quality `chapters` is the only slot that fetches nothing: yt-dlp's metadata already has
+  the chapter list (the uploader's, or timestamps it read in the description). The drop is
+  Markdown: a provenance header, then a table of start (linked to the video at that second
+  where the provider allows), length and title. ~2 s and under a kilobyte.
+- A video with no chapters is a permanent failure ("this video has no chapters") and the
+  coin comes back. Migration 0009 lets the shelf file `chapters`.
+- With this, **all seven slots on the panel are live**: VIDEO, AUDIO, CLIP, GIF, THUMBS,
+  TRANSCRIPT (on machines with whisper), CHAPTERS.
 
 **Kept in the back pocket (v2 §Ideas):** provenance tiers, trust panel, Solomon ingest.
 They become slots or panel lights only if they make the machine more fun.
