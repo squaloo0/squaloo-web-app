@@ -32,6 +32,8 @@ export type Deps = {
   ledger: Ledger;
   query: QueryFn;
   log(line: string): void;
+  /** Directories outside the repo the agent may read: the library's primaries. */
+  readRoots?: string[];
   /** Rung 1 and up: commit what the run left dirty, then hash the branch's diff against main. */
   git: {
     commitAll(cwd: string, message: string): Promise<boolean>;
@@ -92,7 +94,7 @@ export async function runOnce(deps: Deps, req: RunRequest): Promise<RunResult> {
   }
   const memory = ledgerMemory(await deps.ledger.recentRuns(10), 6000, await deps.ledger.instrumentLines(), referenced);
   const id = await deps.ledger.startRun(base);
-  const ctx: GuardContext = { rung: req.rung, cwd: deps.cwd, approvedDiffHashes: await deps.ledger.approvedHashes(), diffHash: req.diffHash };
+  const ctx: GuardContext = { rung: req.rung, cwd: deps.cwd, approvedDiffHashes: await deps.ledger.approvedHashes(), diffHash: req.diffHash, readRoots: deps.readRoots ?? [] };
   const abort = new AbortController();
   let toolCalls = 0;
   let denials = 0;
@@ -148,6 +150,7 @@ export async function runOnce(deps: Deps, req: RunRequest): Promise<RunResult> {
           capUsd: budget.capUsd,
           tools,
           maxTurns: req.maxTurns,
+          libraryRoot: deps.readRoots?.[0] ?? null,
         }),
     },
     tools,
