@@ -149,3 +149,33 @@ response is guideline-3 territory; the Notion library.
 **Machine-local facts.** Air: hits in the local table came from the dev server and are mixed
 with production's once Vercel deploys; both write the same Neon table, so the first
 production week should be read from the deploy's own timestamp on. Day's spend: $0.62.
+
+## 2026-10-13 · Air · Phase 4, the gate end to end
+
+**What landed.** Rung 1 in the harness, without a rung-1 run. A `propose` hat works on
+`wrasse/<kind>/<slug>` in its own worktree beside the repo (`../squaloo-web-app-wrasse/`),
+never in a person's checkout; commits are authored `wrasse <wrasse-agent@squaloo.com>`; the
+harness commits any stragglers at the gate and leaves the branch and the sha256 of
+`git diff origin/main...HEAD` on the run row. The dashboard's gate shows the branch, the diff
+and a link to the gate comment; **Approve** writes the approval row and queues a `publish`
+command; the next host running `work` re-hashes the branch, compares with the row and the
+approval (`publishVerdict`, pure, six tests: no row, a different diff, a denial, no diff each
+refuse), pushes, opens the PR with the run's own report as the body, and writes the URL on
+the row. No model is involved in publishing. `garage publish <run>` does the same by hand.
+Migration 0004 (`pr_url`). The git edge has its own firing test against a scratch repo with
+a bare origin: worktree beside the repo, commit as wrasse, hash follows the diff, push lands
+on origin, nothing lands in the primary checkout. 48 tests, types, lint and `next build`
+green.
+
+**What did not happen, on purpose.** No run at rung 1. The charter's ladder says rung 1 is
+earned by five checked rung-0 runs and a founder ruling dated in the changelog; there are
+three done runs. The machinery is proven with fakes and a scratch repo, not with a real
+proposal, and the first real proposal waits on the founder's word.
+
+**What is next.** The founder rules on rung 1, or asks for two more rung-0 runs first. The
+first proposal on the table, from run `894a1588`: make `/llms.txt` tell an agent what Remora
+offers over JSON. Then the production week of the instrument, read by a rung-0 run.
+
+**Machine-local facts.** Air: worktrees for wrasse will appear at
+`~/Projects/squaloo-web-app-wrasse/<branch with __ for />` with `node_modules` symlinked from
+the repo. `gh` on the host does the PR; it is the founder's login. Day's spend unchanged.
