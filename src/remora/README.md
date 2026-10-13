@@ -103,7 +103,7 @@ the same Docker image. The image is the contract, so the move is an afternoon.
 | 3     | **The machine goes live**   | Docker image on Fly, queue in Neon, heartbeat, R2 upload, download link. Free vends, token-gated |
 | 4     | **The coin slot**           | Stripe Checkout, webhook, ledger, punch card, terms page, the printed receipt. Public |
 | 5     | **The tape**                | public counter, uptime, revenue from Stripe. Devlog still tabled |
-| 6+    | **New slots**               | AUDIO (done 2026-10-13), CLIP, GIF, TRANSCRIPT, one per sitting |
+| 6+    | **New slots**               | AUDIO and CLIP (done 2026-10-13), GIF, TRANSCRIPT, one per sitting |
 
 **The honest risk.** Downloading from YouTube at scale for money invites a letter. The
 machine's answer: wide provider support (direct, Vimeo, TikTok, X, Reddit, Twitch clips,
@@ -181,6 +181,17 @@ which machine vended. Every other provider is unaffected.
 - The NEW tag pulses on the panel and a three-note jingle plays from the browser's own
   oscillator when an audio quality is vended. No audio file, no third party, and it only
   plays on a button press, so no browser blocks it.
+
+### The CLIP slot, as built (2026-10-13)
+
+- A clip is a start and an end on top of the quality dial, so a clip can be 720p video or
+  an mp3. Times as people type them (`83`, `1:23`, `1:02:03`, `1:23.5`); 1 s to 10 min.
+  yt-dlp cuts the section with `--force-keyframes-at-cuts`, so the file begins on the
+  customer's second, not the previous keyframe: a 1:23–1:45 clip is 22.000 s long.
+- One coin. The receipt's slot is CLIP and carries the range; the file name carries it
+  too (`… clip 83-105.mp4`) so two clips of one video never collide on the shelf.
+- Panel: two small fields under Vend, the range on the flap next to the quality.
+  CLI: `--clip 1:23-1:45` on `get` and `enqueue`.
 
 **Kept in the back pocket (v2 §Ideas):** provenance tiers, trust panel, Solomon ingest.
 They become slots or panel lights only if they make the machine more fun.
