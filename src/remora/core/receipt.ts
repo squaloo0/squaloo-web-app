@@ -8,7 +8,7 @@
 import { createHash, createPrivateKey, createPublicKey, generateKeyPairSync, sign, verify, type KeyObject } from "node:crypto";
 import type { Provider } from "./url.ts";
 import type { VideoMeta } from "./meta.ts";
-import type { Quality } from "./format.ts";
+import { isAudio, type Quality } from "./format.ts";
 import { prettyBytes, prettyDuration } from "./pretty.ts";
 
 export const RECEIPT_VERSION = 1 as const;
@@ -91,7 +91,7 @@ export type ReceiptInput = {
 
 export function buildReceipt(i: ReceiptInput): Receipt {
   return {
-    receipt: { version: RECEIPT_VERSION, kind: "vend", slot: i.quality === "audio" ? "AUDIO" : "VIDEO", vendedAt: i.now.toISOString(), machine: "remora" },
+    receipt: { version: RECEIPT_VERSION, kind: "vend", slot: isAudio(i.quality) ? "AUDIO" : "VIDEO", vendedAt: i.now.toISOString(), machine: "remora" },
     source: { input: i.input, canonicalUrl: i.canonicalUrl, provider: i.provider, id: i.id, extractor: i.meta.extractor },
     video: {
       title: i.meta.title,

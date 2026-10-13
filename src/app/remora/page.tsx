@@ -26,6 +26,7 @@ import { presignDownload, shelfWired } from "@/remora/storage";
 import { stripeMode, stripeWired } from "@/remora/stripe";
 import { visitor, type Visitor } from "@/remora/card";
 import Poller from "./poller";
+import Jingle from "./jingle";
 
 export const metadata = {
   title: "Remora — Squaloo",
@@ -39,7 +40,7 @@ type Search = { url?: string | string[]; denied?: string | string[]; coin?: stri
 
 const SLOTS = [
   { label: "VIDEO", tag: "LIVE" },
-  { label: "AUDIO", tag: "RAW" },
+  { label: "AUDIO", tag: "NEW" },
   { label: "CLIP", tag: "SOON" },
   { label: "GIF", tag: "SOON" },
   { label: "THUMBS", tag: "SOON" },
@@ -48,6 +49,13 @@ const SLOTS = [
 ] as const;
 
 const LINK_SECONDS = 3600;
+
+const QUALITY_LABELS: Partial<Record<string, string>> = {
+  best: "best video",
+  audio: "audio · mp3",
+  m4a: "audio · m4a",
+  "audio-raw": "audio · raw",
+};
 
 export default async function RemoraPage({ searchParams }: { searchParams: Promise<Search> }) {
   const sp = await searchParams;
@@ -164,7 +172,8 @@ export default async function RemoraPage({ searchParams }: { searchParams: Promi
                 </div>
               </form>
 
-              <form action="/api/remora/jobs" method="post" className="flex flex-col gap-2">
+              <form id="vend" action="/api/remora/jobs" method="post" className="flex flex-col gap-2">
+                <Jingle formId="vend" />
                 <label htmlFor="vend-url" className="text-[10px] tracking-[0.3em] uppercase text-neutral-500">
                   Vend {coin ? <CoinNote coin={coin} why={why} /> : null}
                 </label>
@@ -190,7 +199,7 @@ export default async function RemoraPage({ searchParams }: { searchParams: Promi
                   >
                     {QUALITIES.map((q) => (
                       <option key={q} value={q}>
-                        {q === "best" ? "best" : q === "audio" ? "audio" : `${q}p`}
+                        {QUALITY_LABELS[q] ?? `${q}p`}
                       </option>
                     ))}
                   </select>
@@ -290,7 +299,7 @@ function Slot({ label, tag, lit }: { label: string; tag: string; lit: boolean })
       }`}
     >
       <span className="text-[9px] sm:text-[10px] tracking-[0.1em] sm:tracking-[0.2em] uppercase">{label}</span>
-      <span className={`text-[8px] tracking-[0.1em] sm:tracking-[0.2em] uppercase ${lit ? "text-neutral-400" : "text-neutral-800"}`}>{tag}</span>
+      <span className={`text-[8px] tracking-[0.1em] sm:tracking-[0.2em] uppercase ${tag === "NEW" ? "text-[#63a375] animate-pulse" : lit ? "text-neutral-400" : "text-neutral-800"}`}>{tag}</span>
     </div>
   );
 }

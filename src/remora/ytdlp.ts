@@ -7,7 +7,7 @@
  */
 import { spawn } from "node:child_process";
 import { parseYtDlpJson, MetaError, type VideoMeta } from "./core/meta.ts";
-import { formatSelector, mergeContainer, type Quality } from "./core/format.ts";
+import { formatSelector, mergeContainer, postprocessArgs, type Quality } from "./core/format.ts";
 import { parseProgressLine, POSTPROCESS_TEMPLATE, PROGRESS_TEMPLATE, type PostProcess, type Progress } from "./core/progress.ts";
 
 export type YtDlpErrorKind =
@@ -90,6 +90,7 @@ export function ytDlpDownload(url: string, opts: DownloadOptions): Promise<Downl
   if (container) {
     args.push("--merge-output-format", container);
   }
+  args.push(...postprocessArgs(opts.quality));
   args.push(
     "-P", opts.dir,
     "-o", OUTPUT_TEMPLATE,

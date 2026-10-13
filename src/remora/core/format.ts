@@ -4,18 +4,32 @@
  */
 import type { VideoFormat, VideoMeta } from "./meta.ts";
 
-export type Quality = "best" | "2160" | "1440" | "1080" | "720" | "480" | "360" | "audio";
+/**
+ * The VIDEO slot's heights, and the AUDIO slot's three containers:
+ *   audio       the AUDIO slot: mp3, best VBR, plays on anything
+ *   m4a         AAC in an MP4 shell: smaller, Apple-native
+ *   audio-raw   the best audio track yt-dlp can find, untouched (usually opus in webm)
+ */
+export type Quality = "best" | "2160" | "1440" | "1080" | "720" | "480" | "360" | "audio" | "m4a" | "audio-raw";
 
-export const QUALITIES: readonly Quality[] = ["best", "2160", "1440", "1080", "720", "480", "360", "audio"];
+export const QUALITIES: readonly Quality[] = ["best", "2160", "1440", "1080", "720", "480", "360", "audio", "m4a", "audio-raw"];
 
-/** "1080p", "1080", "4k", "best", "audio", "BEST " → a Quality; anything else null. */
+export const AUDIO_QUALITIES: readonly Quality[] = ["audio", "m4a", "audio-raw"];
+
+export function isAudio(q: Quality): boolean {
+  return (AUDIO_QUALITIES as readonly string[]).includes(q);
+}
+
+/** "1080p", "1080", "4k", "best", "audio", "mp3", "m4a", "raw", "BEST " → a Quality; anything else null. */
 export function parseQuality(input: string | undefined | null): Quality | null {
   if (input === undefined || input === null) {
     return "best";
   }
   const s = input.trim().toLowerCase();
   if (s === "" || s === "best") return "best";
-  if (s === "audio" || s === "mp3" || s === "m4a") return "audio";
+  if (s === "audio" || s === "mp3") return "audio";
+  if (s === "m4a" || s === "aac") return "m4a";
+  if (s === "audio-raw" || s === "raw" || s === "opus") return "audio-raw";
   if (s === "4k" || s === "uhd") return "2160";
   if (s === "2k") return "1440";
   const m = /^(\d{3,4})p?$/.exec(s);
@@ -32,13 +46,35 @@ export function parseQuality(input: string | undefined | null): Quality | null {
  */
 export function formatSelector(q: Quality): string {
   if (q === "best") return "bestvideo*+bestaudio/best";
-  if (q === "audio") return "bestaudio/best";
+  if (isAudio(q)) return "bestaudio/best";
   return `bestvideo*[height<=${q}]+bestaudio/best[height<=${q}]/best`;
 }
 
 /** Container yt-dlp should merge into, or null when nothing is merged. */
 export function mergeContainer(q: Quality): "mp4" | null {
-  return q === "audio" ? null : "mp4";
+  return isAudio(q) ? null : "mp4";
+}
+
+/**
+ * yt-dlp's post-processing arguments for the AUDIO slot. ffmpeg does the work, through
+ * yt-dlp; we never shell out to it. mp3 at VBR 0 (~245 kbps) because it plays on anything;
+ * m4a without a quality flag because yt-dlp's AAC default is sane and the source is often
+ * AAC already, which it then only remuxes. Raw gets nothing: the track as the host served it.
+ */
+export function postprocessArgs(q: Quality): string[] {
+  switch (q) {
+    case "audio":
+      return ["--extract-audio", "--audio-format", "mp3", "--audio-quality", "0"];
+    case "m4a":
+      return ["--extract-audio", "--audio-format", "m4a"];
+    default:
+      return [];
+  }
+}
+
+/** The extension a vend of this quality lands with, when we can know it. */
+export function expectedExt(q: Quality): string | null {
+  return q === "audio" ? "mp3" : q === "m4a" ? "m4a" : isAudio(q) ? null : "mp4";
 }
 
 export type Estimate = {
@@ -62,9 +98,10 @@ export function estimate(meta: VideoMeta, q: Quality): Estimate | null {
   const videoOnly = usable.filter((f) => f.vcodec !== null && f.acodec === null);
   const muxed = usable.filter((f) => f.vcodec !== null && f.acodec !== null);
 
-  if (q === "audio") {
+  if (isAudio(q)) {
+    // A transcode changes the size; raw keeps it. Either way the source track is the guide.
     const a = best(audioOnly) ?? best(muxed);
-    return a ? { height: null, bytes: a.bytes, approx: a.bytesApprox, formatIds: [a.formatId] } : null;
+    return a ? { height: null, bytes: a.bytes, approx: a.bytesApprox || q !== "audio-raw", formatIds: [a.formatId] } : null;
   }
 
   const cap = q === "best" ? Infinity : Number(q);
