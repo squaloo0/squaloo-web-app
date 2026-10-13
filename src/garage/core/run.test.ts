@@ -35,7 +35,8 @@ test("a run line carries its boundary: machine, rung, cost, turns, charter", () 
 });
 
 test("the preamble tells the agent what it cannot otherwise know", () => {
-  const p = runPreamble({ machine: "air", rung: 0, hat: "report", ticket: null, date: "2026-10-13", capUsd: 2, tools: ["Read"], maxTurns: 30 });
+  const p = runPreamble({ machine: "air", rung: 0, hat: "report", ticket: null, date: "2026-10-13 06:50 UTC", capUsd: 2, tools: ["Read"], maxTurns: 30 });
+  assert.match(p, /Launched 2026-10-13 06:50 UTC/);
   assert.match(p, /Rung: 0\. Hat: report\. No ticket/);
   assert.match(p, /Budget for this run: \$2\.00/);
   assert.match(p, /Do not claim to remember/);
