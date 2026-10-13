@@ -103,7 +103,7 @@ the same Docker image. The image is the contract, so the move is an afternoon.
 | 3     | **The machine goes live**   | Docker image on Fly, queue in Neon, heartbeat, R2 upload, download link. Free vends, token-gated |
 | 4     | **The coin slot**           | Stripe Checkout, webhook, ledger, punch card, terms page, the printed receipt. Public |
 | 5     | **The tape**                | public counter, uptime, revenue from Stripe. Devlog still tabled |
-| 6+    | **New slots**               | AUDIO and CLIP (done 2026-10-13), GIF, TRANSCRIPT, one per sitting |
+| 6+    | **New slots**               | AUDIO, CLIP and GIF (done 2026-10-13), THUMBS, TRANSCRIPT, CHAPTERS, one per sitting |
 
 **The honest risk.** Downloading from YouTube at scale for money invites a letter. The
 machine's answer: wide provider support (direct, Vimeo, TikTok, X, Reddit, Twitch clips,
@@ -192,6 +192,15 @@ which machine vended. Every other provider is unaffected.
   too (`… clip 83-105.mp4`) so two clips of one video never collide on the shelf.
 - Panel: two small fields under Vend, the range on the flap next to the quality.
   CLI: `--clip 1:23-1:45` on `get` and `enqueue`.
+
+### The GIF slot, as built (2026-10-13)
+
+- Quality `gif` is a clip (required, at most 15 s) rendered to an animated GIF: 480 px
+  wide, 15 fps, two-pass palette with Bayer dither, which is the difference between a GIF
+  and a smear. yt-dlp recodes through ffmpeg with the filter graph passed as a single
+  `--postprocessor-args` argument. A 5 s GIF is ~3.6 MB; that is why 15 s is the cap.
+- One coin. Slot GIF on the receipt, with the clip line. The shelf files it as `gif`
+  (migration 0006); the tape counts it as a vend.
 
 **Kept in the back pocket (v2 §Ideas):** provenance tiers, trust panel, Solomon ingest.
 They become slots or panel lights only if they make the machine more fun.
