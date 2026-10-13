@@ -32,6 +32,11 @@ export type Deps = {
   ledger: Ledger;
   query: QueryFn;
   log(line: string): void;
+  /** Rung 1 and up: commit what the run left dirty, then hash the branch's diff against main. */
+  git: {
+    commitAll(cwd: string, message: string): Promise<boolean>;
+    diffHash(cwd: string): Promise<string | null>;
+  };
 };
 
 export type RunRequest = {
@@ -45,6 +50,8 @@ export type RunRequest = {
   diffHash: string | null;
   /** The dashboard command this run answers, when it answers one. */
   commandId: number | null;
+  /** The branch the run works on, rung 1 and up; null at rung 0. `deps.cwd` is its worktree. */
+  branch: string | null;
 };
 
 export type RunResult = FinishRun & { id: string };
@@ -165,6 +172,19 @@ export async function runOnce(deps: Deps, req: RunRequest): Promise<RunResult> {
     if (!abort.signal.aborted) error = e instanceof Error ? e.message : String(e);
   }
 
+  // Rung 1: whatever the run left on the branch is the proposal. Commit the stragglers as
+  // wrasse, then hash the diff; the hash is what the founder rules on.
+  let branch: string | null = null;
+  let diffHash: string | null = null;
+  if (req.rung >= 1 && req.branch) {
+    branch = req.branch;
+    if (await deps.git.commitAll(deps.cwd, `wrasse: work left at the gate (run ${id.slice(0, 8)})`)) {
+      await deps.ledger.addEvent(id, "note", null, "uncommitted work was committed by the harness at the gate");
+    }
+    diffHash = await deps.git.diffHash(deps.cwd);
+    await deps.ledger.addEvent(id, "note", null, diffHash ? `at the gate: branch ${branch}, diff ${diffHash.slice(0, 12)}` : `branch ${branch} has no diff against main`);
+  }
+
   const cost = result ? result.total_cost_usd : 0;
   const turns = result ? result.num_turns : 0;
   let status: RunStatus;
@@ -193,7 +213,7 @@ export async function runOnce(deps: Deps, req: RunRequest): Promise<RunResult> {
     status = "failed";
     error = error ?? "the query ended without a result message";
   }
-  return finish(deps, id, { status, haltReason, costUsd: cost, turns, toolCalls, denials, report, error });
+  return finish(deps, id, { status, haltReason, costUsd: cost, turns, toolCalls, denials, report, error, branch, diffHash });
 }
 
 async function finish(deps: Deps, id: string, f: FinishRun): Promise<RunResult> {

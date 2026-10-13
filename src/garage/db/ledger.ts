@@ -71,6 +71,7 @@ type Row = {
   branch: string | null;
   diff_hash: string | null;
   verdict: string | null;
+  pr_url: string | null;
 };
 
 function fromRow(r: Row): RunRow {
@@ -98,6 +99,7 @@ function fromRow(r: Row): RunRow {
     branch: r.branch,
     diffHash: r.diff_hash,
     verdict: r.verdict as RunRow["verdict"],
+    prUrl: r.pr_url,
   };
 }
 
@@ -313,4 +315,13 @@ export async function hitsSummary(days = 7): Promise<HitsSummary> {
     referrers,
     firstHitAt: first[0]?.at ? new Date(first[0].at).toISOString() : null,
   };
+}
+
+export async function setPrUrl(runId: string, url: string): Promise<void> {
+  await sql()`UPDATE garage_runs SET pr_url = ${url} WHERE id = ${runId}`;
+  await sql()`INSERT INTO garage_events (run_id, kind, tool, detail) VALUES (${runId}, 'note', null, ${"published: " + url})`;
+}
+
+export async function noteRun(runId: string, detail: string): Promise<void> {
+  await sql()`INSERT INTO garage_events (run_id, kind, tool, detail) VALUES (${runId}, 'note', null, ${detail})`;
 }

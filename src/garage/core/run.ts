@@ -31,6 +31,7 @@ export type RunRow = {
   branch: string | null;
   diffHash: string | null;
   verdict: "approved" | "denied" | null;
+  prUrl: string | null;
 };
 
 export type Outcome = { status: RunStatus; haltReason: HaltReason | null };

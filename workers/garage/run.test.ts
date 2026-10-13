@@ -42,7 +42,7 @@ type Notebook = {
   events: { runId: string; kind: EventKind; tool: string | null; detail: string }[];
 };
 
-function fakeDeps(over: { halt?: boolean; spent?: number; charter?: string; script?: Step[]; env?: Record<string, string>; recent?: RunRow[] } = {}) {
+function fakeDeps(over: { halt?: boolean; spent?: number; charter?: string; script?: Step[]; env?: Record<string, string>; recent?: RunRow[]; dirty?: boolean; diff?: string | null } = {}) {
   const book: Notebook = { runs: new Map(), events: [] };
   const ledger: Ledger = {
     async startRun(r) {
@@ -89,11 +89,22 @@ function fakeDeps(over: { halt?: boolean; spent?: number; charter?: string; scri
       return inner(p);
     },
     log: () => {},
+    git: {
+      async commitAll() {
+        gitCalls.push("commitAll");
+        return over.dirty ?? false;
+      },
+      async diffHash() {
+        gitCalls.push("diffHash");
+        return over.diff ?? null;
+      },
+    },
   };
-  return { deps, book, calls: () => calls, captured: () => captured };
+  const gitCalls: string[] = [];
+  return { deps, book, calls: () => calls, captured: () => captured, gitCalls };
 }
 
-const REQ: RunRequest = { hat: "report", prompt: "read and report", rung: 0, ticket: null, model: "test-model", maxTurns: 10, diffHash: null, commandId: null };
+const REQ: RunRequest = { hat: "report", prompt: "read and report", rung: 0, ticket: null, model: "test-model", maxTurns: 10, diffHash: null, commandId: null, branch: null };
 
 test("guard 6: with the HALT file present the run writes one row and exits without calling the model", async () => {
   const f = fakeDeps({ halt: true });
@@ -252,8 +263,31 @@ test("the prompt opens with the ledger block, so the run's memory is the ledger 
     branch: null,
     diffHash: null,
     verdict: null,
+    prUrl: null,
   };
   const second = fakeDeps({ recent: [prior] });
   await runOnce(second.deps, REQ);
   assert.match(second.captured()!.prompt, /the earlier report/);
+});
+
+test("rung 1: the branch and the diff hash land on the row, and stragglers are committed by the harness", async () => {
+  const H = "c".repeat(64);
+  const f = fakeDeps({ dirty: true, diff: H, script: [{ kind: "result", subtype: "success", cost: 0.4, turns: 5, text: "**Gate comment.** did x" }] });
+  const r = await runOnce(f.deps, { ...REQ, rung: 1, branch: "wrasse/feat/x" });
+  assert.equal(r.status, "done");
+  assert.equal(r.branch, "wrasse/feat/x");
+  assert.equal(r.diffHash, H);
+  assert.deepEqual(f.gitCalls, ["commitAll", "diffHash"]);
+  const notes = f.book.events.filter((e) => e.kind === "note").map((e) => e.detail);
+  assert.ok(notes.some((n) => /uncommitted work was committed/.test(n)));
+  assert.ok(notes.some((n) => n === `at the gate: branch wrasse/feat/x, diff ${H.slice(0, 12)}`));
+  assert.deepEqual(f.captured()!.options.tools, ["Read", "Glob", "Grep", "Write", "Edit", "MultiEdit", "NotebookEdit", "Bash"]);
+});
+
+test("rung 0 never touches git", async () => {
+  const f = fakeDeps({ dirty: true, diff: "d".repeat(64) });
+  const r = await runOnce(f.deps, REQ);
+  assert.equal(r.branch, null);
+  assert.equal(r.diffHash, null);
+  assert.deepEqual(f.gitCalls, []);
 });

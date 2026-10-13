@@ -6,7 +6,7 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { isGarageKey, KEY_COOKIE } from "@/garage/auth";
-import { rule } from "@/garage/db/ledger";
+import { enqueueCommand, rule } from "@/garage/db/ledger";
 
 export async function POST(req: Request): Promise<NextResponse> {
   const back = (q = "") => NextResponse.redirect(new URL(`/garage${q}`, req.url), { status: 303 });
@@ -17,6 +17,8 @@ export async function POST(req: Request): Promise<NextResponse> {
   const verdict = String(form.get("verdict") ?? "");
   if (!/^[0-9a-f-]{8,36}$/.test(run) || (verdict !== "approve" && verdict !== "deny")) return back("?denied=form");
   const note = String(form.get("note") ?? "").trim();
-  await rule(run, verdict === "approve" ? "approved" : "denied", "founder", note.length ? note.slice(0, 500) : null);
+  const ruled = await rule(run, verdict === "approve" ? "approved" : "denied", "founder", note.length ? note.slice(0, 500) : null);
+  // An approval is also an order: the next host running `garage work` pushes and opens the PR.
+  if (ruled && verdict === "approve" && ruled.diffHash) await enqueueCommand({ hat: "publish", prompt: ruled.id, ticket: ruled.ticket, by: "founder" });
   return back();
 }
