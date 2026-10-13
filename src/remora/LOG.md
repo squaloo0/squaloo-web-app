@@ -111,3 +111,10 @@ files, what is and isn't on disk) belong here because they do not travel with gi
 - **mac-mini was OFF for this whole sitting** (last seen 19:13 UTC, right after "mini updated"). Likely the worker died on restart; check `npm run remora:status` and `~/Library/Logs/remora/worker.log` on the mini. Fly is on and alone.
 - Air facts: nothing new. Dev server and workers stopped. `.env.local` unchanged.
 - Next: slots. AUDIO transcode (ffmpeg, m4a/mp3), then CLIP (start–end), then GIF. Each one sitting, each with a NEW tag and a jingle.
+
+## 2026-10-13 · MacBook Air · code names and the mini check · DONE
+- Branch `remora/feat/code-names` → PR squaloo0/squaloo-web-app#52. Public surfaces (tape, panel row, light, waiting reason, machine/jobs APIs, the receipt's machine line) say **mantis** (mac-mini), **lantern** (Fly), **minnow** (Air), or a hash-picked fish for any other host. `remora machine` and the database keep real names. Founder's call of 2026-10-12.
+- The mini is fine: its pulse row updates every tick (seen 5 s ago when checked). The "unplugged" in `remora:status` is the old process's last line before `launchctl kickstart -k` restarted it; both processes append to the same log. If it worries anyone later: `remora machine` from any Mac is the truth, the log tail is not.
+- **The mini runs yt-dlp 2025.06.30** (the Python-framework install), Air and Fly run 2026.08.19. `brew install yt-dlp` on the mini, then `npm run remora:install` so launchd's PATH picks it up; the receipt records which one vended either way.
+- Uptime bug fixed in the same PR: `started_at` never reset on restart, so the tape said "up 1d 4h" for processes that had restarted. The worker's first beat now resets it. Takes effect per machine on its next restart on the new code: Fly needs a `fly deploy` after merge, the mini a pull + `npm run remora:install`.
+- Next: slots. AUDIO first.
