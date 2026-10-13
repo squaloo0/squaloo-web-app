@@ -9,6 +9,7 @@ import { NextResponse } from "next/server";
 import { parseVideoUrl } from "@/remora/core/url";
 import { parseQuality } from "@/remora/core/format";
 import { machineLight } from "@/remora/core/job";
+import { codeName } from "@/remora/core/codename";
 import { waitingReason } from "@/remora/core/route";
 import { dbWired } from "@/remora/db/client";
 import { enqueue, freshestMachine, listJobs, liveMachines } from "@/remora/db/queue";
@@ -24,8 +25,8 @@ export async function GET(): Promise<NextResponse> {
   return NextResponse.json(
     {
       jobs: jobs.map((j) => ({ ...j, waiting: waitingReason(j, live, now) })),
-      machine,
-      machines: live,
+      machine: machine ? { ...machine, name: codeName(machine.name) } : null,
+      machines: live.map((m) => ({ ...m, name: codeName(m.name) })),
       light: machineLight(machine, now),
       ...(v.kind === "card" ? { card: v.card.id, coins: v.coins } : {}),
     },

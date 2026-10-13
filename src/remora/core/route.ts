@@ -11,6 +11,7 @@
  */
 import type { Provider } from "./url.ts";
 import type { Job, Machine } from "./job.ts";
+import { codeName } from "./codename.ts";
 
 export const PROVIDERS: readonly Provider[] = ["youtube", "vimeo", "tiktok", "x", "reddit", "twitch", "instagram", "direct", "unknown"];
 
@@ -110,7 +111,7 @@ export function waitingReason(job: Pick<Job, "status" | "provider">, live: Machi
   if (able.length > 0) return null;
   const cooling = live
     .filter((m) => job.provider in activeCooldowns(m.cooldowns, now))
-    .map((m) => `${m.name} cooling ${Math.max(1, Math.ceil((Date.parse(m.cooldowns[job.provider]) - now.getTime()) / 60_000))} min`);
+    .map((m) => `${codeName(m.name)} cooling ${Math.max(1, Math.ceil((Date.parse(m.cooldowns[job.provider]) - now.getTime()) / 60_000))} min`);
   return `no machine can vend ${job.provider} right now${cooling.length ? ` · ${cooling.join(", ")}` : ""}`;
 }
 
@@ -119,5 +120,5 @@ export function machineSummary(m: Machine, now: Date): string {
   const cooling = Object.entries(activeCooldowns(m.cooldowns, now)).map(
     ([p, until]) => `${p} cooling ${Math.max(1, Math.ceil((Date.parse(until) - now.getTime()) / 60_000))} min`,
   );
-  return [m.name, cooling.length ? cooling.join(", ") : "all providers", `${m.vends} vends`].join(" · ");
+  return [codeName(m.name), cooling.length ? cooling.join(", ") : "all providers", `${m.vends} vends`].join(" · ");
 }

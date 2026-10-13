@@ -64,18 +64,18 @@ test("the printed tape carries no titles", () => {
     days: lastDays([{ day: "2026-10-12", vends: 2 }], NOW, 14),
     coins: { purchased: 5, promo: 3, vended: 9, returned: 1, refunded: 0 },
     money: { gross: 500, fees: 45, net: 455, count: 1, mode: "test" },
-    machines: [{ name: "fly-sjc", since: "2026-10-12T00:05:00.000Z", lastSeen: NOW.toISOString(), vends: 4, on: true }],
-    recent: [{ at: "2026-10-12T19:03:01.000Z", provider: "youtube", quality: "360", bytes: 9094158, sha256: "6c77b6466ee2125ef7e2a0657c41d050ad02deb68a0131fa8d25b82b3ef0b249", machine: "mac-mini" }],
+    machines: [{ name: "lantern", since: "2026-10-12T00:05:00.000Z", lastSeen: NOW.toISOString(), vends: 4, on: true }],
+    recent: [{ at: "2026-10-12T19:03:01.000Z", provider: "youtube", quality: "360", bytes: 9094158, sha256: "6c77b6466ee2125ef7e2a0657c41d050ad02deb68a0131fa8d25b82b3ef0b249", machine: "mantis" }],
   };
   const lines = printTape(t);
   for (const l of lines) assert.ok(l.length <= 40, `too wide: ${JSON.stringify(l)}`);
   assert.ok(lines.some((l) => l.includes("gross (sandbox)") && l.includes("$5.00")));
-  assert.ok(lines.some((l) => l.includes("fly-sjc") && l.includes("19h 25m")));
+  assert.ok(lines.some((l) => l.includes("lantern") && l.includes("19h 25m")));
   assert.ok(lines.some((l) => l.includes("youtube") && l.includes("6c77b6466ee2125e")));
   assert.ok(!JSON.stringify(lines).includes("Rick"), "no titles on the tape, ever");
 
   const off = printTape({ ...t, money: { gross: 0, fees: 0, net: 0, count: 0, mode: "off" }, machines: [{ ...t.machines[0], on: false, lastSeen: "2026-10-12T19:13:00.000Z" }] });
   assert.ok(off.some((l) => l.includes("gross") && l.includes("no stripe key")));
-  assert.ok(off.some((l) => l.includes("fly-sjc") && l.includes("off · seen 10-12 19:13")));
+  assert.ok(off.some((l) => l.includes("lantern") && l.includes("off · seen 10-12 19:13")));
   assert.ok(printTape({ ...t, money: null }).some((l) => l.includes("stripe unread")));
 });

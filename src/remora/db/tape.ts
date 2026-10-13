@@ -5,6 +5,7 @@
 import { sql } from "./client.ts";
 import { MACHINE_SILENT_AFTER_MS } from "../core/job.ts";
 import { lastDays, type CoinTotals, type DayCount, type Drop, type Tape } from "../core/tape.ts";
+import { codeName } from "../core/codename.ts";
 
 export async function tapeNumbers(now = new Date()): Promise<Omit<Tape, "money" | "asOf">> {
   const [[totals], days, coins, machines, recent] = await Promise.all([
@@ -44,7 +45,7 @@ export async function tapeNumbers(now = new Date()): Promise<Omit<Tape, "money" 
     days: lastDays(days, now, 14),
     coins: coinTotals,
     machines: machines.map((m) => ({
-      name: m.name,
+      name: codeName(m.name) ?? "unknown",
       since: new Date(m.started_at).toISOString(),
       lastSeen: new Date(m.last_seen).toISOString(),
       vends: m.vends,
@@ -59,7 +60,7 @@ export async function tapeNumbers(now = new Date()): Promise<Omit<Tape, "money" 
         sha256: r.sha256,
         // claimed_by is cleared on completion; the machine that vended is on the receipt,
         // and the tape only needs a name when one is still attached.
-        machine: r.claimed_by,
+        machine: codeName(r.claimed_by),
       }),
     ),
   };

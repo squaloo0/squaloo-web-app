@@ -5,6 +5,7 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { isServiceKey, KEY_COOKIE } from "@/remora/auth";
 import { machineLight } from "@/remora/core/job";
+import { codeName } from "@/remora/core/codename";
 import { dbWired } from "@/remora/db/client";
 import { freshestMachine, liveMachines } from "@/remora/db/queue";
 import { machineSummary } from "@/remora/core/route";
@@ -17,7 +18,11 @@ export async function GET(): Promise<NextResponse> {
   const now = new Date();
   const [machine, live] = await Promise.all([freshestMachine(), liveMachines()]);
   return NextResponse.json(
-    { ...machineLight(machine, now), machine, machines: live.map((m) => ({ ...m, summary: machineSummary(m, now) })) },
+    {
+      ...machineLight(machine, now),
+      machine: machine ? { ...machine, name: codeName(machine.name) } : null,
+      machines: live.map((m) => ({ ...m, name: codeName(m.name), summary: machineSummary(m, now) })),
+    },
     { headers: { "cache-control": "no-store" } },
   );
 }
