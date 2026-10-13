@@ -32,6 +32,7 @@ import { dbWired } from "../../src/remora/db/client.ts";
 import { enqueue, freshestMachine, listJobs, liveMachines, migrate } from "../../src/remora/db/queue.ts";
 import { machineSummary } from "../../src/remora/core/route.ts";
 import { printTape } from "../../src/remora/core/tape.ts";
+import { parseClipSpec, prettyClip } from "../../src/remora/core/clip.ts";
 import { theTape } from "../../src/remora/tape.ts";
 import { shelfWired } from "../../src/remora/storage.ts";
 
@@ -90,13 +91,20 @@ async function main(): Promise<number> {
         console.error(`get: --quality must be one of ${QUALITIES.join(", ")}`);
         return 2;
       }
+      const clipSpec = parseClipSpec(flags.clip);
+      if (clipSpec && !clipSpec.ok) {
+        console.error(`get: --clip ${clipSpec.reason}`);
+        return 2;
+      }
+      const clip = clipSpec?.clip ?? null;
       console.log(BANNER);
-      console.log(`  slot      ${isAudio(quality) ? "AUDIO" : "VIDEO"} · ${quality}`);
+      console.log(`  slot      ${clip ? `CLIP ${prettyClip(clip)}` : isAudio(quality) ? "AUDIO" : "VIDEO"} · ${quality}`);
       const needle = new Needle();
       try {
         const v = await vend({
           input: args[0],
           quality,
+          clip,
           dir: flags.dir,
           onStage: (stage, detail) => needle.stage(stage, detail),
           onEstimate: (meta, est) => {
@@ -199,8 +207,13 @@ async function main(): Promise<number> {
         console.error("  no queue: set NEON_DATABASE_URL");
         return 3;
       }
-      const job = await enqueue({ input: args[0], canonicalUrl: parsed.canonicalUrl, provider: parsed.provider, quality });
-      console.log(`  coin in. ${job.id} · ${job.provider} · ${job.quality} · ${pill(job).text}`);
+      const clipSpec = parseClipSpec(flags.clip);
+      if (clipSpec && !clipSpec.ok) {
+        console.error(`enqueue: --clip ${clipSpec.reason}`);
+        return 2;
+      }
+      const job = await enqueue({ input: args[0], canonicalUrl: parsed.canonicalUrl, provider: parsed.provider, quality, clip: clipSpec?.clip ?? null });
+      console.log(`  coin in. ${job.id} · ${job.provider} · ${job.quality}${job.clip ? ` · ${prettyClip(job.clip)}` : ""} · ${pill(job).text}`);
       return 0;
     }
 
@@ -276,13 +289,14 @@ async function main(): Promise<number> {
       console.log("commands:");
       console.log("  peek <url>                what the glass reads off a URL (offline)");
       console.log("  info <url>                what is behind the glass, via yt-dlp");
-      console.log("  get  <url> [--quality q]  VIDEO: best|2160|1440|1080|720|480|360 · AUDIO: audio (mp3)|m4a|audio-raw");
+      console.log("  get  <url> [--quality q] [--clip 1:23-1:45]");
+      console.log("                            VIDEO: best|2160|1440|1080|720|480|360 · AUDIO: audio (mp3)|m4a|audio-raw · CLIP: --clip");
       console.log("  ls                        the ledger and the scoreboard");
       console.log("  verify <file|receipt>     re-hash a vend against its receipt");
       console.log("  receipt <file|receipt>    print a receipt again");
       console.log("  doctor                    binaries, folders, what is wired");
       console.log("  migrate                   apply db/migrations to Neon");
-      console.log("  enqueue <url> [--quality] put a coin in the slot; the worker vends it");
+      console.log("  enqueue <url> [--quality] [--clip]  put a coin in the slot; the worker vends it");
       console.log("  jobs                      the queue");
       console.log("  machine                   the pulse: READY or OUT OF ORDER");
       console.log("  keygen                    a fresh Ed25519 pair for signing receipts (env lines)");

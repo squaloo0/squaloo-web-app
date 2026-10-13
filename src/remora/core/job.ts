@@ -12,6 +12,7 @@ import type { Quality } from "./format.ts";
 import type { Provider } from "./url.ts";
 import { isRouteError, MAX_ROUTE_FAILURES, ROUTE_RETRY_MS, type Cooldowns } from "./route.ts";
 import { codeName } from "./codename.ts";
+import type { Clip } from "./clip.ts";
 
 export type JobStatus = "pending" | "processing" | "completed" | "failed";
 
@@ -21,6 +22,8 @@ export type Job = {
   canonicalUrl: string;
   provider: Provider;
   quality: Quality;
+  /** The CLIP slot: a start and an end, or null for the whole thing. */
+  clip: Clip | null;
   status: JobStatus;
   /** Real tries. A route failure (bot wall, rate limit) does not count as one. */
   attempts: number;

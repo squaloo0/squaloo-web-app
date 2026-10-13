@@ -126,7 +126,7 @@ async function main(): Promise<void> {
 }
 
 async function process_(job: Job, pulse: () => Pulse): Promise<void> {
-  log(`claimed ${job.id} · ${job.provider} · ${job.quality} · attempt ${job.attempts}${job.routeFailures ? ` · ${job.routeFailures} door(s) so far` : ""}`);
+  log(`claimed ${job.id} · ${job.provider} · ${job.quality}${job.clip ? ` · clip ${job.clip.start}-${job.clip.end}` : ""} · attempt ${job.attempts}${job.routeFailures ? ` · ${job.routeFailures} door(s) so far` : ""}`);
   const dir = await mkdtemp(join(tmpdir(), "remora-"));
   let lastBeat = Date.now();
   let title: string | null = null;
@@ -141,6 +141,7 @@ async function process_(job: Job, pulse: () => Pulse): Promise<void> {
     const v = await vend({
       input: job.input,
       quality: job.quality,
+      clip: job.clip,
       dir,
       card: job.cardId,
       machine: codeName(NAME) ?? NAME, // the receipt is the customer's; it names the fish, not the host

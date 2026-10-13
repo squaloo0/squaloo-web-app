@@ -10,6 +10,7 @@ import type { Provider } from "./url.ts";
 import type { VideoMeta } from "./meta.ts";
 import { isAudio, type Quality } from "./format.ts";
 import { prettyBytes, prettyDuration } from "./pretty.ts";
+import { prettyClip, type Clip } from "./clip.ts";
 
 export const RECEIPT_VERSION = 1 as const;
 
@@ -17,7 +18,7 @@ export type Receipt = {
   receipt: {
     version: typeof RECEIPT_VERSION;
     kind: "vend";
-    slot: "VIDEO" | "AUDIO";
+    slot: "VIDEO" | "AUDIO" | "CLIP";
     /** ISO-8601, UTC. */
     vendedAt: string;
     machine: "remora";
@@ -38,6 +39,8 @@ export type Receipt = {
     duration: number | null;
     webpageUrl: string | null;
   };
+  /** The CLIP slot's range, seconds; null for the whole thing. */
+  clip?: Clip | null;
   file: {
     /** Basename only. The receipt sits next to it. */
     name: string;
@@ -85,13 +88,14 @@ export type ReceiptInput = {
   node: string;
   machine?: string;
   card?: string | null;
+  clip?: Clip | null;
   /** Injected so the builder stays pure and the tests stay still. */
   now: Date;
 };
 
 export function buildReceipt(i: ReceiptInput): Receipt {
   return {
-    receipt: { version: RECEIPT_VERSION, kind: "vend", slot: isAudio(i.quality) ? "AUDIO" : "VIDEO", vendedAt: i.now.toISOString(), machine: "remora" },
+    receipt: { version: RECEIPT_VERSION, kind: "vend", slot: i.clip ? "CLIP" : isAudio(i.quality) ? "AUDIO" : "VIDEO", vendedAt: i.now.toISOString(), machine: "remora" },
     source: { input: i.input, canonicalUrl: i.canonicalUrl, provider: i.provider, id: i.id, extractor: i.meta.extractor },
     video: {
       title: i.meta.title,
@@ -100,6 +104,7 @@ export function buildReceipt(i: ReceiptInput): Receipt {
       duration: i.meta.duration,
       webpageUrl: i.meta.webpageUrl,
     },
+    ...(i.clip ? { clip: i.clip } : {}),
     file: { name: i.fileName, bytes: i.bytes, sha256: i.sha256, quality: i.quality, formatIds: i.formatIds },
     tools: { ytDlp: i.ytDlp, ffmpeg: i.ffmpeg, node: i.node, ...(i.machine ? { machine: i.machine } : {}) },
     card: i.card ?? null,
@@ -239,6 +244,7 @@ export function printReceipt(r: Receipt): string[] {
     kv("by", r.video.uploader ?? "—"),
     kv("length", prettyDuration(r.video.duration)),
     kv("uploaded", r.video.uploadDate ?? "—"),
+    ...(r.clip ? [kv("clip", prettyClip(r.clip))] : []),
     kv("from", `${r.source.provider}${r.source.id ? ` ${r.source.id}` : ""}`),
     "url",
     ...wrap(r.source.canonicalUrl),

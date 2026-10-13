@@ -7,10 +7,8 @@
  */
 import { randomBytes } from "node:crypto";
 import { sql } from "./client.ts";
-import { newId, type JobRow, toJob } from "./queue.ts";
+import { newId, type Coin, type JobRow, toJob } from "./queue.ts";
 import type { Job } from "../core/job.ts";
-import type { Quality } from "../core/format.ts";
-import type { Provider } from "../core/url.ts";
 import { cardIdFromHash, coinsFor, hashCardCode, newCardCode, PROMO_COINS, VEND_COINS, type LedgerEntry, type LedgerKind } from "../core/coins.ts";
 import type { CompletedPurchase } from "../core/stripe.ts";
 
@@ -80,7 +78,7 @@ export async function ledgerOf(cardId: string, limit = 50): Promise<LedgerEntry[
  * balance covers it, and the job is only written when the vend row was. An advisory
  * lock on the card keeps two simultaneous presses from both passing the balance check.
  */
-export async function enqueueWithCoin(i: { cardId: string; input: string; canonicalUrl: string; provider: Provider; quality: Quality }): Promise<Job | null> {
+export async function enqueueWithCoin(i: Coin & { cardId: string }): Promise<Job | null> {
   const jobId = newId("j");
   const rows = (await sql()`
     WITH locked AS (
@@ -90,8 +88,8 @@ export async function enqueueWithCoin(i: { cardId: string; input: string; canoni
       SELECT COALESCE(SUM(coins), 0) AS n FROM remora_ledger, locked WHERE card_id = ${i.cardId}
     ),
     job AS (
-      INSERT INTO remora_jobs (id, input, canonical_url, provider, quality, card_id)
-      SELECT ${jobId}, ${i.input}, ${i.canonicalUrl}, ${i.provider}, ${i.quality}, ${i.cardId}
+      INSERT INTO remora_jobs (id, input, canonical_url, provider, quality, card_id, clip_start, clip_end)
+      SELECT ${jobId}, ${i.input}, ${i.canonicalUrl}, ${i.provider}, ${i.quality}, ${i.cardId}, ${i.clip?.start ?? null}, ${i.clip?.end ?? null}
         FROM bal WHERE bal.n >= ${VEND_COINS}
       RETURNING *
     ),

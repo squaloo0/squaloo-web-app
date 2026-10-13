@@ -8,7 +8,7 @@ import { prettyBytes } from "./pretty.ts";
 
 export type LedgerRow = {
   vendedAt: string;
-  slot: "VIDEO" | "AUDIO";
+  slot: "VIDEO" | "AUDIO" | "CLIP";
   provider: Provider;
   id: string | null;
   title: string;

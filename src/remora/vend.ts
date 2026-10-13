@@ -12,6 +12,7 @@ import { homedir } from "node:os";
 import { basename, dirname, join, resolve } from "node:path";
 import { parseVideoUrl } from "./core/url.ts";
 import { estimate, type Estimate, type Quality } from "./core/format.ts";
+import type { Clip } from "./core/clip.ts";
 import type { VideoMeta } from "./core/meta.ts";
 import type { PostProcess, Progress } from "./core/progress.ts";
 import { buildReceipt, parseReceipt, pemFromEnv, receiptFileName, receiptText, signReceipt, verifyReceipt, type Receipt, type Verification } from "./core/receipt.ts";
@@ -30,6 +31,8 @@ export type Stage = "peek" | "info" | "drop" | "hash" | "receipt";
 export type VendOptions = {
   input: string;
   quality: Quality;
+  /** The CLIP slot: a range, or null for the whole thing. */
+  clip?: Clip | null;
   /** Defaults to downloadsDir(). */
   dir?: string;
   /** The punch card that paid (public handle), for the receipt. */
@@ -86,6 +89,7 @@ export async function vend(opts: VendOptions): Promise<Vend> {
   const { filepath } = await ytDlpDownload(target, {
     dir,
     quality: opts.quality,
+    clip: opts.clip ?? null,
     onTick: (t) => {
       if (t.kind === "download") {
         const m = /\.f([A-Za-z0-9_-]+)\.[^./]+$/.exec(t.filename);
@@ -115,6 +119,7 @@ export async function vend(opts: VendOptions): Promise<Vend> {
     node: process.version,
     machine: opts.machine,
     card: opts.card ?? null,
+    clip: opts.clip ?? null,
     now: new Date(),
   });
   const key = opts.signingKey === undefined ? pemFromEnv(process.env.REMORA_RECEIPT_PRIVATE_KEY) : opts.signingKey;

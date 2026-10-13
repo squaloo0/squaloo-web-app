@@ -12,6 +12,7 @@ function job(patch: Partial<Job> = {}): Job {
     canonicalUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
     provider: "youtube",
     quality: "best",
+    clip: null,
     status: "pending",
     attempts: 0,
     routeFailures: 0,
