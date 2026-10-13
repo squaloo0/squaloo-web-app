@@ -272,3 +272,45 @@ user agent alone; a path-based `probe` kind is a candidate for the next charter-
 **Machine-local facts.** Air: the work loop from the previous sitting is still running in
 this session's background; `garage:install` was not run on the Air, by design, so the mini is
 the only launchd host once the founder installs it. Day's spend unchanged at $1.26.
+
+## 2026-10-13 · Air · Phase 5, the study
+
+**What landed.** Standing orders (a report-only hat re-queued every N hours from the
+dashboard; one-statement tick so two hosts never fire the same order twice; charter 0.4 allows
+them from rung 1 for `report` and `study`, proposals on a schedule stay rung 2; migration
+0005). The library's home in Notion: `garage library pull` regenerates `LIBRARY.md` from the
+Garage Research Library database with a token that stays on the host (`GARAGE_NOTION_TOKEN`,
+`GARAGE_LIBRARY_DB`, `GARAGE_REPORT_PAGE`; `doctor` reports presence only), `garage library
+file <run>` files a study report as a page; parsers tested against a fixture, the live calls
+wait on the founder's integration. `~/.garage/library/` is the one read root outside the
+repo, never writable, guard-tested. The `study` hat. 56 tests, types, lint, build green.
+
+**The first study.** Run `3ab57ff5` (study, GARAGE-7, S1 Cloudflare Radar, $0.088, 25 s, 3
+tools, 0 refused). Tagged every S1 figure `[note-estimate]` because no primary is mirrored;
+named five scrub flags, the sharpest being that a request share is not a visitor share nor a
+buyer share; proposed a qualifier for register row 14 (added, awaiting the founder) and a
+not-yet-true row for the site's own declared-bot share; designed the week's experiment with no
+new code: daily share of declared non-browser kinds, 2026-10-14 to 2026-10-20 UTC, baseline
+15% of 67 hits over 53 minutes, prediction that it stays well under S1's 65% because the
+instrument only counts bots that declare themselves. Its question: can the founder's and the
+orchestrator's own visits be excluded from `garage_hits`, since the first week's browser share
+otherwise mostly measures us. It also left a calibration note instead of calling an earlier
+count an error.
+
+**The orchestrator's own slip, rule 15.** The phase's commit was made on local `main` instead
+of the branch, caught when the PR refused for having no commits. Origin's main was never
+pushed; the commit was moved to the branch and local main reset to origin. Candidate mechanism:
+the `pkill -f` that stopped the Air's work loop matched the shell running the same compound
+command. Observation is fact; mechanism is a candidate.
+
+**What is next, by the founder.** Create the Garage Research Library database in Notion with
+these properties: Name (title), URL (url), Status (select: unread, read, reviewed), Kind
+(select), Scrub (multi-select), Summary (text), Added (date), Added by (text); a report page
+beside it; an internal integration shared with both; the three env values on the mini (and
+the Air); then `garage library pull`. Stand a daily `study` order on the dashboard and let
+the instrument run. On the open question: a marked header is a cookie-free way to exclude our
+own visits; a `self` kind in the classifier would keep the rule in code. Candidate for the
+next charter-health pass with the `probe` kind.
+
+**Machine-local facts.** Air: no work loop running; the mini is the host. Day's spend:
+$1.35 across eleven runs.
