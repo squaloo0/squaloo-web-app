@@ -45,6 +45,8 @@ export type Ledger = {
   recentRuns(limit: number): Promise<RunRow[]>;
   /** The instrument's last seven days, as lines, for the same block. */
   instrumentLines(): Promise<string[]>;
+  /** A run the command names by id prefix, so its report can ride in the block. */
+  runByPrefix(prefix: string): Promise<RunRow | null>;
 };
 
 type Row = {
@@ -134,6 +136,9 @@ export const neonLedger: Ledger = {
   },
   async instrumentLines() {
     return hitsLines(await hitsSummary(7));
+  },
+  async runByPrefix(prefix) {
+    return getRun(prefix);
   },
 };
 

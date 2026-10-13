@@ -179,3 +179,39 @@ offers over JSON. Then the production week of the instrument, read by a rung-0 r
 **Machine-local facts.** Air: worktrees for wrasse will appear at
 `~/Projects/squaloo-web-app-wrasse/<branch with __ for />` with `node_modules` symlinked from
 the repo. `gh` on the host does the PR; it is the founder's login. Day's spend unchanged.
+
+## 2026-10-13 · Air · rung 1, and the first proposal
+
+**What landed.** Charter 0.3: rung 1 by founder ruling after five rung-0 runs; the `llms.txt`
+sources join the proposal paths. Two rung-0 runs through the queue with the founder watching
+from the dashboard: `eea55df9` (GARAGE-4, the instrument's first hours, $0.10) and
+`4f6151a9` (GARAGE-5, the red-team of the pay-rail report, $0.14), after `bad1c71b` stopped
+itself ($0.09) because the memory block did not carry the report it was told to attack.
+Three fixes from those runs: the search indexers move from agent to ai-crawler (the
+classifier's own comment said agents fetch for a person right now); the eleven local dev rows
+are removed so the instrument carries production only; a command that names a run now gets
+that run's report in the block. Two register rows re-ruled by the red-team: "anyone can pay
+into any card" drops to needs review (the checkout route sets the card from the caller's own
+cookie), and "an agent cannot pay today" becomes qualified (a client that keeps its cookie can
+already reach checkout; nothing tells it so).
+
+**The first proposal.** Run `21c07027` (hat propose, ticket GARAGE-6, $0.31, 63 s, 23
+turns, 21 tools, 1 refused: a `cd` at rung 1). Branch
+`wrasse/feat/garage-6-make-llms-txt-tell-an-agent-wha`, one commit authored by wrasse, one
+file, 27 lines added: a `## Remora` section in `llmsIndex`, generated, quality list from
+`QUALITIES`, no prices, eight bullets with method, path and what comes back, each fact cited
+to its route in the gate comment. Tests and types run in the worktree. Banked prediction:
+agent plus ai-crawler hits on `/api/remora/*` in the 14 days after shipping exceed the 14
+before, baseline 0 over about one day of counting, which it called thin. Its one question:
+whether to advertise "take a card" to crawlers at all, given the promo coin's only guard is the
+per-address limit. **At the gate**, diff `f3123ad7d12c`, waiting for the founder on the
+dashboard; the work loop on the Air publishes on approval.
+
+**A seam to know about.** The run reads its charter from its own worktree, which is
+origin/main, so its row says charter 0.2 while the guard code it ran under is this branch's
+(0.3, with the llms paths). Consistent once #65 merges; recorded here so the row's hash
+reads right later.
+
+**Machine-local facts.** Air: `garage work --every 10` is running in this session's
+background; the worktree is at `~/Projects/squaloo-web-app-wrasse/`. Day's spend: $1.26 across
+nine runs.

@@ -14,7 +14,7 @@ import { charterHash, charterVersion } from "../../src/garage/core/charter.ts";
 import { budgetBeforeLaunch } from "../../src/garage/core/budget.ts";
 import { agentEnv, findSecretShapes } from "../../src/garage/core/secrets.ts";
 import { decide, toolsForRung, type GuardContext, type Rung } from "../../src/garage/core/guard.ts";
-import { ledgerMemory, outcomeOf, runPreamble, type HaltReason, type RunStatus } from "../../src/garage/core/run.ts";
+import { ledgerMemory, outcomeOf, runIdsIn, runPreamble, type HaltReason, type RunRow, type RunStatus } from "../../src/garage/core/run.ts";
 import type { FinishRun, Ledger } from "../../src/garage/db/ledger.ts";
 
 export const HALT_FILE = "src/garage/HALT";
@@ -85,7 +85,12 @@ export async function runOnce(deps: Deps, req: RunRequest): Promise<RunResult> {
     return finish(deps, id, blank("halted", "day-budget"));
   }
 
-  const memory = ledgerMemory(await deps.ledger.recentRuns(10), 6000, await deps.ledger.instrumentLines());
+  const referenced: RunRow[] = [];
+  for (const prefix of runIdsIn(req.prompt).slice(0, 3)) {
+    const r = await deps.ledger.runByPrefix(prefix);
+    if (r) referenced.push(r);
+  }
+  const memory = ledgerMemory(await deps.ledger.recentRuns(10), 6000, await deps.ledger.instrumentLines(), referenced);
   const id = await deps.ledger.startRun(base);
   const ctx: GuardContext = { rung: req.rung, cwd: deps.cwd, approvedDiffHashes: await deps.ledger.approvedHashes(), diffHash: req.diffHash };
   const abort = new AbortController();

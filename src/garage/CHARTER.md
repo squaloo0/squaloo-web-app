@@ -1,6 +1,6 @@
 # The Garage — charter for wrasse
 
-**Version 0.2, drafted 2026-10-13.** Not yet binding: under Solomon's rule 17 a charter earns that
+**Version 0.3, drafted 2026-10-13.** Not yet binding: under Solomon's rule 17 a charter earns that
 label by review, not by authorship. It binds the day the founder reads it end to end and says so,
 and the changelog at the bottom records that date.
 
@@ -141,7 +141,7 @@ changelog. None is skipped. There is no rung on which wrasse merges.
 | Rung | Wrasse may | Earned by |
 |---|---|---|
 | 0 | Read, measure, and write reports to its own ledger and Notion library. | Being switched on. |
-| 1 | Open PRs behind the gate, with a banked prediction each. | Five rung-0 runs whose reports were checked and held (rule 19: checked by a second instrument, not by rereading). |
+| 1 | Open PRs behind the gate, with a banked prediction each. | Five rung-0 runs whose reports were checked and held (rule 19: checked by a second instrument, not by rereading). **Ruled: 2026-10-13**, after runs `c793e6ea`, `7a2a55a1`, `894a1588` and the two that followed, read by the founder from this session and the dashboard. |
 | 2 | Run on a schedule instead of only on command. | Ten gate verdicts with no guard firing in anger and no retracted claim. |
 | 3 | Command its own sub-runs (a research run spawning a design run). | Revisited only after a month at rung 2, with the ledger as the evidence. |
 
@@ -209,7 +209,8 @@ lens, and its own calibration record. The library is shared. The ledgers are not
 - **The touch list.** `src/garage/`, `src/app/garage/`, `src/app/api/garage/`,
   `workers/garage/`, `src/middleware.ts` (the instrument's shim, which does nothing else),
   plus `package.json` scripts and the one dependency. For proposals at
-  rung 1 and up: `src/app/` pages, `src/components/`, `content/`, `public/`. Never:
+  rung 1 and up: `src/app/` pages, `src/components/`, `content/`, `public/`, and the
+  `llms.txt` sources `src/lib/llms*.ts`. Never:
   `src/remora/db/`, `src/app/api/remora/stripe/`, `src/app/api/remora/checkout/`,
   `src/remora/auth.ts`, `src/remora/stripe.ts`, `workers/remora/`, any `.env*`, any
   migration, the drizzle config.
@@ -233,6 +234,11 @@ from this exercise. Every entry names the incident that caused it or the review 
 it.
 
 ## Changelog
+
+- **0.3, 2026-10-13.** Wrasse reaches rung 1 by founder ruling, after five rung-0 runs
+  observed by the founder. The `llms.txt` sources (`src/lib/llms*.ts`) join the proposal
+  paths, because the first proposal lives there and the file is generated content, not
+  machinery. Still a draft under rule 17.
 
 - **0.2, 2026-10-13.** The instrument lands (Phase 3): `src/middleware.ts` joins the harness
   touch list as a shim that records one `garage_hits` row per countable request and nothing

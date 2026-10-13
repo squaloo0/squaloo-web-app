@@ -24,14 +24,15 @@ type Rule = { kind: VisitorKind; re: RegExp; family?: string };
 export const VISITOR_RULES: readonly Rule[] = [
   // Agents: fetch on behalf of a person, right now.
   { kind: "agent", re: /Claude-User/i, family: "claude-user" },
-  { kind: "agent", re: /Claude-SearchBot/i, family: "claude-searchbot" },
   { kind: "agent", re: /ChatGPT-User/i, family: "chatgpt-user" },
-  { kind: "agent", re: /OAI-SearchBot/i, family: "oai-searchbot" },
   { kind: "agent", re: /Perplexity-User/i, family: "perplexity-user" },
   { kind: "agent", re: /DuckAssistBot/i, family: "duckassistbot" },
   { kind: "agent", re: /Google-CloudVertexBot/i, family: "vertexbot" },
   { kind: "agent", re: /\bOperator\b|\bagentic\b|Browserbase|Browser Use|Playwright|HeadlessChrome/i, family: "agentic-browser" },
-  // AI crawlers: fetch to train or to index for answers.
+  // AI crawlers: fetch to train, or to index for answers. The search indexers are here, not
+  // under agents: nobody is waiting on the other end of a SearchBot (run eea55df9's catch).
+  { kind: "ai-crawler", re: /Claude-SearchBot/i, family: "claude-searchbot" },
+  { kind: "ai-crawler", re: /OAI-SearchBot/i, family: "oai-searchbot" },
   { kind: "ai-crawler", re: /ClaudeBot|anthropic-ai/i, family: "claudebot" },
   { kind: "ai-crawler", re: /GPTBot/i, family: "gptbot" },
   { kind: "ai-crawler", re: /PerplexityBot/i, family: "perplexitybot" },

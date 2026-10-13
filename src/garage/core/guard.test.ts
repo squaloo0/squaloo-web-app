@@ -49,6 +49,8 @@ test("guard 3, the touch list: Remora's money paths are refused, the Garage's co
   assert.deepEqual(decide({ tool: "Write", input: { file_path: `${CWD}/src/app/garage/page.tsx` } }, ctx({ rung: 1 })), { allow: true });
   assert.deepEqual(decide({ tool: "Edit", input: { file_path: "src/app/page.tsx" } }, ctx({ rung: 1 })), { allow: true });
   assert.deepEqual(decide({ tool: "Edit", input: { file_path: "content/devlog/x.md" } }, ctx({ rung: 1 })), { allow: true });
+  assert.deepEqual(decide({ tool: "Edit", input: { file_path: "src/lib/llms.ts" } }, ctx({ rung: 1 })), { allow: true }, "the llms.txt sources are proposal paths (charter 0.3)");
+  denied(decide({ tool: "Edit", input: { file_path: "src/lib/devlog.ts" } }, ctx({ rung: 1 })), "touch", /not on the touch list/);
 });
 
 test("rung 0 reads and reports: every write and every shell is refused", () => {
