@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { checkMirror, extFor, idWithMirror, mirrorFileName, mirrorOf, parseSums, stripMirror, sumsText } from "./library.ts";
+import { checkMirror, extFor, idWithMirror, mirrorFileName, mirrorOf, parseSums, primaryUrl, stripMirror, sumsText } from "./library.ts";
 import type { LibraryRow } from "./notion.ts";
 
 const H = "a".repeat(64);
@@ -50,4 +50,11 @@ test("rule 19: the rows and the disk are compared, and every kind of disagreemen
   assert.deepEqual(c.missing, [{ row: "C", file: "S3-c.pdf" }]);
   assert.deepEqual(c.orphans, ["S9-orphan.pdf"]);
   assert.deepEqual(c.unmirrored, [{ row: "D", url: "https://d" }], "a row with no URL is not a hunt");
+});
+
+test("an arXiv abstract page is fetched as its PDF; anything else as written", () => {
+  assert.equal(primaryUrl("https://arxiv.org/abs/2502.15840"), "https://arxiv.org/pdf/2502.15840");
+  assert.equal(primaryUrl("https://arxiv.org/abs/1512.04922v3"), "https://arxiv.org/pdf/1512.04922v3");
+  assert.equal(primaryUrl("https://arxiv.org/pdf/1907.07032"), "https://arxiv.org/pdf/1907.07032");
+  assert.equal(primaryUrl("https://www.anthropic.com/research/project-vend-1"), "https://www.anthropic.com/research/project-vend-1");
 });
