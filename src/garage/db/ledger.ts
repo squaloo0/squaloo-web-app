@@ -6,6 +6,7 @@ import { sql } from "./client.ts";
 import type { HaltReason, RunRow, RunStatus } from "../core/run.ts";
 import type { Rung } from "../core/guard.ts";
 import { hitsLines } from "../core/hits.ts";
+import type { Order } from "../core/orders.ts";
 
 export type StartRun = {
   machine: string;
@@ -329,4 +330,48 @@ export async function setPrUrl(runId: string, url: string): Promise<void> {
 
 export async function noteRun(runId: string, detail: string): Promise<void> {
   await sql()`INSERT INTO garage_events (run_id, kind, tool, detail) VALUES (${runId}, 'note', null, ${detail})`;
+}
+
+type OrderRow = { id: number | string; created_at: string; created_by: string; hat: string; prompt: string | null; ticket: string | null; every_hours: number; enabled: boolean; last_queued_at: string | null; runs: number };
+
+function fromOrder(o: OrderRow): Order {
+  return {
+    id: Number(o.id),
+    createdAt: new Date(o.created_at).toISOString(),
+    createdBy: o.created_by,
+    hat: o.hat,
+    prompt: o.prompt,
+    ticket: o.ticket,
+    everyHours: o.every_hours,
+    enabled: o.enabled,
+    lastQueuedAt: o.last_queued_at ? new Date(o.last_queued_at).toISOString() : null,
+    runs: o.runs,
+  };
+}
+
+export async function listOrders(): Promise<Order[]> {
+  const rows = (await sql()`SELECT * FROM garage_orders ORDER BY id`) as OrderRow[];
+  return rows.map(fromOrder);
+}
+
+export async function addOrder(o: { hat: string; prompt: string | null; ticket: string | null; everyHours: number; by: string }): Promise<Order> {
+  const rows = (await sql()`INSERT INTO garage_orders (created_by, hat, prompt, ticket, every_hours) VALUES (${o.by}, ${o.hat}, ${o.prompt}, ${o.ticket}, ${o.everyHours}) RETURNING *`) as OrderRow[];
+  return fromOrder(rows[0]);
+}
+
+export async function setOrderEnabled(id: number, enabled: boolean): Promise<void> {
+  await sql()`UPDATE garage_orders SET enabled = ${enabled} WHERE id = ${id}`;
+}
+
+export async function deleteOrder(id: number): Promise<void> {
+  await sql()`DELETE FROM garage_orders WHERE id = ${id}`;
+}
+
+/** Marks an order queued now; the caller enqueues the command. One statement, so two hosts cannot both fire it. */
+export async function claimOrderTick(id: number, everyHours: number): Promise<boolean> {
+  const rows = (await sql()`
+    UPDATE garage_orders SET last_queued_at = now(), runs = runs + 1
+    WHERE id = ${id} AND enabled AND (last_queued_at IS NULL OR last_queued_at <= now() - make_interval(hours => ${everyHours}))
+    RETURNING id`) as { id: number }[];
+  return rows.length > 0;
 }

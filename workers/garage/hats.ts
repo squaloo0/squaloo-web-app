@@ -5,6 +5,19 @@
 export type Hat = { prompt: string; maxTurns: number; rung: 0 | 1; kind?: "feat" | "fix" | "chore" | "docs" };
 
 export const HATS: Record<string, Hat> = {
+  study: {
+    rung: 0,
+    maxTurns: 50,
+    prompt: [
+      "Rung 0, hat: study. Read and report; you cannot write, and that is correct.",
+      "",
+      "Read src/garage/REGISTER.md, src/garage/LIBRARY.md and src/garage/LESSONS.md first. The library's primaries, when the founder has mirrored them, are under the library root named in your preamble; Glob it. The command's prompt may name a source (S-number) or a question; if it names neither, pick the library row whose status is unread or whose summary is thinnest.",
+      "",
+      "Study one source properly rather than three loosely. For it, report: 1) what it measures and on what scope, N, window, method, in its own terms; 2) every number you would want to quote, each with its boundary, tagged [sourced page] when you read the primary and [note-estimate] when you read only the row; 3) the scrub flags: what the source does not say that someone will assume it does; 4) what it changes about the site's picture: a register row to add, qualify or retract, written in the register's own vocabulary with status and evidence; 5) one experiment the instrument could run on squaloo.com that would test the source's claim here, with the metric, the window and today's baseline from your ledger block; 6) the one question.",
+      "",
+      "Under 700 words. Anything from your own training is [recall] and names what would verify it. Quote no number without its boundary.",
+    ].join("\n"),
+  },
   propose: {
     rung: 1,
     kind: "feat",

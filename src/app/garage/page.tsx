@@ -9,7 +9,8 @@ import AppFooter from "@/components/AppFooter";
 import Wordmark from "@/components/Wordmark";
 import { isGarageKey, KEY_COOKIE, keySlotWired } from "@/garage/auth";
 import { ledgerWired } from "@/garage/db/client";
-import { gateQueue, hitsSummary, listCommands, listRuns, neonLedger, queuedCount, type CommandRow, type HitsSummary } from "@/garage/db/ledger";
+import { gateQueue, hitsSummary, listCommands, listOrders, listRuns, neonLedger, queuedCount, type CommandRow, type HitsSummary } from "@/garage/db/ledger";
+import { orderLine, type Order } from "@/garage/core/orders";
 import { PER_DAY_USD, PER_RUN_USD, prettyUsd } from "@/garage/core/budget";
 import { shortId, type RunRow } from "@/garage/core/run";
 import Poller from "./poller";
@@ -28,7 +29,7 @@ export default async function GaragePage({ searchParams }: { searchParams: Promi
   const keyed = isGarageKey(jar.get(KEY_COOKIE)?.value);
   const wired = ledgerWired();
 
-  const [runs, gate, commands, queued, spent, hits] = keyed && wired ? await Promise.all([listRuns(20), gateQueue(), listCommands(12), queuedCount(), neonLedger.spentTodayUsd(), hitsSummary(7)]) : [[], [], [], 0, 0, null];
+  const [runs, gate, commands, queued, spent, hits, orders] = keyed && wired ? await Promise.all([listRuns(20), gateQueue(), listCommands(12), queuedCount(), neonLedger.spentTodayUsd(), hitsSummary(7), listOrders()]) : [[], [], [], 0, 0, null, []];
   const running = commands.some((c) => c.status === "running" || c.status === "queued");
 
   return (
@@ -82,6 +83,7 @@ export default async function GaragePage({ searchParams }: { searchParams: Promi
                   <label className="text-[10px] tracking-[0.3em] uppercase text-neutral-500 self-center">hat</label>
                   <select name="hat" className="bg-black border border-neutral-800 text-sm px-2 py-1 text-neutral-200 min-w-0 max-w-full">
                     <option value="report">report · rung 0 · read and report</option>
+                    <option value="study">study · rung 0 · one library source, properly</option>
                     <option value="propose">propose · rung 1 · a change on a branch, behind the gate</option>
                   </select>
                   <input name="ticket" placeholder="ticket (optional)" className="bg-black border border-neutral-800 text-sm px-2 py-1 text-neutral-200 flex-1 min-w-0 basis-full sm:basis-auto" />
@@ -98,6 +100,23 @@ export default async function GaragePage({ searchParams }: { searchParams: Promi
                     Queue the run
                   </button>
                 </div>
+              </form>
+            </Section>
+
+            <Section title="Standing orders" hint="report-only hats, re-queued every N hours by whichever host ticks first">
+              {orders.length === 0 ? <Dashed>No standing orders</Dashed> : orders.map((o) => <OrderLine key={o.id} o={o} />)}
+              <form method="POST" action="/api/garage/order" className="flex flex-wrap gap-2 items-center pt-2 border-t border-neutral-900">
+                <select name="hat" className="bg-black border border-neutral-800 text-xs px-2 py-1 text-neutral-200">
+                  <option value="study">study</option>
+                  <option value="report">report</option>
+                </select>
+                <label className="text-[10px] tracking-[0.2em] uppercase text-neutral-500">every</label>
+                <input name="every" defaultValue="24" inputMode="numeric" className="w-14 bg-black border border-neutral-800 text-xs px-2 py-1 text-neutral-200" />
+                <span className="text-[10px] tracking-[0.2em] uppercase text-neutral-500">h</span>
+                <input name="ticket" placeholder="ticket" className="w-28 bg-black border border-neutral-800 text-xs px-2 py-1 text-neutral-200" />
+                <input name="prompt" placeholder="what to study, or leave empty for the hat's own pick" className="flex-1 min-w-0 basis-full sm:basis-auto bg-black border border-neutral-800 text-xs px-2 py-1 text-neutral-200" />
+                <button className="border border-[#5688c7] text-[#5688c7] hover:bg-[#5688c7] hover:text-black px-3 py-1 text-[10px] tracking-[0.2em] uppercase">Stand</button>
+                {sp.ordered && <span className="text-neutral-600 text-xs">standing.</span>}
               </form>
             </Section>
 
@@ -315,6 +334,20 @@ function Instrument({ s }: { s: HitsSummary }) {
           )}
         </div>
       </div>
+    </div>
+  );
+}
+
+function OrderLine({ o }: { o: Order }) {
+  return (
+    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-neutral-400 min-w-0">
+      <span className={o.enabled ? "text-neutral-200" : "text-neutral-600"}>{orderLine(o)}</span>
+      {o.prompt && <span className="text-neutral-600 truncate max-w-full sm:max-w-xs" title={o.prompt}>“{o.prompt.slice(0, 50)}{o.prompt.length > 50 ? "…" : ""}”</span>}
+      <form method="POST" action="/api/garage/order" className="flex gap-2">
+        <input type="hidden" name="id" value={o.id} />
+        <button name="action" value={o.enabled ? "off" : "on"} className="text-neutral-600 hover:text-white text-[10px] tracking-widest uppercase">{o.enabled ? "pause" : "resume"}</button>
+        <button name="action" value="rm" className="text-neutral-700 hover:text-red-400 text-[10px] tracking-widest uppercase">remove</button>
+      </form>
     </div>
   );
 }

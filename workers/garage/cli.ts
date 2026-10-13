@@ -9,6 +9,9 @@
  *   queue [n]               the last n commands
  *   command <hat> [--prompt "..."] [--ticket T]   queue a command from here instead of the dashboard
  *   hits [days]             the instrument: visitors by kind, day, path, family
+ *   orders                  the standing orders; `orders add <hat> --every H [--ticket T] [--prompt ...]`, `orders on|off|rm <id>`
+ *   library pull            regenerate src/garage/LIBRARY.md from the Notion library (token on this host only)
+ *   library file <run-id>   file a run's report as a page under the Notion report page
  *   runs [n]                the last n run rows
  *   show <id>               one run: its row, its events, its report
  *   halt [on|off]           the HALT file; no argument prints its state
@@ -27,7 +30,10 @@ import { charterBinding, charterHash, charterVersion } from "../../src/garage/co
 import { PER_DAY_USD, PER_RUN_USD, prettyUsd } from "../../src/garage/core/budget.ts";
 import { runLine } from "../../src/garage/core/run.ts";
 import { ledgerWired } from "../../src/garage/db/client.ts";
-import { approve, claimCommand, enqueueCommand, finishCommand, getRun, hitsSummary, listCommands, listEvents, listRuns, migrate, neonLedger, noteRun, setPrUrl, type CommandRow } from "../../src/garage/db/ledger.ts";
+import { addOrder, approve, claimCommand, claimOrderTick, deleteOrder, enqueueCommand, finishCommand, getRun, hitsSummary, listCommands, listEvents, listOrders, listRuns, migrate, neonLedger, noteRun, setOrderEnabled, setPrUrl, type CommandRow } from "../../src/garage/db/ledger.ts";
+import { dueOrders, ORDERABLE_HATS, orderLine, parseEveryHours } from "../../src/garage/core/orders.ts";
+import { libraryMarkdown } from "../../src/garage/core/notion.ts";
+import { fileReport, notionWired, pullLibrary } from "../../src/garage/notion.ts";
 import { hitsLines } from "../../src/garage/core/hits.ts";
 import { CHARTER_FILE, HALT_FILE, runOnce } from "./run.ts";
 import { HATS, type Hat } from "./hats.ts";
@@ -44,6 +50,8 @@ const BANNER = String.raw`
 const REPO = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 const MACHINE = process.env.GARAGE_MACHINE_NAME || hostname().toLowerCase().split(".")[0];
 const MODEL = process.env.GARAGE_MODEL || "claude-sonnet-5-5";
+/** Where the founder mirrors the library's primaries on this Mac; readable by the agent, never written. */
+const LIBRARY_ROOT = process.env.GARAGE_LIBRARY_ROOT || join(process.env.HOME ?? "", ".garage", "library");
 
 const [, , command, ...rawArgs] = process.argv;
 const { args, flags } = splitFlags(rawArgs);
@@ -64,6 +72,9 @@ async function main(): Promise<number> {
       console.log(`  halt      ${existsSync(join(REPO, HALT_FILE)) ? "ON: " + HALT_FILE + " is present, runs exit at launch" : "off"}`);
       console.log(`  sdk       @anthropic-ai/claude-agent-sdk ${sdk.version}`);
       console.log(`  hats      ${Object.keys(HATS).join(", ")}`);
+      const nw = notionWired();
+      console.log(`  notion    token ${nw.token ? "present" : "absent"} · library db ${nw.db ? "set" : "unset"} · report page ${nw.reportPage ? "set" : "unset"}`);
+      console.log(`  library   ${LIBRARY_ROOT}${existsSync(LIBRARY_ROOT) ? "" : " (not on this Mac)"}`);
       if (ledgerWired()) {
         const spent = await neonLedger.spentTodayUsd();
         console.log(`  today     ${prettyUsd(spent)} spent of ${prettyUsd(PER_DAY_USD)}`);
@@ -102,6 +113,13 @@ async function main(): Promise<number> {
         if (existsSync(join(REPO, HALT_FILE))) {
           console.log(`  HALT is on; not picking anything up`);
         } else {
+          // Standing orders: a due order becomes a queued command, once, whichever host ticks first.
+          for (const o of dueOrders(await listOrders(), new Date())) {
+            if (await claimOrderTick(o.id, o.everyHours)) {
+              const c = await enqueueCommand({ hat: o.hat, prompt: o.prompt, ticket: o.ticket, by: `order #${o.id}` });
+              console.log(`  order #${o.id} (${o.hat}) due → command #${c.id}`);
+            }
+          }
           const c = await claimCommand(MACHINE);
           if (c) {
             console.log(`  command #${c.id} · ${c.hat}${c.ticket ? ` · ${c.ticket}` : ""} · from ${c.createdBy}`);
@@ -151,6 +169,53 @@ async function main(): Promise<number> {
       const s = await hitsSummary(Number(args[0] ?? 7));
       for (const line of hitsLines(s)) console.log(line);
       return 0;
+    }
+    case "orders": {
+      const sub = args[0];
+      if (sub === "add") {
+        const hat = args[1];
+        const every = parseEveryHours(typeof flags.every === "string" ? flags.every : undefined);
+        if (!hat || !ORDERABLE_HATS.includes(hat) || every === null) {
+          console.error(`orders add <${ORDERABLE_HATS.join("|")}> --every <hours 1..336> [--ticket T] [--prompt "..."]`);
+          return 2;
+        }
+        const o = await addOrder({ hat, prompt: typeof flags.prompt === "string" ? flags.prompt : null, ticket: typeof flags.ticket === "string" ? flags.ticket : null, everyHours: every, by: `${process.env.USER ?? "someone"}@${MACHINE}` });
+        console.log(orderLine(o));
+        return 0;
+      }
+      if ((sub === "on" || sub === "off" || sub === "rm") && args[1] && /^\d+$/.test(args[1])) {
+        if (sub === "rm") await deleteOrder(Number(args[1]));
+        else await setOrderEnabled(Number(args[1]), sub === "on");
+        console.log(`order #${args[1]} ${sub}`);
+        return 0;
+      }
+      const orders = await listOrders();
+      if (orders.length === 0) console.log("no standing orders");
+      for (const o of orders) console.log(orderLine(o));
+      return 0;
+    }
+    case "library": {
+      if (args[0] === "pull") {
+        const { rows, databaseId } = await pullLibrary();
+        const md = libraryMarkdown(rows, new Date().toISOString().slice(0, 16).replace("T", " ") + " UTC", databaseId);
+        writeFileSync(join(REPO, "src/garage/LIBRARY.md"), md);
+        console.log(`pulled ${rows.length} source${rows.length === 1 ? "" : "s"} into src/garage/LIBRARY.md`);
+        for (const r of rows) console.log(`  ${r.name} · ${r.status || "unread"}${r.scrub.length ? ` · scrub: ${r.scrub.join(", ")}` : ""}`);
+        return 0;
+      }
+      if (args[0] === "file" && args[1]) {
+        const r = await getRun(args[1]);
+        if (!r || !r.report) {
+          console.error("library file: no such run, or no report");
+          return 1;
+        }
+        const url = await fileReport(`${r.hat}${r.ticket ? ` ${r.ticket}` : ""} · run ${r.id.slice(0, 8)} · ${r.startedAt.slice(0, 10)}`, r.report);
+        await noteRun(r.id, `filed in Notion: ${url}`);
+        console.log(`filed: ${url}`);
+        return 0;
+      }
+      console.error("library pull | library file <run-id>");
+      return 2;
     }
     case "runs": {
       const rows = await listRuns(Number(args[0] ?? 20));
@@ -220,7 +285,7 @@ async function main(): Promise<number> {
     }
     default: {
       console.log(BANNER);
-      console.log("  garage doctor | migrate | run [hat] | work [--once] | queue | command <hat> | hits [days] | runs [n] | show <id> | halt [on|off] | hash | approve <hash> | publish <run>");
+      console.log("  garage doctor | migrate | run [hat] | work [--once] | queue | command <hat> | orders | library pull|file | hits [days] | runs [n] | show <id> | halt [on|off] | hash | approve <hash> | publish <run>");
       return command ? 2 : 0;
     }
   }
@@ -250,6 +315,7 @@ async function oneRun(hatName: string, hat: Hat, o: { prompt: string | null; tic
       query,
       log: (line) => console.log(`  · ${line}`),
       git: { commitAll, diffHash },
+      readRoots: existsSync(LIBRARY_ROOT) ? [LIBRARY_ROOT] : [],
     },
     { hat: hatName, prompt: o.prompt ? `${hat.prompt}\n\n## The command\n\n${o.prompt}` : hat.prompt, rung: hat.rung, ticket: o.ticket, model: o.model, maxTurns: hat.maxTurns, diffHash: null, commandId: o.commandId, branch },
   );

@@ -19,6 +19,8 @@ export type GuardContext = {
   approvedDiffHashes: ReadonlySet<string>;
   /** sha256 of the diff on the agent's branch right now, or null when there is none. */
   diffHash: string | null;
+  /** Directories outside the repo the agent may read, such as the library's primaries. Never written. */
+  readRoots?: readonly string[];
 };
 
 export type GuardName = "rung" | "touch" | "gate" | "secrets";
@@ -64,7 +66,11 @@ export function decide(call: ToolCall, ctx: GuardContext): Verdict {
     const p = pathOf(input);
     if (p === null) return { allow: true };
     const rel = inside(ctx.cwd, p);
-    if (rel === null) return deny("secrets", `${tool} outside the repo: ${p}`);
+    if (rel === null) {
+      const root = (ctx.readRoots ?? []).find((r) => inside(r, p) !== null);
+      if (root && !isSecretPath(p)) return { allow: true };
+      return deny("secrets", `${tool} outside the repo: ${p}`);
+    }
     if (isSecretPath(rel)) return deny("secrets", `${tool} of a secret path: ${rel}`);
     return { allow: true };
   }

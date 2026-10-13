@@ -86,3 +86,13 @@ test("inside() judges paths relative to the repo root", () => {
   assert.equal(inside(CWD, `${CWD}/../elsewhere`), null);
   assert.equal(inside(CWD, "/tmp/x"), null);
 });
+
+test("the library mirror is a read root: readable at every rung, never writable", () => {
+  const lib = "/Users/wrasse/.garage/library";
+  const withLib = ctx({ readRoots: [lib] });
+  assert.deepEqual(decide({ tool: "Read", input: { file_path: `${lib}/2509.00001.pdf` } }, withLib), { allow: true });
+  assert.deepEqual(decide({ tool: "Glob", input: { pattern: "*.pdf", path: lib } }, withLib), { allow: true });
+  denied(decide({ tool: "Read", input: { file_path: "/Users/wrasse/.garage/other.txt" } }, withLib), "secrets", /outside the repo/);
+  denied(decide({ tool: "Read", input: { file_path: `${lib}/../.ssh/id_ed25519` } }, withLib), "secrets", /outside the repo/);
+  denied(decide({ tool: "Write", input: { file_path: `${lib}/note.md` } }, { ...withLib, rung: 1 }), "touch", /outside the repo/);
+});

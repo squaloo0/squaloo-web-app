@@ -1,6 +1,6 @@
 # The Garage — charter for wrasse
 
-**Version 0.3, drafted 2026-10-13.** Not yet binding: under Solomon's rule 17 a charter earns that
+**Version 0.4, drafted 2026-10-13.** Not yet binding: under Solomon's rule 17 a charter earns that
 label by review, not by authorship. It binds the day the founder reads it end to end and says so,
 and the changelog at the bottom records that date.
 
@@ -142,7 +142,13 @@ changelog. None is skipped. There is no rung on which wrasse merges.
 |---|---|---|
 | 0 | Read, measure, and write reports to its own ledger and Notion library. | Being switched on. |
 | 1 | Open PRs behind the gate, with a banked prediction each. | Five rung-0 runs whose reports were checked and held (rule 19: checked by a second instrument, not by rereading). **Ruled: 2026-10-13**, after runs `c793e6ea`, `7a2a55a1`, `894a1588` and the two that followed, read by the founder from this session and the dashboard. |
-| 2 | Run on a schedule instead of only on command. | Ten gate verdicts with no guard firing in anger and no retracted claim. |
+| 2 | Run **proposals** on a schedule instead of only on command. | Ten gate verdicts with no guard firing in anger and no retracted claim. |
+
+**Standing orders (0.4).** A report-only hat (`report`, `study`) may run on a standing order
+from rung 1 on, because a report's mistakes announce themselves on the next read and nothing
+it does is latent (Solomon's pod v2 line). The order is a row the founder writes on the
+dashboard; the work loop re-queues it every N hours; the budget caps still bound every run and
+every day; a proposal never runs on a schedule below rung 2.
 | 3 | Command its own sub-runs (a research run spawning a design run). | Revisited only after a month at rung 2, with the ledger as the evidence. |
 
 A guard firing in anger (a refused push, a budget halt, a touch-list refusal) is not a failure
@@ -158,7 +164,7 @@ each with one owner and one write path.
 
 | Memory | What it holds | Who writes | Where |
 |---|---|---|---|
-| **The library** | Sources: papers, studies, and documents on pricing, conversion, web performance, design. One row per source, with status, scrub flags, and wrasse's notes under its own heading. Same shape as the Gate E Research Library. | The founder adds sources. Wrasse adds notes and may propose a source. | Notion, "Garage Research Library". Primary PDFs mirrored on disk with a SHA256SUMS file, read through the second instrument (rule 19). |
+| **The library** | Sources: papers, studies, and documents on pricing, conversion, web performance, design. One row per source, with status, scrub flags, and wrasse's notes under its own heading. Same shape as the Gate E Research Library. | The founder adds sources. Wrasse studies them and proposes rows and notes in its reports; the harness files study reports in Notion; the founder folds notes back into the row. | Notion, "Garage Research Library", read with an integration token that lives on the host and never in the agent's environment. `src/garage/LIBRARY.md` is its generated mirror (`garage library pull`). Primaries mirrored on disk under `~/.garage/library/`, the one place outside the repo the agent may read, never write. |
 | **The register** | Claims about this site: what is supported, qualified, not yet true, do-not-quote, retracted. Same vocabulary as Solomon's claims register. | Wrasse proposes rows; the founder ratifies. | `src/garage/REGISTER.md`. |
 | **The ledger** | Every run: hat, ticket, charter hash, cost, tool calls, verdict, prediction id. Append-only. | The harness, never the agent directly. | Neon, `garage_runs` and friends. |
 | **The lessons** | What the retrospectives concluded. Short. | The founder, at charter-health passes. Wrasse may draft. | `src/garage/LESSONS.md`. |
@@ -234,6 +240,10 @@ from this exercise. Every entry names the incident that caused it or the review 
 it.
 
 ## Changelog
+
+- **0.4, 2026-10-13.** The study: standing orders for report-only hats from rung 1, the
+  library's home in Notion with a generated mirror and a read-only primaries root, the
+  `study` hat. Proposals on a schedule stay rung 2. Still a draft under rule 17.
 
 - **0.3, 2026-10-13.** Wrasse reaches rung 1 by founder ruling, after five rung-0 runs
   observed by the founder. The `llms.txt` sources (`src/lib/llms*.ts`) join the proposal
