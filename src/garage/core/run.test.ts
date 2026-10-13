@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { outcomeOf, runLine, runPreamble, type RunRow } from "./run.ts";
+import { ledgerMemory, outcomeOf, runLine, runPreamble, type RunRow } from "./run.ts";
 
 test("guard 2: a budget-stopped query lands as halted: budget, a turn-stopped one as halted: turns", () => {
   assert.deepEqual(outcomeOf("error_max_budget_usd"), { status: "halted", haltReason: "budget" });
@@ -30,6 +30,10 @@ test("a run line carries its boundary: machine, rung, cost, turns, charter", () 
     denials: 1,
     report: null,
     error: null,
+    commandId: null,
+    branch: null,
+    diffHash: null,
+    verdict: null,
   };
   assert.equal(runLine(row), "3f2a9c1e · 2026-10-13 06:10Z · air · report · rung 0 · halted: budget · $2.00 · 7 turns · 12 tools · 1 refused · charter 0.1 e3b0c442");
 });
@@ -40,4 +44,39 @@ test("the preamble tells the agent what it cannot otherwise know", () => {
   assert.match(p, /Rung: 0\. Hat: report\. No ticket/);
   assert.match(p, /Budget for this run: \$2\.00/);
   assert.match(p, /Do not claim to remember/);
+});
+
+test("the ledger block is the agent's whole memory of itself: lines, then the newest report", () => {
+  const base: RunRow = {
+    id: "c793e6ea-0000-0000-0000-000000000000",
+    startedAt: "2026-10-13T06:49:00.000Z",
+    finishedAt: null,
+    machine: "air",
+    hat: "report",
+    rung: 0,
+    ticket: null,
+    prompt: "x",
+    charterVersion: "0.1",
+    charterHash: "0983781777b6",
+    model: "m",
+    status: "done",
+    haltReason: null,
+    costUsd: 0.17,
+    turns: 16,
+    toolCalls: 15,
+    denials: 0,
+    report: "**Report.** Remora is the only thing that takes money.",
+    error: null,
+    commandId: null,
+    branch: null,
+    diffHash: null,
+    verdict: null,
+  };
+  assert.match(ledgerMemory([]), /You are the first/);
+  const m = ledgerMemory([{ ...base, id: "aaaaaaaa-1", report: null, status: "failed" }, base]);
+  assert.match(m, /The last 2 runs, newest first:/);
+  assert.match(m, /- aaaaaaaa · .* · failed/);
+  assert.match(m, /The newest report, from run c793e6ea \(report, 2026-10-13 06:49 UTC\):/);
+  assert.match(m, /Remora is the only thing that takes money/);
+  assert.match(ledgerMemory([base], 10), /\[truncated\]/);
 });

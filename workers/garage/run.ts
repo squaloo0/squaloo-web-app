@@ -14,7 +14,7 @@ import { charterHash, charterVersion } from "../../src/garage/core/charter.ts";
 import { budgetBeforeLaunch } from "../../src/garage/core/budget.ts";
 import { agentEnv, findSecretShapes } from "../../src/garage/core/secrets.ts";
 import { decide, toolsForRung, type GuardContext, type Rung } from "../../src/garage/core/guard.ts";
-import { outcomeOf, runPreamble, type HaltReason, type RunStatus } from "../../src/garage/core/run.ts";
+import { ledgerMemory, outcomeOf, runPreamble, type HaltReason, type RunStatus } from "../../src/garage/core/run.ts";
 import type { FinishRun, Ledger } from "../../src/garage/db/ledger.ts";
 
 export const HALT_FILE = "src/garage/HALT";
@@ -43,6 +43,8 @@ export type RunRequest = {
   maxTurns: number;
   /** sha256 of the branch's diff, for the gate; null at rung 0 where nothing is written. */
   diffHash: string | null;
+  /** The dashboard command this run answers, when it answers one. */
+  commandId: number | null;
 };
 
 export type RunResult = FinishRun & { id: string };
@@ -58,6 +60,7 @@ export async function runOnce(deps: Deps, req: RunRequest): Promise<RunResult> {
     charterVersion: charterVersion(charterText) ?? "unversioned",
     charterHash: charterHash(charterText),
     model: req.model,
+    commandId: req.commandId,
   };
 
   // Guard 6: the halt file. One row, one event, and out.
@@ -75,6 +78,7 @@ export async function runOnce(deps: Deps, req: RunRequest): Promise<RunResult> {
     return finish(deps, id, blank("halted", "day-budget"));
   }
 
+  const memory = ledgerMemory(await deps.ledger.recentRuns(10));
   const id = await deps.ledger.startRun(base);
   const ctx: GuardContext = { rung: req.rung, cwd: deps.cwd, approvedDiffHashes: await deps.ledger.approvedHashes(), diffHash: req.diffHash };
   const abort = new AbortController();
@@ -147,7 +151,7 @@ export async function runOnce(deps: Deps, req: RunRequest): Promise<RunResult> {
   let result: SDKResultMessage | null = null;
   let error: string | null = null;
   try {
-    for await (const m of deps.query({ prompt: req.prompt, options })) {
+    for await (const m of deps.query({ prompt: memory + "\n---\n\n" + req.prompt, options })) {
       if (m.type === "assistant") {
         for (const block of m.message.content) {
           if (block.type === "text" && (await haltOnSecret("the agent's own words", null, block.text))) break;

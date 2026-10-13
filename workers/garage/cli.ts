@@ -5,6 +5,9 @@
  *   doctor                  charter version and hash, auth source, ledger, HALT, SDK
  *   migrate                 apply src/garage/db/migrations to Neon
  *   run [hat] [--ticket T] [--model M] [--prompt "..."]   one run of wrasse, headless
+ *   work [--once] [--every S]   pick up dashboard commands and run them, forever or once
+ *   queue [n]               the last n commands
+ *   command <hat> [--prompt "..."] [--ticket T]   queue a command from here instead of the dashboard
  *   runs [n]                the last n run rows
  *   show <id>               one run: its row, its events, its report
  *   halt [on|off]           the HALT file; no argument prints its state
@@ -24,9 +27,9 @@ import { charterBinding, charterHash, charterVersion } from "../../src/garage/co
 import { PER_DAY_USD, PER_RUN_USD, prettyUsd } from "../../src/garage/core/budget.ts";
 import { runLine } from "../../src/garage/core/run.ts";
 import { ledgerWired } from "../../src/garage/db/client.ts";
-import { approve, getRun, listEvents, listRuns, migrate, neonLedger } from "../../src/garage/db/ledger.ts";
+import { approve, claimCommand, enqueueCommand, finishCommand, getRun, listCommands, listEvents, listRuns, migrate, neonLedger, type CommandRow } from "../../src/garage/db/ledger.ts";
 import { CHARTER_FILE, HALT_FILE, runOnce } from "./run.ts";
-import { HATS } from "./hats.ts";
+import { HATS, type Hat } from "./hats.ts";
 import { resolveAuth } from "./auth.ts";
 
 const BANNER = String.raw`
@@ -79,35 +82,64 @@ async function main(): Promise<number> {
         console.error(`run: no hat named ${hatName}; have ${Object.keys(HATS).join(", ")}`);
         return 2;
       }
-      const auth = resolveAuth(process.env);
-      const prompt = typeof flags.prompt === "string" ? flags.prompt : hat.prompt;
-      const model = typeof flags.model === "string" ? flags.model : MODEL;
       console.log(BANNER);
-      console.log(`  ${MACHINE} · hat ${hatName} · rung ${hat.rung} · ${model} · auth ${auth.source}`);
-      const started = Date.now();
-      const r = await runOnce(
-        {
-          now: () => new Date(),
-          machine: MACHINE,
-          cwd: REPO,
-          exists: existsSync,
-          readFile: (p) => readFileSync(p, "utf8"),
-          env: { ...process.env, ...auth.patch },
-          ledger: neonLedger,
-          query,
-          log: (line) => console.log(`  · ${line}`),
-        },
-        { hat: hatName, prompt, rung: hat.rung, ticket: typeof flags.ticket === "string" ? flags.ticket : null, model, maxTurns: hat.maxTurns, diffHash: null },
-      );
-      const secs = Math.round((Date.now() - started) / 1000);
-      console.log("");
-      console.log(`  run ${r.id.slice(0, 8)} · ${r.status}${r.haltReason ? `: ${r.haltReason}` : ""} · ${prettyUsd(r.costUsd)} · ${r.turns} turn${r.turns === 1 ? "" : "s"} · ${r.toolCalls} tool${r.toolCalls === 1 ? "" : "s"} · ${r.denials} refused · ${secs}s`);
-      if (r.error) console.log(`  error: ${r.error}`);
-      if (r.report) {
-        console.log("");
-        console.log(r.report.split("\n").map((l) => "  " + l).join("\n"));
-      }
+      const r = await oneRun(hatName, hat, {
+        prompt: typeof flags.prompt === "string" ? flags.prompt : null,
+        ticket: typeof flags.ticket === "string" ? flags.ticket : null,
+        model: typeof flags.model === "string" ? flags.model : MODEL,
+        commandId: null,
+      });
       return r.status === "done" ? 0 : 1;
+    }
+    case "work": {
+      const every = Math.max(5, Number(flags.every ?? 15)) * 1000;
+      console.log(BANNER);
+      console.log(`  ${MACHINE} · working the queue${flags.once ? " once" : ` every ${every / 1000}s`} · ctrl-c to stop`);
+      for (;;) {
+        if (existsSync(join(REPO, HALT_FILE))) {
+          console.log(`  HALT is on; not picking anything up`);
+        } else {
+          const c = await claimCommand(MACHINE);
+          if (c) {
+            console.log(`  command #${c.id} · ${c.hat}${c.ticket ? ` · ${c.ticket}` : ""} · from ${c.createdBy}`);
+            const hat = HATS[c.hat];
+            if (!hat) {
+              await finishCommand(c.id, "failed", null);
+              console.log(`  no hat named ${c.hat}; marked failed`);
+            } else {
+              let r: Awaited<ReturnType<typeof oneRun>> | null = null;
+              try {
+                r = await oneRun(c.hat, hat, { prompt: c.prompt, ticket: c.ticket, model: MODEL, commandId: c.id });
+              } finally {
+                await finishCommand(c.id, r && r.status === "done" ? "done" : "failed", r?.id ?? null);
+              }
+            }
+            if (flags.once) return 0;
+            continue;
+          }
+          if (flags.once) {
+            console.log("  the queue is empty");
+            return 0;
+          }
+        }
+        await new Promise((res) => setTimeout(res, every));
+      }
+    }
+    case "queue": {
+      const rows = await listCommands(Number(args[0] ?? 20));
+      if (rows.length === 0) console.log("no commands yet");
+      for (const c of rows) console.log(commandLine(c));
+      return 0;
+    }
+    case "command": {
+      const hatName = args[0];
+      if (!hatName || !HATS[hatName]) {
+        console.error(`command: which hat? have ${Object.keys(HATS).join(", ")}`);
+        return 2;
+      }
+      const c = await enqueueCommand({ hat: hatName, prompt: typeof flags.prompt === "string" ? flags.prompt : null, ticket: typeof flags.ticket === "string" ? flags.ticket : null, by: `${process.env.USER ?? "someone"}@${MACHINE}` });
+      console.log(`queued #${c.id}; a host running \`garage work\` will pick it up`);
+      return 0;
     }
     case "runs": {
       const rows = await listRuns(Number(args[0] ?? 20));
@@ -170,10 +202,46 @@ async function main(): Promise<number> {
     }
     default: {
       console.log(BANNER);
-      console.log("  garage doctor | migrate | run [hat] | runs [n] | show <id> | halt [on|off] | hash | approve <hash>");
+      console.log("  garage doctor | migrate | run [hat] | work [--once] | queue | command <hat> | runs [n] | show <id> | halt [on|off] | hash | approve <hash>");
       return command ? 2 : 0;
     }
   }
+}
+
+async function oneRun(hatName: string, hat: Hat, o: { prompt: string | null; ticket: string | null; model: string; commandId: number | null }) {
+  const auth = resolveAuth(process.env);
+  console.log(`  ${MACHINE} · hat ${hatName} · rung ${hat.rung} · ${o.model} · auth ${auth.source}`);
+  const started = Date.now();
+  const r = await runOnce(
+    {
+      now: () => new Date(),
+      machine: MACHINE,
+      cwd: REPO,
+      exists: existsSync,
+      readFile: (p) => readFileSync(p, "utf8"),
+      env: { ...process.env, ...auth.patch },
+      ledger: neonLedger,
+      query,
+      log: (line) => console.log(`  · ${line}`),
+    },
+    { hat: hatName, prompt: o.prompt ?? hat.prompt, rung: hat.rung, ticket: o.ticket, model: o.model, maxTurns: hat.maxTurns, diffHash: null, commandId: o.commandId },
+  );
+  const secs = Math.round((Date.now() - started) / 1000);
+  console.log("");
+  console.log(`  run ${r.id.slice(0, 8)} · ${r.status}${r.haltReason ? `: ${r.haltReason}` : ""} · ${prettyUsd(r.costUsd)} · ${r.turns} turn${r.turns === 1 ? "" : "s"} · ${r.toolCalls} tool${r.toolCalls === 1 ? "" : "s"} · ${r.denials} refused · ${secs}s`);
+  if (r.error) console.log(`  error: ${r.error}`);
+  if (r.report) {
+    console.log("");
+    console.log(r.report.split("\n").map((l) => "  " + l).join("\n"));
+  }
+  console.log("");
+  return r;
+}
+
+function commandLine(c: CommandRow): string {
+  return [`#${c.id}`, c.createdAt.slice(0, 16).replace("T", " ") + "Z", c.hat, c.ticket ?? "", c.status, c.pickedBy ? `on ${c.pickedBy}` : "", c.runId ? `run ${c.runId.slice(0, 8)}` : "", c.prompt ? `"${c.prompt.slice(0, 50)}${c.prompt.length > 50 ? "…" : ""}"` : ""]
+    .filter((x) => x.length > 0)
+    .join(" · ");
 }
 
 function readCharter(): string {

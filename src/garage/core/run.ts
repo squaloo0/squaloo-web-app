@@ -27,6 +27,10 @@ export type RunRow = {
   denials: number;
   report: string | null;
   error: string | null;
+  commandId: number | null;
+  branch: string | null;
+  diffHash: string | null;
+  verdict: "approved" | "denied" | null;
 };
 
 export type Outcome = { status: RunStatus; haltReason: HaltReason | null };
@@ -83,7 +87,23 @@ export function runPreamble(p: { machine: string; rung: Rung; hat: string; ticke
     `- Tools you have: ${p.tools.join(", ")}. Every call is judged by the guards; a refusal is recorded, not punished.`,
     `- Budget for this run: ${prettyUsd(p.capUsd)}. Turns: at most ${p.maxTurns}. The harness stops you at either; stop yourself first.`,
     "- Your final message is the report. It is stored verbatim in the ledger, so write it for the founder: findings first, tagged [sourced] with a path, or [hypothesis]. Name the one thing you would ask.",
-    "- You have no memory of earlier runs except what the prompt gives you. Do not claim to remember.",
+    "- Your memory is exactly three things: the ledger block at the top of your prompt, src/garage/REGISTER.md (what is proven about this site, and the founder's answers), and src/garage/LESSONS.md. Read the two files before anything else. Do not claim to remember anything else.",
     "",
   ].join("\n");
+}
+
+/**
+ * The ledger block that opens every prompt: the last runs, one line each, and the newest
+ * report in full (bounded). This is the whole of the agent's memory of itself.
+ */
+export function ledgerMemory(rows: RunRow[], maxReportChars = 6000): string {
+  if (rows.length === 0) return "## The ledger says\n\nNo runs before this one. You are the first.\n";
+  const lines = rows.map((r) => `- ${runLine(r)}`);
+  const last = rows.find((r) => r.report !== null) ?? null;
+  const out = ["## The ledger says", "", `The last ${rows.length} run${rows.length === 1 ? "" : "s"}, newest first:`, ...lines, ""];
+  if (last) {
+    const text = last.report!.length > maxReportChars ? last.report!.slice(0, maxReportChars) + "\n[truncated]" : last.report!;
+    out.push(`The newest report, from run ${shortId(last.id)} (${last.hat}, ${last.startedAt.slice(0, 16).replace("T", " ")} UTC):`, "", text, "");
+  }
+  return out.join("\n");
 }
