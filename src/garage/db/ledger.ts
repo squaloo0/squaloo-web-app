@@ -15,6 +15,7 @@ export type StartRun = {
   charterVersion: string;
   charterHash: string;
   model: string;
+  commandId: number | null;
 };
 
 export type FinishRun = {
@@ -26,6 +27,8 @@ export type FinishRun = {
   denials: number;
   report: string | null;
   error: string | null;
+  branch?: string | null;
+  diffHash?: string | null;
 };
 
 export type EventKind = "tool" | "deny" | "halt" | "note";
@@ -37,6 +40,8 @@ export type Ledger = {
   addEvent(runId: string, kind: EventKind, tool: string | null, detail: string): Promise<void>;
   spentTodayUsd(): Promise<number>;
   approvedHashes(): Promise<Set<string>>;
+  /** The newest rows first, for the run's memory block. */
+  recentRuns(limit: number): Promise<RunRow[]>;
 };
 
 type Row = {
@@ -59,6 +64,10 @@ type Row = {
   denials: number;
   report: string | null;
   error: string | null;
+  command_id: number | string | null;
+  branch: string | null;
+  diff_hash: string | null;
+  verdict: string | null;
 };
 
 function fromRow(r: Row): RunRow {
@@ -82,21 +91,26 @@ function fromRow(r: Row): RunRow {
     denials: r.denials,
     report: r.report,
     error: r.error,
+    commandId: r.command_id === null ? null : Number(r.command_id),
+    branch: r.branch,
+    diffHash: r.diff_hash,
+    verdict: r.verdict as RunRow["verdict"],
   };
 }
 
 export const neonLedger: Ledger = {
   async startRun(r) {
     const rows = (await sql()`
-      INSERT INTO garage_runs (machine, hat, rung, ticket, prompt, charter_version, charter_hash, model)
-      VALUES (${r.machine}, ${r.hat}, ${r.rung}, ${r.ticket}, ${r.prompt}, ${r.charterVersion}, ${r.charterHash}, ${r.model})
+      INSERT INTO garage_runs (machine, hat, rung, ticket, prompt, charter_version, charter_hash, model, command_id)
+      VALUES (${r.machine}, ${r.hat}, ${r.rung}, ${r.ticket}, ${r.prompt}, ${r.charterVersion}, ${r.charterHash}, ${r.model}, ${r.commandId})
       RETURNING id`) as { id: string }[];
     return rows[0].id;
   },
   async finishRun(id, f) {
     await sql()`
       UPDATE garage_runs SET finished_at = now(), status = ${f.status}, halt_reason = ${f.haltReason}, cost_usd = ${f.costUsd},
-        turns = ${f.turns}, tool_calls = ${f.toolCalls}, denials = ${f.denials}, report = ${f.report}, error = ${f.error}
+        turns = ${f.turns}, tool_calls = ${f.toolCalls}, denials = ${f.denials}, report = ${f.report}, error = ${f.error},
+        branch = ${f.branch ?? null}, diff_hash = ${f.diffHash ?? null}
       WHERE id = ${id}`;
   },
   async addEvent(runId, kind, tool, detail) {
@@ -109,6 +123,9 @@ export const neonLedger: Ledger = {
   async approvedHashes() {
     const rows = (await sql()`SELECT diff_hash FROM garage_approvals`) as { diff_hash: string }[];
     return new Set(rows.map((r) => r.diff_hash));
+  },
+  async recentRuns(limit) {
+    return listRuns(limit);
   },
 };
 
@@ -159,4 +176,99 @@ export function splitStatements(text: string): string[] {
     .split(";")
     .map((s) => s.trim())
     .filter((s) => s.length > 0);
+}
+
+/** Runs that wrote a diff and have not been ruled on: the founder's queue. */
+export async function gateQueue(): Promise<RunRow[]> {
+  const rows = (await sql()`SELECT * FROM garage_runs WHERE diff_hash IS NOT NULL AND verdict IS NULL ORDER BY started_at DESC`) as Row[];
+  return rows.map(fromRow);
+}
+
+/** The founder's ruling on a run's diff. Approve writes the approval row the gate reads. */
+export async function rule(runId: string, verdict: "approved" | "denied", by: string, note: string | null): Promise<RunRow | null> {
+  const r = await getRun(runId);
+  if (!r) return null;
+  if (verdict === "approved" && r.diffHash) await approve(r.diffHash, by, note, r.id);
+  await sql()`UPDATE garage_runs SET verdict = ${verdict} WHERE id = ${r.id}`;
+  await sql()`INSERT INTO garage_events (run_id, kind, tool, detail) VALUES (${r.id}, 'note', null, ${`${verdict} by ${by}${note ? ": " + note : ""}`})`;
+  return { ...r, verdict };
+}
+
+export type CommandStatus = "queued" | "running" | "done" | "failed" | "cancelled";
+
+export type CommandRow = {
+  id: number;
+  createdAt: string;
+  createdBy: string;
+  hat: string;
+  prompt: string | null;
+  ticket: string | null;
+  status: CommandStatus;
+  pickedBy: string | null;
+  pickedAt: string | null;
+  finishedAt: string | null;
+  runId: string | null;
+};
+
+type CmdRow = {
+  id: number | string;
+  created_at: string;
+  created_by: string;
+  hat: string;
+  prompt: string | null;
+  ticket: string | null;
+  status: string;
+  picked_by: string | null;
+  picked_at: string | null;
+  finished_at: string | null;
+  run_id: string | null;
+};
+
+function fromCmd(c: CmdRow): CommandRow {
+  return {
+    id: Number(c.id),
+    createdAt: new Date(c.created_at).toISOString(),
+    createdBy: c.created_by,
+    hat: c.hat,
+    prompt: c.prompt,
+    ticket: c.ticket,
+    status: c.status as CommandStatus,
+    pickedBy: c.picked_by,
+    pickedAt: c.picked_at ? new Date(c.picked_at).toISOString() : null,
+    finishedAt: c.finished_at ? new Date(c.finished_at).toISOString() : null,
+    runId: c.run_id,
+  };
+}
+
+export async function enqueueCommand(c: { hat: string; prompt: string | null; ticket: string | null; by: string }): Promise<CommandRow> {
+  const rows = (await sql()`INSERT INTO garage_commands (created_by, hat, prompt, ticket) VALUES (${c.by}, ${c.hat}, ${c.prompt}, ${c.ticket}) RETURNING *`) as CmdRow[];
+  return fromCmd(rows[0]);
+}
+
+/** One statement: the oldest queued command becomes this host's, or null when the queue is empty. */
+export async function claimCommand(host: string): Promise<CommandRow | null> {
+  const rows = (await sql()`
+    UPDATE garage_commands SET status = 'running', picked_by = ${host}, picked_at = now()
+    WHERE id = (SELECT id FROM garage_commands WHERE status = 'queued' ORDER BY id LIMIT 1 FOR UPDATE SKIP LOCKED)
+    RETURNING *`) as CmdRow[];
+  return rows[0] ? fromCmd(rows[0]) : null;
+}
+
+export async function finishCommand(id: number, status: "done" | "failed", runId: string | null): Promise<void> {
+  await sql()`UPDATE garage_commands SET status = ${status}, finished_at = now(), run_id = ${runId} WHERE id = ${id}`;
+}
+
+export async function cancelCommand(id: number): Promise<boolean> {
+  const rows = (await sql()`UPDATE garage_commands SET status = 'cancelled', finished_at = now() WHERE id = ${id} AND status = 'queued' RETURNING id`) as { id: number }[];
+  return rows.length > 0;
+}
+
+export async function listCommands(limit = 20): Promise<CommandRow[]> {
+  const rows = (await sql()`SELECT * FROM garage_commands ORDER BY id DESC LIMIT ${limit}`) as CmdRow[];
+  return rows.map(fromCmd);
+}
+
+export async function queuedCount(): Promise<number> {
+  const rows = (await sql()`SELECT count(*)::int AS n FROM garage_commands WHERE status = 'queued'`) as { n: number }[];
+  return rows[0]?.n ?? 0;
 }

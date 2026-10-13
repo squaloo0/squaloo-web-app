@@ -11,7 +11,7 @@ export const HATS: Record<string, Hat> = {
     prompt: [
       "Rung 0, hat: report. Read and report; you cannot write, and that is correct.",
       "",
-      "Read README.md, one page.tsx per route under src/app (Glob them), the first 80 lines of src/remora/README.md, and section 1 of src/garage/CHARTER.md.",
+      "Read src/garage/REGISTER.md and src/garage/LESSONS.md first: the founder's answers and rulings live there and outrank anything you infer. Then README.md, one page.tsx per route under src/app (Glob them), the first 80 lines of src/remora/README.md, and section 1 of src/garage/CHARTER.md.",
       "",
       "Then write the report, under 600 words, for the founder:",
       "1. What the site sells today and where money can enter it. Cite the file that implements each entry point.",

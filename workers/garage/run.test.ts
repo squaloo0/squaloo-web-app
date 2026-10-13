@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import type { HookCallback, Options, SDKMessage } from "@anthropic-ai/claude-agent-sdk";
 import { runOnce, type Deps, type RunRequest } from "./run.ts";
 import type { EventKind, FinishRun, Ledger, StartRun } from "../../src/garage/db/ledger.ts";
+import type { RunRow } from "../../src/garage/core/run.ts";
 
 const CHARTER = "# The Garage — charter for wrasse\n\n**Version 0.1, drafted 2026-10-13.** Not yet binding.\n";
 const CWD = "/Users/wrasse/squaloo-web-app";
@@ -41,7 +42,7 @@ type Notebook = {
   events: { runId: string; kind: EventKind; tool: string | null; detail: string }[];
 };
 
-function fakeDeps(over: { halt?: boolean; spent?: number; charter?: string; script?: Step[]; env?: Record<string, string> } = {}) {
+function fakeDeps(over: { halt?: boolean; spent?: number; charter?: string; script?: Step[]; env?: Record<string, string>; recent?: RunRow[] } = {}) {
   const book: Notebook = { runs: new Map(), events: [] };
   const ledger: Ledger = {
     async startRun(r) {
@@ -60,6 +61,9 @@ function fakeDeps(over: { halt?: boolean; spent?: number; charter?: string; scri
     },
     async approvedHashes() {
       return new Set<string>();
+    },
+    async recentRuns() {
+      return over.recent ?? [];
     },
   };
   let captured: { prompt: string; options: Options } | null = null;
@@ -86,7 +90,7 @@ function fakeDeps(over: { halt?: boolean; spent?: number; charter?: string; scri
   return { deps, book, calls: () => calls, captured: () => captured };
 }
 
-const REQ: RunRequest = { hat: "report", prompt: "read and report", rung: 0, ticket: null, model: "test-model", maxTurns: 10, diffHash: null };
+const REQ: RunRequest = { hat: "report", prompt: "read and report", rung: 0, ticket: null, model: "test-model", maxTurns: 10, diffHash: null, commandId: null };
 
 test("guard 6: with the HALT file present the run writes one row and exits without calling the model", async () => {
   const f = fakeDeps({ halt: true });
@@ -213,4 +217,39 @@ test("a result that flags is_error is a failed row even when its subtype says su
   assert.equal(r.status, "failed");
   assert.equal(r.report, null);
   assert.match(r.error!, /Failed to authenticate/);
+});
+
+test("the prompt opens with the ledger block, so the run's memory is the ledger and nothing else", async () => {
+  const first = fakeDeps();
+  await runOnce(first.deps, REQ);
+  assert.match(first.captured()!.prompt, /^## The ledger says\n\nNo runs before this one/);
+  assert.match(first.captured()!.prompt, /\n---\n\nread and report$/);
+  const prior: RunRow = {
+    id: "c793e6ea-0000-0000-0000-000000000000",
+    startedAt: "2026-10-13T06:49:00.000Z",
+    finishedAt: null,
+    machine: "air",
+    hat: "report",
+    rung: 0,
+    ticket: null,
+    prompt: "x",
+    charterVersion: "0.1",
+    charterHash: "0983781777b6",
+    model: "m",
+    status: "done",
+    haltReason: null,
+    costUsd: 0.17,
+    turns: 16,
+    toolCalls: 15,
+    denials: 0,
+    report: "the earlier report",
+    error: null,
+    commandId: null,
+    branch: null,
+    diffHash: null,
+    verdict: null,
+  };
+  const second = fakeDeps({ recent: [prior] });
+  await runOnce(second.deps, REQ);
+  assert.match(second.captured()!.prompt, /the earlier report/);
 });
