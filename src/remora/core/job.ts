@@ -198,6 +198,8 @@ export type Machine = {
   providers: string[];
   /** Providers it is sitting out right now, and until when. */
   cooldowns: Cooldowns;
+  /** Has whisper.cpp and a model: can vend the TRANSCRIPT slot. */
+  transcribe: boolean;
 };
 
 /** The light on the front: green when a worker has checked in recently. */

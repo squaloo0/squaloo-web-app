@@ -20,6 +20,8 @@ import { ledgerLine, ledgerRow, parseLedgerLine, type LedgerRow } from "./core/l
 import { ytDlpDownload, ytDlpInfo, ytDlpVersion } from "./ytdlp.ts";
 import { ffmpeg as runFfmpeg } from "./ffmpeg.ts";
 import { thumbsFileName, thumbsPlan } from "./core/thumbs.ts";
+import { transcriptFileName, transcriptMarkdown } from "./core/transcript.ts";
+import { transcribe, whisperModelName, whisperWired } from "./whisper.ts";
 
 export class VendError extends Error {
   constructor(message: string) {
@@ -28,7 +30,7 @@ export class VendError extends Error {
   }
 }
 
-export type Stage = "peek" | "info" | "drop" | "tile" | "hash" | "receipt";
+export type Stage = "peek" | "info" | "drop" | "tile" | "listen" | "hash" | "receipt";
 
 export type VendOptions = {
   input: string;
@@ -102,6 +104,26 @@ export async function vend(opts: VendOptions): Promise<Vend> {
   });
   let filepath = dropped.filepath;
 
+  let transcript: { model: string; language: string | null; segments: number; whisper: string | null } | null = null;
+  if (opts.quality === "transcript") {
+    // The TRANSCRIPT slot: whisper listens to the WAV, Remora writes the document, the WAV goes.
+    const wired = await whisperWired();
+    if (!wired.ok) throw new VendError(`this machine cannot transcribe: ${wired.reason}`);
+    opts.onStage?.("listen", `${whisperModelName()} · ${meta.duration ? prettyDurationSafe(opts.clip ? opts.clip.end - opts.clip.start : meta.duration) : "unknown length"}`);
+    const outBase = filepath.replace(/\.[^./]+$/, "") + ".whisper";
+    const result = await transcribe(filepath, outBase);
+    const doc = join(dirname(filepath), transcriptFileName(basename(filepath)));
+    await writeFile(
+      doc,
+      transcriptMarkdown({ meta, canonicalUrl: parsed.canonicalUrl, clip: opts.clip ?? null, result, model: whisperModelName(), whisperVersion: wired.version, now: new Date() }),
+      "utf8",
+    );
+    await rm(filepath, { force: true });
+    await rm(`${outBase}.json`, { force: true });
+    transcript = { model: whisperModelName(), language: result.language, segments: result.segments.length, whisper: wired.version };
+    filepath = doc;
+  }
+
   if (opts.quality === "thumbs") {
     // The THUMBS slot: tile twelve frames of what dropped into one sheet, then drop the video.
     const span = opts.clip ? opts.clip.end - opts.clip.start : meta.duration;
@@ -137,6 +159,7 @@ export async function vend(opts: VendOptions): Promise<Vend> {
     machine: opts.machine,
     card: opts.card ?? null,
     clip: opts.clip ?? null,
+    transcript,
     now: new Date(),
   });
   const key = opts.signingKey === undefined ? pemFromEnv(process.env.REMORA_RECEIPT_PRIVATE_KEY) : opts.signingKey;
@@ -223,4 +246,10 @@ export async function verifyOnDisk(path: string): Promise<Verified> {
   }
   const sha256 = await sha256File(filepath);
   return { receipt, receiptPath, filepath, verification: verifyReceipt(receipt, { bytes: size, sha256 }) };
+}
+
+function prettyDurationSafe(seconds: number): string {
+  const m = Math.floor(seconds / 60);
+  const sec = Math.round(seconds % 60);
+  return `${m}:${String(sec).padStart(2, "0")}`;
 }

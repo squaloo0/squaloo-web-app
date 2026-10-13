@@ -4,6 +4,7 @@
  */
 import type { VideoFormat, VideoMeta } from "./meta.ts";
 import { GIF_FORMAT_SELECTOR, gifPostprocessArgs } from "./gif.ts";
+import { wavPostprocessArgs } from "./transcript.ts";
 
 /**
  * The VIDEO slot's heights, and the AUDIO slot's three containers:
@@ -11,9 +12,9 @@ import { GIF_FORMAT_SELECTOR, gifPostprocessArgs } from "./gif.ts";
  *   m4a         AAC in an MP4 shell: smaller, Apple-native
  *   audio-raw   the best audio track yt-dlp can find, untouched (usually opus in webm)
  */
-export type Quality = "best" | "2160" | "1440" | "1080" | "720" | "480" | "360" | "audio" | "m4a" | "audio-raw" | "gif" | "thumbs";
+export type Quality = "best" | "2160" | "1440" | "1080" | "720" | "480" | "360" | "audio" | "m4a" | "audio-raw" | "gif" | "thumbs" | "transcript";
 
-export const QUALITIES: readonly Quality[] = ["best", "2160", "1440", "1080", "720", "480", "360", "audio", "m4a", "audio-raw", "gif", "thumbs"];
+export const QUALITIES: readonly Quality[] = ["best", "2160", "1440", "1080", "720", "480", "360", "audio", "m4a", "audio-raw", "gif", "thumbs", "transcript"];
 
 export const AUDIO_QUALITIES: readonly Quality[] = ["audio", "m4a", "audio-raw"];
 
@@ -33,6 +34,7 @@ export function parseQuality(input: string | undefined | null): Quality | null {
   if (s === "audio-raw" || s === "raw" || s === "opus") return "audio-raw";
   if (s === "gif") return "gif";
   if (s === "thumbs" || s === "contact" || s === "sheet") return "thumbs";
+  if (s === "transcript" || s === "transcribe" || s === "whisper" || s === "text") return "transcript";
   if (s === "4k" || s === "uhd") return "2160";
   if (s === "2k") return "1440";
   const m = /^(\d{3,4})p?$/.exec(s);
@@ -50,13 +52,13 @@ export function parseQuality(input: string | undefined | null): Quality | null {
 export function formatSelector(q: Quality): string {
   if (q === "best") return "bestvideo*+bestaudio/best";
   if (q === "gif" || q === "thumbs") return GIF_FORMAT_SELECTOR;
-  if (isAudio(q)) return "bestaudio/best";
+  if (isAudio(q) || q === "transcript") return "bestaudio/best";
   return `bestvideo*[height<=${q}]+bestaudio/best[height<=${q}]/best`;
 }
 
 /** Container yt-dlp should merge into, or null when nothing is merged. */
 export function mergeContainer(q: Quality): "mp4" | null {
-  return isAudio(q) || q === "gif" || q === "thumbs" ? null : "mp4";
+  return isAudio(q) || q === "gif" || q === "thumbs" || q === "transcript" ? null : "mp4";
 }
 
 /**
@@ -73,6 +75,8 @@ export function postprocessArgs(q: Quality): string[] {
       return ["--extract-audio", "--audio-format", "m4a"];
     case "gif":
       return gifPostprocessArgs();
+    case "transcript":
+      return wavPostprocessArgs();
     default:
       return [];
   }
@@ -80,7 +84,7 @@ export function postprocessArgs(q: Quality): string[] {
 
 /** The extension a vend of this quality lands with, when we can know it. */
 export function expectedExt(q: Quality): string | null {
-  return q === "audio" ? "mp3" : q === "m4a" ? "m4a" : q === "gif" ? "gif" : q === "thumbs" ? "jpg" : isAudio(q) ? null : "mp4";
+  return q === "audio" ? "mp3" : q === "m4a" ? "m4a" : q === "gif" ? "gif" : q === "thumbs" ? "jpg" : q === "transcript" ? "md" : isAudio(q) ? null : "mp4";
 }
 
 export type Estimate = {
@@ -104,7 +108,7 @@ export function estimate(meta: VideoMeta, q: Quality): Estimate | null {
   const videoOnly = usable.filter((f) => f.vcodec !== null && f.acodec === null);
   const muxed = usable.filter((f) => f.vcodec !== null && f.acodec !== null);
 
-  if (isAudio(q)) {
+  if (isAudio(q) || q === "transcript") {
     // A transcode changes the size; raw keeps it. Either way the source track is the guide.
     const a = best(audioOnly) ?? best(muxed);
     return a ? { height: null, bytes: a.bytes, approx: a.bytesApprox || q !== "audio-raw", formatIds: [a.formatId] } : null;

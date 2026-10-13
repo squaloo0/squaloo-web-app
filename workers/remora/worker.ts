@@ -55,6 +55,7 @@ import { pemFromEnv } from "../../src/remora/core/receipt.ts";
 import { codeName } from "../../src/remora/core/codename.ts";
 import { ffmpegVersion, sha256File, vend } from "../../src/remora/vend.ts";
 import { ytDlpVersion } from "../../src/remora/ytdlp.ts";
+import { whisperWired } from "../../src/remora/whisper.ts";
 
 const NAME = process.env.REMORA_MACHINE_NAME || hostname().toLowerCase();
 const TICK_MS = Number(process.env.REMORA_TICK_MS ?? 5000);
@@ -83,9 +84,11 @@ async function main(): Promise<void> {
   if (!shelfWired()) throw new Error("the shelf is not wired; set the REMORA_R2_* variables");
   if (CAPABILITIES.length === 0) throw new Error("REMORA_PROVIDERS names no provider the machine knows");
 
-  const tools = { name: NAME, ytDlp: await ytDlpVersion().catch(() => null), ffmpeg: await ffmpegVersion() };
+  const whisper = await whisperWired();
+  const tools = { name: NAME, ytDlp: await ytDlpVersion().catch(() => null), ffmpeg: await ffmpegVersion(), transcribe: whisper.ok };
   const signs = pemFromEnv(process.env.REMORA_RECEIPT_PRIVATE_KEY) !== null;
   log(`receipts ${signs ? "signed" : "UNSIGNED (no REMORA_RECEIPT_PRIVATE_KEY)"}`);
+  log(whisper.ok ? `transcribes · whisper.cpp ${whisper.version ?? "?"}` : `does not transcribe · ${whisper.reason}`);
   log(
     `plugged in · yt-dlp ${tools.ytDlp ?? "missing"} · ffmpeg ${tools.ffmpeg ?? "missing"} · vends ${CAPABILITIES.join(",")} · ` +
       `pace ${PER_HOUR}/h (youtube ${YOUTUBE_PER_HOUR}/h) · tick ${TICK_MS}ms · ttl ${TTL_DAYS}d`,
@@ -112,7 +115,7 @@ async function main(): Promise<void> {
       lastProviders = key;
     }
 
-    const job = await claimNextJob(NAME, providers);
+    const job = await claimNextJob(NAME, providers, { transcribe: tools.transcribe });
     if (job) {
       await process_(job, pulse);
       continue; // straight to the next coin
@@ -166,7 +169,7 @@ async function process_(job: Job, pulse: () => Pulse): Promise<void> {
 
     await addAsset({
       jobId: job.id,
-      kind: job.quality === "gif" ? "gif" : job.quality === "thumbs" ? "thumbs" : isAudio(job.quality) ? "audio" : "video",
+      kind: job.quality === "gif" ? "gif" : job.quality === "thumbs" ? "thumbs" : job.quality === "transcript" ? "transcript" : isAudio(job.quality) ? "audio" : "video",
       objectKey: `${prefix}/${fileName}`,
       fileName,
       bytes: v.receipt.file.bytes,
