@@ -241,6 +241,11 @@ it.
 
 ## Changelog
 
+- **0.4.1, 2026-10-13.** The instrument's first night: two kinds join the classifier.
+  `probe`, judged by path before the user agent (a sweep of 134 PHP and WordPress paths in one
+  hour arrived with no user agent, and the rest wore Chrome); `self`, a browser holding the
+  founder's key, so our own visits never count as the public (run `3ab57ff5`'s question).
+  The instrument records only in production; a laptop's dev server no longer writes to it.
 - **0.4, 2026-10-13.** The study: standing orders for report-only hats from rung 1, the
   library's home in Notion with a generated mirror and a read-only primaries root, the
   `study` hat. Proposals on a schedule stay rung 2. Still a draft under rule 17.
