@@ -133,3 +133,10 @@ files, what is and isn't on disk) belong here because they do not travel with gi
 - Fly was redeployed at the start of the sitting with the AUDIO code (lantern). After this merges: `fly deploy` again, and on the mini pull + `npm run remora:install`. A worker on older code ignores the clip columns and would vend the whole video, so deploy before advertising the slot.
 - Air facts: nothing new. Dev server stopped. No live vend attempted this sitting.
 - Next: GIF (a clip to an animated GIF via ffmpeg's palette pass, through yt-dlp's `--exec`? or a Remora post-step; decide then), then THUMBS.
+
+## 2026-10-13 · MacBook Air · the GIF slot · DONE
+- Branch `remora/feat/the-gif-slot`. Quality `gif`: a clip (required, ≤15 s) rendered to an animated GIF, 480 px, 15 fps, two-pass palette with Bayer dither, through yt-dlp `--recode-video gif --postprocessor-args "VideoConvertor:-vf <graph> -loop 0"` (one argument, no shell). `core/gif.ts` is the spec. Migration 0006 widens the shelf's kind check to `gif` (applied to production). Receipt slot GIF. API and CLI refuse a GIF without a short clip, with the reason. Panel: GIF reads NEW (AUDIO and CLIP now LIVE), the quality menu says what it needs, jingle plays.
+- Vended locally on this code: 1:23–1:28 → 480×270, 15 fps, 5.000 s, 3.6 MB, signed GIF receipt. ffprobe agrees.
+- Lantern was redeployed at the start of the sitting with the CLIP code; mantis updated by the founder. After this merges: `fly deploy` and the mini's pull + `npm run remora:install`, then four slots are live: VIDEO, AUDIO, CLIP, GIF.
+- Air facts: nothing new. No dev server this sitting; verified by CLI + API tests.
+- Next: THUMBS (a strip of frames from a video: ffmpeg `fps=1/N,tile` through yt-dlp's exec? or a Remora post-step; decide then), then TRANSCRIPT (whisper.cpp, the big one), then CHAPTERS.
