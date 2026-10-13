@@ -16,6 +16,8 @@
  *                           write the mirror tag back to the row's ID; print the URLs that refused, for the hand hunt
  *   library sums            rewrite ~/.garage/library/SHA256SUMS from what is on disk (after a hand hunt)
  *   library file <run-id>   file a run's report as a page under the Notion report page
+ *   library import <csv>    a CoWork seed batch into the Notion library, one page per row; rows already
+ *                           present (same name) are skipped, so a re-run is safe
  *   runs [n]                the last n run rows
  *   show <id>               one run: its row, its events, its report
  *   halt [on|off]           the HALT file; no argument prints its state
@@ -37,7 +39,9 @@ import { ledgerWired } from "../../src/garage/db/client.ts";
 import { addOrder, approve, claimCommand, claimOrderTick, deleteOrder, enqueueCommand, finishCommand, getRun, hitsSummary, listCommands, listEvents, listOrders, listRuns, migrate, neonLedger, noteRun, setOrderEnabled, setPrUrl, type CommandRow } from "../../src/garage/db/ledger.ts";
 import { dueOrders, ORDERABLE_HATS, orderLine, parseEveryHours } from "../../src/garage/core/orders.ts";
 import { libraryMarkdown } from "../../src/garage/core/notion.ts";
-import { fetchPrimary, fileReport, notionWired, pullLibrary, setIdent } from "../../src/garage/notion.ts";
+import { createLibraryPage, fetchPrimary, fileReport, notionWired, pullLibrary, setIdent } from "../../src/garage/notion.ts";
+import { parseCsv } from "../../src/garage/core/csv.ts";
+import { seedChildren, seedPage, seedProperties } from "../../src/garage/core/seed.ts";
 import { checkMirror, idWithMirror, mirrorFileName, mirrorOf, parseSums, sumsText } from "../../src/garage/core/library.ts";
 import { createHash } from "node:crypto";
 import { mkdirSync, readdirSync } from "node:fs";
@@ -278,7 +282,25 @@ async function main(): Promise<number> {
         console.log(`filed: ${url}`);
         return 0;
       }
-      console.error("library pull | fetch | sums | file <run-id>");
+      if (args[0] === "import" && args[1]) {
+        const rows = parseCsv(readFileSync(resolve(args[1]), "utf8"));
+        const pages = rows.map(seedPage).filter((p) => p !== null);
+        const existing = new Set((await pullLibrary()).rows.map((r) => r.name.trim().toLowerCase()));
+        let made = 0;
+        let skipped = 0;
+        for (const p of pages) {
+          if (existing.has(p.name.trim().toLowerCase())) {
+            skipped++;
+            continue;
+          }
+          const url = await createLibraryPage(seedProperties(p), seedChildren(p));
+          made++;
+          console.log(`  + ${p.name.slice(0, 80)}${p.scrub.length ? ` · scrub ${p.scrub.length}` : ""}${p.lane ? ` · ${p.lane}` : ""}  ${url}`);
+        }
+        console.log(`imported ${made}, skipped ${skipped} already present, of ${pages.length} rows; now run library fetch, then library pull`);
+        return 0;
+      }
+      console.error("library pull | fetch | sums | file <run-id> | import <csv>");
       return 2;
     }
     case "runs": {

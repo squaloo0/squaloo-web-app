@@ -82,3 +82,11 @@ export async function fetchPrimary(url: string): Promise<{ ok: true; bytes: Uint
     return { ok: false, reason: e instanceof Error ? e.message : String(e) };
   }
 }
+
+/** Creates one library page with the given properties and body blocks; returns its URL or id. */
+export async function createLibraryPage(properties: Record<string, unknown>, children: unknown[]): Promise<string> {
+  const databaseId = process.env.GARAGE_LIBRARY_DB;
+  if (!databaseId) throw new Error("GARAGE_LIBRARY_DB is not set");
+  const json = (await call("/pages", "POST", { parent: { database_id: databaseId }, properties, children })) as { url?: string; id?: string };
+  return json.url ?? json.id ?? "created";
+}
