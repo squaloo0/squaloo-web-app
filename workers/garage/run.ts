@@ -128,7 +128,7 @@ export async function runOnce(deps: Deps, req: RunRequest): Promise<RunResult> {
           rung: req.rung,
           hat: req.hat,
           ticket: req.ticket,
-          date: deps.now().toISOString().slice(0, 10),
+          date: deps.now().toISOString().slice(0, 16).replace("T", " ") + " UTC",
           capUsd: budget.capUsd,
           tools,
           maxTurns: req.maxTurns,

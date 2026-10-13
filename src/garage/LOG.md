@@ -52,3 +52,25 @@ dashboard at `/garage`: runs, spend, the approval queue, a command box.
 and the agent's subprocess never sees. No `GARAGE_MODEL` set, so the default is
 `claude-sonnet-5-5`. Hostname resolves to `mac`; set `GARAGE_MACHINE_NAME` for a nicer name.
 Mantis is not yet a Garage host; nothing to install there this phase.
+
+## 2026-10-13 · Air · the first report
+
+**What landed.** Run `c793e6ea`: hat report, rung 0, `claude-sonnet-5-5`, auth
+`keychain: squaloo-garage/wrasse`. 27 s, 16 turns, 15 tool calls, 0 refused, $0.17. The
+report is in the row; `npm run garage -- show c793e6ea` prints it. In short: Remora is the only
+thing that takes money; the tape and Stripe are the only instruments; nothing measures visits,
+referrers or `/shop`; three hypotheses (free-coin to sleeve conversion, a first-party `/remora`
+hit counter as the first proposal, `/shop`'s "coming soon" cart as a credibility cost); and the
+one question, whether production Stripe is live or test and whether `/shop` is meant to sell.
+It declared its coverage gap unprompted: 7 of 30 pages read.
+
+**What it caught.** The preamble gave the run's date as a bare `2026-10-13` while the agent's
+own clock read the 12th (Pacific evening, UTC morning). Wrasse reported the mismatch instead
+of picking one. Fixed: the preamble now says `Launched 2026-10-13 06:50 UTC` and tells the
+agent that is the ledger's clock. Rule 16, in its first hour.
+
+**What is next.** The founder answers the one question. Then Phase 2, the dashboard at
+`/garage`: runs, spend, the approval queue, and a command box, keyed like Remora's admin.
+
+**Machine-local facts.** Air: wrasse's token in the Keychain, service `squaloo-garage`,
+account `wrasse`, length 108. Nothing else changed.

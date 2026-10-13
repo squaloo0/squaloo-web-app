@@ -78,7 +78,7 @@ export function runPreamble(p: { machine: string; rung: Rung; hat: string; ticke
     "",
     "## This run",
     "",
-    `- Machine: ${p.machine}. Date: ${p.date}.`,
+    `- Machine: ${p.machine}. Launched ${p.date}; that is the clock the ledger keeps, and the date you report.`,
     `- Rung: ${p.rung}. Hat: ${p.hat}.${p.ticket ? ` Ticket: ${p.ticket}.` : " No ticket; the standing objective applies."}`,
     `- Tools you have: ${p.tools.join(", ")}. Every call is judged by the guards; a refusal is recorded, not punished.`,
     `- Budget for this run: ${prettyUsd(p.capUsd)}. Turns: at most ${p.maxTurns}. The harness stops you at either; stop yourself first.`,
