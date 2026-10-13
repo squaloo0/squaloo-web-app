@@ -8,6 +8,7 @@
  *   work [--once] [--every S]   pick up dashboard commands and run them, forever or once
  *   queue [n]               the last n commands
  *   command <hat> [--prompt "..."] [--ticket T]   queue a command from here instead of the dashboard
+ *   hits [days]             the instrument: visitors by kind, day, path, family
  *   runs [n]                the last n run rows
  *   show <id>               one run: its row, its events, its report
  *   halt [on|off]           the HALT file; no argument prints its state
@@ -27,7 +28,8 @@ import { charterBinding, charterHash, charterVersion } from "../../src/garage/co
 import { PER_DAY_USD, PER_RUN_USD, prettyUsd } from "../../src/garage/core/budget.ts";
 import { runLine } from "../../src/garage/core/run.ts";
 import { ledgerWired } from "../../src/garage/db/client.ts";
-import { approve, claimCommand, enqueueCommand, finishCommand, getRun, listCommands, listEvents, listRuns, migrate, neonLedger, type CommandRow } from "../../src/garage/db/ledger.ts";
+import { approve, claimCommand, enqueueCommand, finishCommand, getRun, hitsSummary, listCommands, listEvents, listRuns, migrate, neonLedger, type CommandRow } from "../../src/garage/db/ledger.ts";
+import { hitsLines } from "../../src/garage/core/hits.ts";
 import { CHARTER_FILE, HALT_FILE, runOnce } from "./run.ts";
 import { HATS, type Hat } from "./hats.ts";
 import { resolveAuth } from "./auth.ts";
@@ -141,6 +143,11 @@ async function main(): Promise<number> {
       console.log(`queued #${c.id}; a host running \`garage work\` will pick it up`);
       return 0;
     }
+    case "hits": {
+      const s = await hitsSummary(Number(args[0] ?? 7));
+      for (const line of hitsLines(s)) console.log(line);
+      return 0;
+    }
     case "runs": {
       const rows = await listRuns(Number(args[0] ?? 20));
       if (rows.length === 0) console.log("no runs yet; the station is quiet");
@@ -202,7 +209,7 @@ async function main(): Promise<number> {
     }
     default: {
       console.log(BANNER);
-      console.log("  garage doctor | migrate | run [hat] | work [--once] | queue | command <hat> | runs [n] | show <id> | halt [on|off] | hash | approve <hash>");
+      console.log("  garage doctor | migrate | run [hat] | work [--once] | queue | command <hat> | hits [days] | runs [n] | show <id> | halt [on|off] | hash | approve <hash>");
       return command ? 2 : 0;
     }
   }

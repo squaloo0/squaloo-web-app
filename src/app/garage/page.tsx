@@ -9,7 +9,7 @@ import AppFooter from "@/components/AppFooter";
 import Wordmark from "@/components/Wordmark";
 import { isGarageKey, KEY_COOKIE, keySlotWired } from "@/garage/auth";
 import { ledgerWired } from "@/garage/db/client";
-import { gateQueue, listCommands, listRuns, neonLedger, queuedCount, type CommandRow } from "@/garage/db/ledger";
+import { gateQueue, hitsSummary, listCommands, listRuns, neonLedger, queuedCount, type CommandRow, type HitsSummary } from "@/garage/db/ledger";
 import { PER_DAY_USD, PER_RUN_USD, prettyUsd } from "@/garage/core/budget";
 import { shortId, type RunRow } from "@/garage/core/run";
 import Poller from "./poller";
@@ -28,7 +28,7 @@ export default async function GaragePage({ searchParams }: { searchParams: Promi
   const keyed = isGarageKey(jar.get(KEY_COOKIE)?.value);
   const wired = ledgerWired();
 
-  const [runs, gate, commands, queued, spent] = keyed && wired ? await Promise.all([listRuns(20), gateQueue(), listCommands(12), queuedCount(), neonLedger.spentTodayUsd()]) : [[], [], [], 0, 0];
+  const [runs, gate, commands, queued, spent, hits] = keyed && wired ? await Promise.all([listRuns(20), gateQueue(), listCommands(12), queuedCount(), neonLedger.spentTodayUsd(), hitsSummary(7)]) : [[], [], [], 0, 0, null];
   const running = commands.some((c) => c.status === "running" || c.status === "queued");
 
   return (
@@ -98,6 +98,10 @@ export default async function GaragePage({ searchParams }: { searchParams: Promi
                   </button>
                 </div>
               </form>
+            </Section>
+
+            <Section title="The instrument" hint="first-party · server-side · last 7 days UTC · no addresses, no raw user agents">
+              {hits && hits.total > 0 ? <Instrument s={hits} /> : <Dashed>{hits?.firstHitAt ? "No hits in the last 7 days" : "The instrument has not recorded a hit yet"}</Dashed>}
             </Section>
 
             <Section title="The queue" hint="newest first">
@@ -230,6 +234,76 @@ function CommandLine({ c }: { c: CommandRow }) {
           <button className="text-neutral-700 hover:text-red-400 text-[10px] tracking-widest uppercase">cancel</button>
         </form>
       )}
+    </div>
+  );
+}
+
+function Instrument({ s }: { s: HitsSummary }) {
+  const kinds = s.byKind.map((k) => k.kind);
+  const days = [...new Set(s.byDay.map((d) => d.day))];
+  const cell = (day: string, kind: string) => s.byDay.find((d) => d.day === day && d.kind === kind)?.n ?? 0;
+  return (
+    <div className="space-y-4 text-xs text-neutral-400">
+      <div className="flex flex-wrap gap-x-4 gap-y-1">
+        <span className="text-neutral-200">{s.total} hits</span>
+        {s.byKind.map((k) => (
+          <span key={k.kind}>
+            <span className="text-neutral-300">{k.kind}</span> {k.n} <span className="text-neutral-600">({Math.round((100 * k.n) / s.total)}%)</span>
+          </span>
+        ))}
+        <span className="text-neutral-600">counting since {s.firstHitAt?.slice(0, 16).replace("T", " ")}Z</span>
+      </div>
+      <table className="w-full text-left">
+        <thead>
+          <tr className="text-[10px] tracking-[0.2em] uppercase text-neutral-600">
+            <th className="pr-3 font-normal">day</th>
+            {kinds.map((k) => (
+              <th key={k} className="pr-3 font-normal">{k}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {days.map((d) => (
+            <tr key={d} className="border-t border-neutral-900">
+              <td className="pr-3 py-1 text-neutral-500">{d}</td>
+              {kinds.map((k) => (
+                <td key={k} className="pr-3 py-1">{cell(d, k) || <span className="text-neutral-800">·</span>}</td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <div className="grid sm:grid-cols-2 gap-4">
+        <div>
+          <div className="text-[10px] tracking-[0.2em] uppercase text-neutral-600 mb-1">top paths</div>
+          {s.topPaths.slice(0, 12).map((p, i) => (
+            <div key={i} className="flex justify-between gap-2">
+              <span className="truncate">{p.path} <span className="text-neutral-600">{p.kind}</span></span>
+              <span className="text-neutral-300">{p.n}</span>
+            </div>
+          ))}
+        </div>
+        <div>
+          <div className="text-[10px] tracking-[0.2em] uppercase text-neutral-600 mb-1">families</div>
+          {s.families.slice(0, 12).map((f, i) => (
+            <div key={i} className="flex justify-between gap-2">
+              <span className="truncate">{f.family} <span className="text-neutral-600">{f.kind}</span></span>
+              <span className="text-neutral-300">{f.n}</span>
+            </div>
+          ))}
+          {s.referrers.length > 0 && (
+            <>
+              <div className="text-[10px] tracking-[0.2em] uppercase text-neutral-600 mt-3 mb-1">referrers</div>
+              {s.referrers.slice(0, 8).map((r, i) => (
+                <div key={i} className="flex justify-between gap-2">
+                  <span className="truncate">{r.refHost}</span>
+                  <span className="text-neutral-300">{r.n}</span>
+                </div>
+              ))}
+            </>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

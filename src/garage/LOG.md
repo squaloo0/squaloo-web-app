@@ -108,3 +108,44 @@ founder's open question), so a baseline exists before any proposal. Then rung 1.
 **Machine-local facts.** Air: `work` is run by hand this phase; no launchd yet. The dev
 config `squaloo-garage` in `~/Projects/.claude/launch.json` sets a local-only test key.
 Day's spend so far: $0.38.
+
+## 2026-10-13 · Air · Phase 3, the instrument
+
+**What landed.** `garage_hits`: one row per countable request, written from the edge by
+`src/middleware.ts` after the response is on its way, holding a UTC time, a path with its ids
+folded, a visitor kind (browser, agent, ai-crawler, crawler, monitor, tool, unknown), a family
+(chrome, claude-user, gptbot, curl, ...), a referrer host, and a method. No address, no raw
+user agent, no query string, no cookie, by construction: the classifier is pure and tested
+(`core/hits.ts`, 9 tests), the shim does nothing else, and `/garage` and static files are not
+counted. Migration 0003 applied. The dashboard shows the last seven days by day and kind, the
+top paths, families and referrers; `npm run garage -- hits [days]` prints the same lines; and
+the same lines open every run's prompt, so wrasse's baseline is the instrument and not a
+guess. Charter 0.2: the shim joins the touch list, the `[recall]` tag joins section 6.
+`LIBRARY.md` is the library's disk mirror, opened with the founder's two sources and their
+boundaries (Cloudflare Radar: bot 65%, human 35%, worldwide, HTML responses, week to
+2026-10-12; Semrush: 57% in June 2026, same network). 42 tests, types, lint and `next build`
+green; middleware bundle 77.6 kB.
+
+**Verified.** Local dev server: six Chrome page loads, one Claude-User fetch of `/llms.txt`,
+one GPTBot fetch of `/remora`, one curl of the peek API with a referrer, one curl of `/garage`
+and one of a static svg. The instrument recorded 11 rows: browser 8, agent 1, ai-crawler 1,
+tool 1, referrer news.ycombinator.com 1; `/garage` and the svg were not counted. The dashboard
+rendered the same table.
+
+**What wrasse said.** Run `894a1588` (hat report, ticket GARAGE-3, $0.25, 59 s, 0 refused),
+the deeper read on a browserless pay rail, is in the ledger. Its recommendation: instrument
+first, then the bearer-plus-pointer design only if 402s show up, with the stablecoin and
+delegated-token designs waiting on live Stripe and on verification of two `[recall]` claims.
+Its one question was for a counter table; this phase is the answer, with one gap named in the
+register: the instrument cannot see a response status, so 402s stay uncounted until a one-line
+seam in Remora's jobs route, which is the founder's call.
+
+**What is next.** Let the instrument run a week on production, then a rung-0 run that reads
+its first real week. Rung 1 after that, with the first proposal behind the gate: most likely
+the machine-readable 402 and `llms.txt`, which wrasse called the first cheap change. Founder
+calls open: the 402 seam in the jobs route; whether publishing the sleeve list in an API
+response is guideline-3 territory; the Notion library.
+
+**Machine-local facts.** Air: hits in the local table came from the dev server and are mixed
+with production's once Vercel deploys; both write the same Neon table, so the first
+production week should be read from the deploy's own timestamp on. Day's spend: $0.62.

@@ -79,4 +79,5 @@ test("the ledger block is the agent's whole memory of itself: lines, then the ne
   assert.match(m, /The newest report, from run c793e6ea \(report, 2026-10-13 06:49 UTC\):/);
   assert.match(m, /Remora is the only thing that takes money/);
   assert.match(ledgerMemory([base], 10), /\[truncated\]/);
+  assert.match(ledgerMemory([], 6000, ["3 hits, last 7 days to now, UTC"]), /You are the first\.\n\nThe instrument \(garage_hits[^\n]*\n- 3 hits/);
 });
