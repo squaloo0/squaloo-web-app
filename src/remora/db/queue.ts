@@ -240,14 +240,17 @@ export async function markDeleted(id: string): Promise<void> {
 
 export type Pulse = { name: string; ytDlp: string | null; ffmpeg: string | null; providers: readonly string[]; cooldowns: Cooldowns };
 
-export async function beat(machine: Pulse, vended = 0): Promise<void> {
+/** `fresh` on a process's first beat resets started_at, so uptime means this run, not the row's birth. */
+export async function beat(machine: Pulse, vended = 0, opts: { fresh?: boolean } = {}): Promise<void> {
+  const fresh = opts.fresh === true;
   await sql()`
-    INSERT INTO remora_machine (name, last_seen, yt_dlp, ffmpeg, vends, providers, cooldowns)
-    VALUES (${machine.name}, now(), ${machine.ytDlp}, ${machine.ffmpeg}, ${vended}, ${[...machine.providers]}, ${JSON.stringify(machine.cooldowns)}::jsonb)
+    INSERT INTO remora_machine (name, last_seen, yt_dlp, ffmpeg, vends, providers, cooldowns, started_at)
+    VALUES (${machine.name}, now(), ${machine.ytDlp}, ${machine.ffmpeg}, ${vended}, ${[...machine.providers]}, ${JSON.stringify(machine.cooldowns)}::jsonb, now())
     ON CONFLICT (name) DO UPDATE
       SET last_seen = now(), yt_dlp = EXCLUDED.yt_dlp, ffmpeg = EXCLUDED.ffmpeg,
           vends = remora_machine.vends + ${vended},
-          providers = EXCLUDED.providers, cooldowns = EXCLUDED.cooldowns`;
+          providers = EXCLUDED.providers, cooldowns = EXCLUDED.cooldowns,
+          started_at = CASE WHEN ${fresh} THEN now() ELSE remora_machine.started_at END`;
 }
 
 type MachineRow = {

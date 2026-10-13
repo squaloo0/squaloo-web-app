@@ -11,6 +11,7 @@
 import type { Quality } from "./format.ts";
 import type { Provider } from "./url.ts";
 import { isRouteError, MAX_ROUTE_FAILURES, ROUTE_RETRY_MS, type Cooldowns } from "./route.ts";
+import { codeName } from "./codename.ts";
 
 export type JobStatus = "pending" | "processing" | "completed" | "failed";
 
@@ -201,7 +202,7 @@ export function machineLight(machine: Machine | null, now: Date): { on: boolean;
   if (!machine) return { on: false, text: "OUT OF ORDER · no machine has ever checked in" };
   const silentMs = now.getTime() - Date.parse(machine.lastSeen);
   if (silentMs > MACHINE_SILENT_AFTER_MS) {
-    return { on: false, text: `OUT OF ORDER · ${machine.name} last seen ${Math.round(silentMs / 60_000)} min ago · jobs are safe` };
+    return { on: false, text: `OUT OF ORDER · ${codeName(machine.name)} last seen ${Math.round(silentMs / 60_000)} min ago · jobs are safe` };
   }
-  return { on: true, text: `${machine.name} · ${machine.vends} vends` };
+  return { on: true, text: `${codeName(machine.name)} · ${machine.vends} vends` };
 }

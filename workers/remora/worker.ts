@@ -51,6 +51,7 @@ import {
 import { contentTypeFor, deleteObject, putFile, shelfWired } from "../../src/remora/storage.ts";
 import { returnCoin } from "../../src/remora/db/coins.ts";
 import { pemFromEnv } from "../../src/remora/core/receipt.ts";
+import { codeName } from "../../src/remora/core/codename.ts";
 import { ffmpegVersion, sha256File, vend } from "../../src/remora/vend.ts";
 import { ytDlpVersion } from "../../src/remora/ytdlp.ts";
 
@@ -89,7 +90,7 @@ async function main(): Promise<void> {
       `pace ${PER_HOUR}/h (youtube ${YOUTUBE_PER_HOUR}/h) · tick ${TICK_MS}ms · ttl ${TTL_DAYS}d`,
   );
   const pulse = (): Pulse => ({ ...tools, providers: CAPABILITIES, cooldowns });
-  await beat(pulse());
+  await beat(pulse(), 0, { fresh: true }); // this process just started: uptime counts from here
 
   let lastProviders = "";
   while (running) {
@@ -141,7 +142,7 @@ async function process_(job: Job, pulse: () => Pulse): Promise<void> {
       quality: job.quality,
       dir,
       card: job.cardId,
-      machine: NAME,
+      machine: codeName(NAME) ?? NAME, // the receipt is the customer's; it names the fish, not the host
       onEstimate: (meta) => {
         title = meta.title;
         void tick(0);

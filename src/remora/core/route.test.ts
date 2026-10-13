@@ -73,7 +73,7 @@ test("live machines and the waiting reason", () => {
   assert.equal(waitingReason(yt, [fresh], NOW), null);
   assert.equal(waitingReason(yt, [], NOW), "no machine is on");
   const cooling = machine({ name: "fly-sjc", cooldowns: withCooldown({}, "youtube", NOW) });
-  assert.equal(waitingReason(yt, [cooling], later(2 * 60_000)), "no machine can vend youtube right now · fly-sjc cooling 28 min");
+  assert.equal(waitingReason(yt, [cooling], later(2 * 60_000)), "no machine can vend youtube right now · lantern cooling 28 min");
   assert.equal(waitingReason(yt, [cooling, fresh], NOW), null, "another machine can");
   const narrow = machine({ name: "fly-sjc", providers: ["vimeo"] });
   assert.equal(waitingReason(yt, [narrow], NOW), "no machine can vend youtube right now");
@@ -81,7 +81,7 @@ test("live machines and the waiting reason", () => {
 });
 
 test("machine summary", () => {
-  assert.equal(machineSummary(machine(), NOW), "air · all providers · 3 vends");
-  assert.equal(machineSummary(machine({ name: "fly-sjc", cooldowns: withCooldown({}, "youtube", NOW) }), later(60_000)), "fly-sjc · youtube cooling 29 min · 3 vends");
+  assert.equal(machineSummary(machine(), NOW), "minnow · all providers · 3 vends");
+  assert.equal(machineSummary(machine({ name: "fly-sjc", cooldowns: withCooldown({}, "youtube", NOW) }), later(60_000)), "lantern · youtube cooling 29 min · 3 vends");
   assert.ok(MAX_ROUTE_FAILURES > 3);
 });

@@ -93,11 +93,11 @@ test("the machine light", () => {
   const now = new Date(T1);
   assert.equal(machineLight(null, now).on, false);
   const fresh = { name: "fly-1", lastSeen: T1, ytDlp: "x", ffmpeg: "y", vends: 3, providers: ["youtube"], cooldowns: {} };
-  assert.deepEqual(machineLight(fresh, now), { on: true, text: "fly-1 · 3 vends" });
+  assert.deepEqual(machineLight(fresh, now), { on: true, text: "lantern · 3 vends" });
   const silent = { ...fresh, lastSeen: T0 };
   const light = machineLight(silent, new Date(Date.parse(T0) + 10 * 60_000));
   assert.equal(light.on, false);
-  assert.match(light.text, /OUT OF ORDER · fly-1 last seen 10 min ago · jobs are safe/);
+  assert.match(light.text, /OUT OF ORDER · lantern last seen 10 min ago · jobs are safe/);
 });
 
 test("a permanent error fails on the first attempt; a transient one goes back on the shelf with a pause", () => {
