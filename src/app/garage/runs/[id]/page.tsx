@@ -25,7 +25,7 @@ export default async function RunPage({ params }: { params: Promise<{ id: string
           <Link href="/garage" className="text-neutral-600 text-xs tracking-widest uppercase hover:text-white transition-colors">
             ← The Garage
           </Link>
-          <span className="text-neutral-700 text-xs tracking-[0.3em] uppercase">A run</span>
+          <span className="hidden sm:inline shrink-0 whitespace-nowrap text-neutral-700 text-xs tracking-[0.3em] uppercase">A run</span>
         </div>
       </nav>
       <main className="max-w-3xl mx-auto px-8 pt-36 pb-24 flex-1 w-full">
@@ -55,19 +55,19 @@ export default async function RunPage({ params }: { params: Promise<{ id: string
             <div className="border border-neutral-800 bg-[#0c0d0f] p-4 mb-8 text-xs text-neutral-400 space-y-1">
               {events.length === 0 && <div className="text-neutral-700">none</div>}
               {events.map((e) => (
-                <div key={e.id} className="flex gap-3">
+                <div key={e.id} className="flex flex-wrap sm:flex-nowrap gap-x-3 gap-y-0.5 min-w-0">
                   <span className="text-neutral-600 shrink-0">{e.at.slice(11, 19)}</span>
                   <span className={`shrink-0 w-10 ${e.kind === "deny" ? "text-amber-400" : e.kind === "halt" ? "text-red-400" : e.kind === "note" ? "text-[#5688c7]" : "text-neutral-500"}`}>{e.kind}</span>
                   <span className="shrink-0 w-16 text-neutral-500">{e.tool ?? ""}</span>
-                  <span className="break-all">{e.detail}</span>
+                  <span className="break-all min-w-0 basis-full sm:basis-auto">{e.detail}</span>
                 </div>
               ))}
             </div>
             <h2 className="text-xs tracking-[0.3em] uppercase text-neutral-400 mb-2">Report</h2>
-            <div className="border border-neutral-800 bg-[#0c0d0f] p-4 text-sm text-neutral-300 whitespace-pre-wrap leading-relaxed">{r.report ?? <span className="text-neutral-700">no report</span>}</div>
+            <div className="border border-neutral-800 bg-[#0c0d0f] p-4 text-sm text-neutral-300 whitespace-pre-wrap break-words leading-relaxed min-w-0 overflow-x-auto">{r.report ?? <span className="text-neutral-700">no report</span>}</div>
             <div className="mt-8 text-xs text-neutral-600">
               <div className="mb-1">The prompt it was given:</div>
-              <div className="border border-neutral-900 p-3 whitespace-pre-wrap text-neutral-500">{r.prompt}</div>
+              <div className="border border-neutral-900 p-3 whitespace-pre-wrap break-words text-neutral-500 min-w-0">{r.prompt}</div>
             </div>
           </>
         )}

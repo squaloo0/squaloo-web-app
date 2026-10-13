@@ -31,7 +31,7 @@ export default async function RemoraTapePage() {
           <Link href="/remora" className="group inline-flex items-center gap-1.5 text-neutral-600 text-xs tracking-widest uppercase hover:text-white transition-colors">
             ← <Wordmark className="h-3.5 opacity-60 group-hover:opacity-100 transition-opacity" /> <span className="ml-2">Remora</span>
           </Link>
-          <span className="text-neutral-700 text-xs tracking-[0.3em] uppercase">Open books</span>
+          <span className="hidden sm:inline shrink-0 whitespace-nowrap text-neutral-700 text-xs tracking-[0.3em] uppercase">Open books</span>
         </div>
       </nav>
 
@@ -66,9 +66,9 @@ export default async function RemoraTapePage() {
             </div>
 
             {/* Fourteen days */}
-            <div className="px-5 py-4 border-b border-neutral-800 flex items-baseline gap-4">
+            <div className="px-5 py-4 border-b border-neutral-800 flex flex-wrap items-baseline gap-x-4 gap-y-2">
               <span className="text-[10px] tracking-[0.3em] uppercase text-neutral-500 shrink-0">14 days</span>
-              <pre className="text-[#5688c7] text-lg leading-none tracking-[0.2em]" aria-label={t.days.map((d) => `${d.day}: ${d.vends}`).join(", ")}>
+              <pre className="text-[#5688c7] text-base sm:text-lg leading-none tracking-[0.1em] sm:tracking-[0.2em] min-w-0 overflow-hidden" aria-label={t.days.map((d) => `${d.day}: ${d.vends}`).join(", ")}>
                 {sparkline(t.days)}
               </pre>
               <span className="text-[10px] tracking-[0.2em] uppercase text-neutral-700 ml-auto">utc</span>
@@ -96,7 +96,7 @@ export default async function RemoraTapePage() {
 
             {/* The strip */}
             <div className="px-5 py-4">
-              <div className="flex items-baseline justify-between mb-3">
+              <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 mb-3">
                 <span className="text-[10px] tracking-[0.3em] uppercase text-neutral-500">Recent drops</span>
                 <span className="text-[10px] tracking-[0.2em] uppercase text-neutral-700">as of {t.asOf.replace("T", " ").slice(0, 16)} utc</span>
               </div>
@@ -107,11 +107,11 @@ export default async function RemoraTapePage() {
               ) : (
                 <ul className="divide-y divide-neutral-900 border-t border-neutral-900 text-[11px]">
                   {t.recent.map((d) => (
-                    <li key={d.sha256 + d.at} className="py-2 grid grid-cols-[7rem_5rem_4rem_1fr] sm:grid-cols-[8rem_6rem_5rem_1fr_6rem] gap-2 items-baseline">
+                    <li key={d.sha256 + d.at} className="py-2 grid grid-cols-[6rem_4rem_1fr] sm:grid-cols-[8rem_6rem_5rem_1fr_6rem] gap-2 items-baseline min-w-0">
                       <span className="text-neutral-500">{d.at.replace("T", " ").slice(5, 16)}</span>
                       <span className="text-neutral-400 uppercase tracking-widest text-[10px]">{d.provider}</span>
-                      <span className="text-neutral-500">{prettyBytes(d.bytes)}</span>
-                      <Link href={`/remora/verify?sha256=${d.sha256}`} className="text-[#5688c7] hover:text-white transition-colors truncate" title="verify by hash">
+                      <span className="hidden sm:inline text-neutral-500">{prettyBytes(d.bytes)}</span>
+                      <Link href={`/remora/verify?sha256=${d.sha256}`} className="text-[#5688c7] hover:text-white transition-colors truncate min-w-0" title="verify by hash">
                         {shortHash(d.sha256)}…
                       </Link>
                       <span className="hidden sm:inline text-neutral-700 text-[10px] uppercase tracking-widest text-right">{d.quality}</span>
