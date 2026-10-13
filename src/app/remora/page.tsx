@@ -42,8 +42,8 @@ type Search = { url?: string | string[]; denied?: string | string[]; coin?: stri
 const SLOTS = [
   { label: "VIDEO", tag: "LIVE" },
   { label: "AUDIO", tag: "LIVE" },
-  { label: "CLIP", tag: "NEW" },
-  { label: "GIF", tag: "SOON" },
+  { label: "CLIP", tag: "LIVE" },
+  { label: "GIF", tag: "NEW" },
   { label: "THUMBS", tag: "SOON" },
   { label: "TRANSCRIPT", tag: "SOON" },
   { label: "CHAPTERS", tag: "SOON" },
@@ -56,6 +56,7 @@ const QUALITY_LABELS: Partial<Record<string, string>> = {
   audio: "audio · mp3",
   m4a: "audio · m4a",
   "audio-raw": "audio · raw",
+  gif: "gif · 480p 15fps · needs a clip ≤15s",
 };
 
 export default async function RemoraPage({ searchParams }: { searchParams: Promise<Search> }) {
@@ -124,7 +125,7 @@ export default async function RemoraPage({ searchParams }: { searchParams: Promi
           <div className="p-5 border-b border-neutral-800 bg-[linear-gradient(180deg,rgba(86,136,199,0.06),transparent_60%)]">
             <div className="grid grid-cols-4 sm:grid-cols-7 gap-1.5 sm:gap-2 mb-5">
               {SLOTS.map((s, i) => (
-                <Slot key={s.label} label={s.label} tag={s.tag} lit={i < 3} />
+                <Slot key={s.label} label={s.label} tag={s.tag} lit={i < 4} />
               ))}
             </div>
 
@@ -233,7 +234,7 @@ export default async function RemoraPage({ searchParams }: { searchParams: Promi
                     disabled={!queue || !canVend}
                     className="w-16 bg-black border border-neutral-800 px-2 py-1 text-xs text-white placeholder:text-neutral-700 focus:outline-none focus:border-[#5688c7] disabled:opacity-40 normal-case tracking-normal"
                   />
-                  <span className="text-neutral-700 normal-case tracking-normal">optional · up to 10 min · cut on the second</span>
+                  <span className="text-neutral-700 normal-case tracking-normal">optional · up to 10 min (gif: 15 s) · cut on the second</span>
                 </div>
                 {(keyed || carded) && !dbWired() ? (
                   <span className="text-[10px] tracking-[0.2em] uppercase text-neutral-700">No queue wired on this deploy (NEON_DATABASE_URL)</span>

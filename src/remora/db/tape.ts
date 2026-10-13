@@ -13,10 +13,10 @@ export async function tapeNumbers(now = new Date()): Promise<Omit<Tape, "money" 
       SELECT count(*)::int AS total,
              count(*) FILTER (WHERE created_at >= date_trunc('day', now() AT TIME ZONE 'utc') AT TIME ZONE 'utc')::int AS today,
              COALESCE(SUM(bytes), 0)::bigint AS bytes
-        FROM remora_assets WHERE kind IN ('video', 'audio')` as unknown) as Promise<{ total: number; today: number; bytes: string | number }[]>,
+        FROM remora_assets WHERE kind IN ('video', 'audio', 'gif')` as unknown) as Promise<{ total: number; today: number; bytes: string | number }[]>,
     (sql()`
       SELECT to_char(created_at AT TIME ZONE 'utc', 'YYYY-MM-DD') AS day, count(*)::int AS vends
-        FROM remora_assets WHERE kind IN ('video', 'audio') AND created_at > now() - interval '15 days'
+        FROM remora_assets WHERE kind IN ('video', 'audio', 'gif') AND created_at > now() - interval '15 days'
        GROUP BY 1` as unknown) as Promise<DayCount[]>,
     (sql()`SELECT kind, COALESCE(SUM(ABS(coins)), 0)::int AS n FROM remora_ledger GROUP BY kind` as unknown) as Promise<{ kind: string; n: number }[]>,
     (sql()`SELECT name, started_at, last_seen, vends FROM remora_machine ORDER BY last_seen DESC` as unknown) as Promise<
@@ -25,7 +25,7 @@ export async function tapeNumbers(now = new Date()): Promise<Omit<Tape, "money" 
     (sql()`
       SELECT a.created_at, j.provider, j.quality, a.bytes, a.sha256, j.claimed_by, a.job_id
         FROM remora_assets a JOIN remora_jobs j ON j.id = a.job_id
-       WHERE a.kind IN ('video', 'audio')
+       WHERE a.kind IN ('video', 'audio', 'gif')
        ORDER BY a.created_at DESC LIMIT 25` as unknown) as Promise<
       { created_at: string | Date; provider: string; quality: string; bytes: string | number; sha256: string; claimed_by: string | null; job_id: string }[]
     >,

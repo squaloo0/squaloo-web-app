@@ -33,6 +33,7 @@ import { enqueue, freshestMachine, listJobs, liveMachines, migrate } from "../..
 import { machineSummary } from "../../src/remora/core/route.ts";
 import { printTape } from "../../src/remora/core/tape.ts";
 import { parseClipSpec, prettyClip } from "../../src/remora/core/clip.ts";
+import { gifClipReason } from "../../src/remora/core/gif.ts";
 import { theTape } from "../../src/remora/tape.ts";
 import { shelfWired } from "../../src/remora/storage.ts";
 
@@ -97,8 +98,13 @@ async function main(): Promise<number> {
         return 2;
       }
       const clip = clipSpec?.clip ?? null;
+      const gifWhy = quality === "gif" ? gifClipReason(clip) : null;
+      if (gifWhy) {
+        console.error(`get: ${gifWhy} (--clip 1:23-1:28)`);
+        return 2;
+      }
       console.log(BANNER);
-      console.log(`  slot      ${clip ? `CLIP ${prettyClip(clip)}` : isAudio(quality) ? "AUDIO" : "VIDEO"} · ${quality}`);
+      console.log(`  slot      ${quality === "gif" ? `GIF ${prettyClip(clip!)}` : clip ? `CLIP ${prettyClip(clip)}` : isAudio(quality) ? "AUDIO" : "VIDEO"} · ${quality}`);
       const needle = new Needle();
       try {
         const v = await vend({
@@ -212,6 +218,11 @@ async function main(): Promise<number> {
         console.error(`enqueue: --clip ${clipSpec.reason}`);
         return 2;
       }
+      const gifWhy = quality === "gif" ? gifClipReason(clipSpec?.clip ?? null) : null;
+      if (gifWhy) {
+        console.error(`enqueue: ${gifWhy} (--clip 1:23-1:28)`);
+        return 2;
+      }
       const job = await enqueue({ input: args[0], canonicalUrl: parsed.canonicalUrl, provider: parsed.provider, quality, clip: clipSpec?.clip ?? null });
       console.log(`  coin in. ${job.id} · ${job.provider} · ${job.quality}${job.clip ? ` · ${prettyClip(job.clip)}` : ""} · ${pill(job).text}`);
       return 0;
@@ -290,7 +301,7 @@ async function main(): Promise<number> {
       console.log("  peek <url>                what the glass reads off a URL (offline)");
       console.log("  info <url>                what is behind the glass, via yt-dlp");
       console.log("  get  <url> [--quality q] [--clip 1:23-1:45]");
-      console.log("                            VIDEO: best|2160|1440|1080|720|480|360 · AUDIO: audio (mp3)|m4a|audio-raw · CLIP: --clip");
+      console.log("                            VIDEO: best|2160|1440|1080|720|480|360 · AUDIO: audio (mp3)|m4a|audio-raw · CLIP: --clip · GIF: gif --clip (≤15s)");
       console.log("  ls                        the ledger and the scoreboard");
       console.log("  verify <file|receipt>     re-hash a vend against its receipt");
       console.log("  receipt <file|receipt>    print a receipt again");
@@ -327,7 +338,7 @@ class Needle {
     if (t.kind === "postprocess") {
       this.close();
       if (t.status === "started" && t.processor !== "MoveFiles") {
-        const label = { Merger: "merging", ExtractAudio: "extracting", FFmpegFixupM4a: "fixing" }[t.processor] ?? t.processor.toLowerCase().slice(0, 9);
+        const label = { Merger: "merging", ExtractAudio: "extracting", VideoConvertor: "rendering", FFmpegFixupM4a: "fixing" }[t.processor] ?? t.processor.toLowerCase().slice(0, 9);
         console.log(`  ${label.padEnd(9)} ffmpeg at work`);
       }
       return;

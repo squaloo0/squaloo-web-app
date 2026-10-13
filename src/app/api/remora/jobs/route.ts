@@ -9,6 +9,7 @@ import { NextResponse } from "next/server";
 import { parseVideoUrl } from "@/remora/core/url";
 import { parseQuality } from "@/remora/core/format";
 import { parseClip } from "@/remora/core/clip";
+import { gifClipReason } from "@/remora/core/gif";
 import { machineLight } from "@/remora/core/job";
 import { codeName } from "@/remora/core/codename";
 import { waitingReason } from "@/remora/core/route";
@@ -67,6 +68,8 @@ export async function POST(req: Request): Promise<NextResponse> {
   if (!q) return fail("?coin=bad-quality", "quality must be best, 2160..360 or audio", 400);
   const clipParse = parseClip(typeof start === "string" || typeof start === "number" ? String(start) : undefined, typeof end === "string" || typeof end === "number" ? String(end) : undefined);
   if (clipParse && !clipParse.ok) return fail(`?coin=bad-clip&why=${encodeURIComponent(clipParse.reason)}`, clipParse.reason, 400);
+  const gifWhy = q === "gif" ? gifClipReason(clipParse?.ok ? clipParse.clip : null) : null;
+  if (gifWhy) return fail(`?coin=bad-clip&why=${encodeURIComponent(gifWhy)}`, gifWhy, 400);
   if (!dbWired()) return fail("?coin=no-queue", "no queue wired on this deploy", 503);
 
   const coin = { input: url as string, canonicalUrl: parsed.canonicalUrl, provider: parsed.provider, quality: q, clip: clipParse?.clip ?? null };
