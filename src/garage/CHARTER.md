@@ -1,6 +1,6 @@
 # The Garage — charter for wrasse
 
-**Version 0.1, drafted 2026-10-13.** Not yet binding: under Solomon's rule 17 a charter earns that
+**Version 0.2, drafted 2026-10-13.** Not yet binding: under Solomon's rule 17 a charter earns that
 label by review, not by authorship. It binds the day the founder reads it end to end and says so,
 and the changelog at the bottom records that date.
 
@@ -167,7 +167,9 @@ The flywheel turns like this:
 
 1. **Read** the library from the current hat's lens. A design run reads design sources; a
    pricing run reads pricing sources. Tag everything: `[sourced]` with a page reference,
-   `[note-estimate]` until re-verified against the primary, `[hypothesis]` when nothing backs it.
+   `[note-estimate]` until re-verified against the primary, `[hypothesis]` when nothing backs
+   it, and `[recall]` when it came from the model's own training rather than any file, with
+   the thing that would verify it named beside it. A `[recall]` is never a source.
 2. **Propose** with a banked prediction. Metric, direction, size, window, and the source the
    prediction leans on.
 3. **Measure** when the window closes, with the instrument named in the prediction. A later
@@ -205,7 +207,8 @@ lens, and its own calibration record. The library is shared. The ledgers are not
   In Review. Its Notion write surface is the Garage Research Library and the Garage report
   page, nothing else.
 - **The touch list.** `src/garage/`, `src/app/garage/`, `src/app/api/garage/`,
-  `workers/garage/`, plus `package.json` scripts and the one dependency. For proposals at
+  `workers/garage/`, `src/middleware.ts` (the instrument's shim, which does nothing else),
+  plus `package.json` scripts and the one dependency. For proposals at
   rung 1 and up: `src/app/` pages, `src/components/`, `content/`, `public/`. Never:
   `src/remora/db/`, `src/app/api/remora/stripe/`, `src/app/api/remora/checkout/`,
   `src/remora/auth.ts`, `src/remora/stripe.ts`, `workers/remora/`, any `.env*`, any
@@ -230,6 +233,11 @@ from this exercise. Every entry names the incident that caused it or the review 
 it.
 
 ## Changelog
+
+- **0.2, 2026-10-13.** The instrument lands (Phase 3): `src/middleware.ts` joins the harness
+  touch list as a shim that records one `garage_hits` row per countable request and nothing
+  else; the `[recall]` tag joins section 6 after run `894a1588` needed it. Guards 1 through 7
+  now have their firing tests (Phase 1). Still a draft under rule 17.
 
 - **0.1, 2026-10-13.** First draft, from the discussion of how a headless agent's charter
   differs from a seated pod's. Guidelines and budget founder-ratified in that discussion; the

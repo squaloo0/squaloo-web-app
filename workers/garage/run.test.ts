@@ -65,6 +65,9 @@ function fakeDeps(over: { halt?: boolean; spent?: number; charter?: string; scri
     async recentRuns() {
       return over.recent ?? [];
     },
+    async instrumentLines() {
+      return ["12 hits, last 7 days to now, UTC, counting since 2026-10-13 08:00Z"];
+    },
   };
   let captured: { prompt: string; options: Options } | null = null;
   let calls = 0;
@@ -223,6 +226,7 @@ test("the prompt opens with the ledger block, so the run's memory is the ledger 
   const first = fakeDeps();
   await runOnce(first.deps, REQ);
   assert.match(first.captured()!.prompt, /^## The ledger says\n\nNo runs before this one/);
+  assert.match(first.captured()!.prompt, /The instrument \(garage_hits.*\n- 12 hits, last 7 days/);
   assert.match(first.captured()!.prompt, /\n---\n\nread and report$/);
   const prior: RunRow = {
     id: "c793e6ea-0000-0000-0000-000000000000",

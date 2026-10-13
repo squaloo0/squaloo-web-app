@@ -78,7 +78,7 @@ export async function runOnce(deps: Deps, req: RunRequest): Promise<RunResult> {
     return finish(deps, id, blank("halted", "day-budget"));
   }
 
-  const memory = ledgerMemory(await deps.ledger.recentRuns(10));
+  const memory = ledgerMemory(await deps.ledger.recentRuns(10), 6000, await deps.ledger.instrumentLines());
   const id = await deps.ledger.startRun(base);
   const ctx: GuardContext = { rung: req.rung, cwd: deps.cwd, approvedDiffHashes: await deps.ledger.approvedHashes(), diffHash: req.diffHash };
   const abort = new AbortController();

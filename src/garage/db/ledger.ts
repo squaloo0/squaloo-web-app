@@ -5,6 +5,7 @@
 import { sql } from "./client.ts";
 import type { HaltReason, RunRow, RunStatus } from "../core/run.ts";
 import type { Rung } from "../core/guard.ts";
+import { hitsLines } from "../core/hits.ts";
 
 export type StartRun = {
   machine: string;
@@ -42,6 +43,8 @@ export type Ledger = {
   approvedHashes(): Promise<Set<string>>;
   /** The newest rows first, for the run's memory block. */
   recentRuns(limit: number): Promise<RunRow[]>;
+  /** The instrument's last seven days, as lines, for the same block. */
+  instrumentLines(): Promise<string[]>;
 };
 
 type Row = {
@@ -126,6 +129,9 @@ export const neonLedger: Ledger = {
   },
   async recentRuns(limit) {
     return listRuns(limit);
+  },
+  async instrumentLines() {
+    return hitsLines(await hitsSummary(7));
   },
 };
 
@@ -271,4 +277,40 @@ export async function listCommands(limit = 20): Promise<CommandRow[]> {
 export async function queuedCount(): Promise<number> {
   const rows = (await sql()`SELECT count(*)::int AS n FROM garage_commands WHERE status = 'queued'`) as { n: number }[];
   return rows[0]?.n ?? 0;
+}
+
+/** The instrument, read back: counts by UTC day and kind, the top paths, the families, the referrers. */
+export type HitsSummary = {
+  days: number;
+  since: string;
+  total: number;
+  byKind: { kind: string; n: number }[];
+  byDay: { day: string; kind: string; n: number }[];
+  topPaths: { path: string; kind: string; n: number }[];
+  families: { family: string; kind: string; n: number }[];
+  referrers: { refHost: string; n: number }[];
+  firstHitAt: string | null;
+};
+
+export async function hitsSummary(days = 7): Promise<HitsSummary> {
+  const since = new Date(Date.now() - days * 86_400_000).toISOString();
+  const [byKind, byDay, topPaths, families, referrers, first] = await Promise.all([
+    sql()`SELECT kind, count(*)::int AS n FROM garage_hits WHERE at >= ${since} GROUP BY kind ORDER BY n DESC` as unknown as Promise<{ kind: string; n: number }[]>,
+    sql()`SELECT to_char((at AT TIME ZONE 'UTC')::date, 'YYYY-MM-DD') AS day, kind, count(*)::int AS n FROM garage_hits WHERE at >= ${since} GROUP BY 1, 2 ORDER BY 1 DESC, n DESC` as unknown as Promise<{ day: string; kind: string; n: number }[]>,
+    sql()`SELECT path, kind, count(*)::int AS n FROM garage_hits WHERE at >= ${since} GROUP BY path, kind ORDER BY n DESC LIMIT 25` as unknown as Promise<{ path: string; kind: string; n: number }[]>,
+    sql()`SELECT family, kind, count(*)::int AS n FROM garage_hits WHERE at >= ${since} AND family <> '' GROUP BY family, kind ORDER BY n DESC LIMIT 25` as unknown as Promise<{ family: string; kind: string; n: number }[]>,
+    sql()`SELECT ref_host AS "refHost", count(*)::int AS n FROM garage_hits WHERE at >= ${since} AND ref_host <> '' GROUP BY ref_host ORDER BY n DESC LIMIT 15` as unknown as Promise<{ refHost: string; n: number }[]>,
+    sql()`SELECT min(at) AS at FROM garage_hits` as unknown as Promise<{ at: string | null }[]>,
+  ]);
+  return {
+    days,
+    since,
+    total: byKind.reduce((n, r) => n + r.n, 0),
+    byKind,
+    byDay,
+    topPaths,
+    families,
+    referrers,
+    firstHitAt: first[0]?.at ? new Date(first[0].at).toISOString() : null,
+  };
 }
