@@ -11,6 +11,11 @@ test("agents acting for a person are agents, not crawlers, even in a Mozilla coa
   assert.deepEqual(classifyVisitor("Mozilla/5.0 (compatible; Perplexity-User/1.0; +https://perplexity.ai/perplexity-user)"), { kind: "agent", family: "perplexity-user" });
 });
 
+test("the search indexers are crawlers, not agents: nobody is waiting on the other end", () => {
+  assert.deepEqual(classifyVisitor("Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; Claude-SearchBot/1.0; +claude-searchbot@anthropic.com)"), { kind: "ai-crawler", family: "claude-searchbot" });
+  assert.deepEqual(classifyVisitor("Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko); compatible; OAI-SearchBot/1.0; +https://openai.com/searchbot"), { kind: "ai-crawler", family: "oai-searchbot" });
+});
+
 test("the crawlers that train are their own kind", () => {
   assert.deepEqual(classifyVisitor("Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; ClaudeBot/1.0; +claudebot@anthropic.com)"), { kind: "ai-crawler", family: "claudebot" });
   assert.deepEqual(classifyVisitor("Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko); compatible; GPTBot/1.2; +https://openai.com/gptbot"), { kind: "ai-crawler", family: "gptbot" });
