@@ -140,3 +140,10 @@ files, what is and isn't on disk) belong here because they do not travel with gi
 - Lantern was redeployed at the start of the sitting with the CLIP code; mantis updated by the founder. After this merges: `fly deploy` and the mini's pull + `npm run remora:install`, then four slots are live: VIDEO, AUDIO, CLIP, GIF.
 - Air facts: nothing new. No dev server this sitting; verified by CLI + API tests.
 - Next: THUMBS (a strip of frames from a video: ffmpeg `fps=1/N,tile` through yt-dlp's exec? or a Remora post-step; decide then), then TRANSCRIPT (whisper.cpp, the big one), then CHAPTERS.
+
+## 2026-10-13 · MacBook Air · the THUMBS slot · DONE
+- Branch `remora/feat/the-thumbs-slot`. Quality `thumbs`: twelve frames evenly spaced across the video or the clip, tiled 4×3 at 320 px into one 1280-wide JPEG. `core/thumbs.ts` builds the ffmpeg argument list; `src/remora/ffmpeg.ts` is the first direct ffmpeg call in Remora (spawn through the same runner as yt-dlp; never a shell). Migration 0007 widens the shelf's kinds to `thumbs` (applied to production). Receipt slot THUMBS. Panel: THUMBS reads NEW, GIF goes LIVE; the quality menu says "12 frames, one sheet".
+- Vended locally on this code: whole video → 1280×540, 94 KB, frames 17.8 s apart; 1:00–1:30 clip → 2.5 s apart. Both receipts signed; the intermediate low-res video is removed after tiling.
+- Lantern redeployed at the start of the sitting with the GIF code; mantis updated by the founder; both on with fresh uptimes at the end (lantern 1 m, mantis 3 m). After this merges: `fly deploy` and the mini's pull + `npm run remora:install`, then five slots are live.
+- Air facts: nothing new. The Dockerfile's Debian ffmpeg 5.1 supports fps/scale/tile; no image change needed.
+- Next: TRANSCRIPT (whisper.cpp as a slot: a sidecar binary + model in the image and on the Macs; the big one, probably two sittings), then CHAPTERS (yt-dlp's chapter list → a text file, cheap).
