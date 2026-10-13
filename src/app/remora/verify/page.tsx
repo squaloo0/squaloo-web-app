@@ -9,7 +9,7 @@ import VerifyForm from "./verify-form";
 async function lookupHash(sha: string): Promise<{ at: string; bytes: number; provider: string } | null> {
   const rows = (await sql()`
     SELECT a.bytes, a.created_at, j.provider FROM remora_assets a JOIN remora_jobs j ON j.id = a.job_id
-     WHERE a.sha256 = ${sha} AND a.kind IN ('video', 'audio', 'gif', 'thumbs', 'transcript') ORDER BY a.created_at LIMIT 1`) as
+     WHERE a.sha256 = ${sha} AND a.kind IN ('video', 'audio', 'gif', 'thumbs', 'transcript', 'chapters') ORDER BY a.created_at LIMIT 1`) as
     { bytes: string | number; created_at: string | Date; provider: string }[];
   const r = rows[0];
   return r ? { at: new Date(r.created_at).toISOString(), bytes: Number(r.bytes), provider: r.provider } : null;

@@ -169,7 +169,7 @@ async function process_(job: Job, pulse: () => Pulse): Promise<void> {
 
     await addAsset({
       jobId: job.id,
-      kind: job.quality === "gif" ? "gif" : job.quality === "thumbs" ? "thumbs" : job.quality === "transcript" ? "transcript" : isAudio(job.quality) ? "audio" : "video",
+      kind: job.quality === "gif" ? "gif" : job.quality === "thumbs" ? "thumbs" : job.quality === "transcript" ? "transcript" : job.quality === "chapters" ? "chapters" : isAudio(job.quality) ? "audio" : "video",
       objectKey: `${prefix}/${fileName}`,
       fileName,
       bytes: v.receipt.file.bytes,

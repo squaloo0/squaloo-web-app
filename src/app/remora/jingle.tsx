@@ -15,7 +15,7 @@ export default function Jingle({ formId }: { formId: string }) {
     const onSubmit = () => {
       const q = (form.elements.namedItem("quality") as HTMLSelectElement | null)?.value ?? "";
       const start = (form.elements.namedItem("start") as HTMLInputElement | null)?.value.trim() ?? "";
-      const newSlot = q.startsWith("audio") || q === "m4a" || q === "gif" || q === "thumbs" || q === "transcript" || start !== "";
+      const newSlot = q.startsWith("audio") || q === "m4a" || q === "gif" || q === "thumbs" || q === "transcript" || q === "chapters" || start !== "";
       if (!newSlot) return;
       try {
         const Ctx = window.AudioContext;

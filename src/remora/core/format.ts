@@ -12,9 +12,14 @@ import { wavPostprocessArgs } from "./transcript.ts";
  *   m4a         AAC in an MP4 shell: smaller, Apple-native
  *   audio-raw   the best audio track yt-dlp can find, untouched (usually opus in webm)
  */
-export type Quality = "best" | "2160" | "1440" | "1080" | "720" | "480" | "360" | "audio" | "m4a" | "audio-raw" | "gif" | "thumbs" | "transcript";
+export type Quality = "best" | "2160" | "1440" | "1080" | "720" | "480" | "360" | "audio" | "m4a" | "audio-raw" | "gif" | "thumbs" | "transcript" | "chapters";
 
-export const QUALITIES: readonly Quality[] = ["best", "2160", "1440", "1080", "720", "480", "360", "audio", "m4a", "audio-raw", "gif", "thumbs", "transcript"];
+export const QUALITIES: readonly Quality[] = ["best", "2160", "1440", "1080", "720", "480", "360", "audio", "m4a", "audio-raw", "gif", "thumbs", "transcript", "chapters"];
+
+/** Slots that never download the video: the drop is made from metadata alone. */
+export function isMetadataOnly(q: Quality): boolean {
+  return q === "chapters";
+}
 
 export const AUDIO_QUALITIES: readonly Quality[] = ["audio", "m4a", "audio-raw"];
 
@@ -35,6 +40,7 @@ export function parseQuality(input: string | undefined | null): Quality | null {
   if (s === "gif") return "gif";
   if (s === "thumbs" || s === "contact" || s === "sheet") return "thumbs";
   if (s === "transcript" || s === "transcribe" || s === "whisper" || s === "text") return "transcript";
+  if (s === "chapters" || s === "chapter" || s === "toc") return "chapters";
   if (s === "4k" || s === "uhd") return "2160";
   if (s === "2k") return "1440";
   const m = /^(\d{3,4})p?$/.exec(s);
@@ -52,13 +58,13 @@ export function parseQuality(input: string | undefined | null): Quality | null {
 export function formatSelector(q: Quality): string {
   if (q === "best") return "bestvideo*+bestaudio/best";
   if (q === "gif" || q === "thumbs") return GIF_FORMAT_SELECTOR;
-  if (isAudio(q) || q === "transcript") return "bestaudio/best";
+  if (isAudio(q) || q === "transcript" || q === "chapters") return "bestaudio/best"; // chapters never fetch; the selector is moot
   return `bestvideo*[height<=${q}]+bestaudio/best[height<=${q}]/best`;
 }
 
 /** Container yt-dlp should merge into, or null when nothing is merged. */
 export function mergeContainer(q: Quality): "mp4" | null {
-  return isAudio(q) || q === "gif" || q === "thumbs" || q === "transcript" ? null : "mp4";
+  return isAudio(q) || q === "gif" || q === "thumbs" || q === "transcript" || q === "chapters" ? null : "mp4";
 }
 
 /**
@@ -84,7 +90,7 @@ export function postprocessArgs(q: Quality): string[] {
 
 /** The extension a vend of this quality lands with, when we can know it. */
 export function expectedExt(q: Quality): string | null {
-  return q === "audio" ? "mp3" : q === "m4a" ? "m4a" : q === "gif" ? "gif" : q === "thumbs" ? "jpg" : q === "transcript" ? "md" : isAudio(q) ? null : "mp4";
+  return q === "audio" ? "mp3" : q === "m4a" ? "m4a" : q === "gif" ? "gif" : q === "thumbs" ? "jpg" : q === "transcript" || q === "chapters" ? "md" : isAudio(q) ? null : "mp4";
 }
 
 export type Estimate = {
@@ -103,6 +109,7 @@ export type Estimate = {
  * panel is in the right neighbourhood, not a promise. Null when nothing fits.
  */
 export function estimate(meta: VideoMeta, q: Quality): Estimate | null {
+  if (q === "chapters") return { height: null, bytes: null, approx: false, formatIds: [] };
   const usable = meta.formats.filter((f) => f.vcodec !== null || f.acodec !== null);
   const audioOnly = usable.filter((f) => f.vcodec === null && f.acodec !== null);
   const videoOnly = usable.filter((f) => f.vcodec !== null && f.acodec === null);

@@ -26,6 +26,13 @@ export type VideoFormat = {
   protocol: string | null;
 };
 
+export type Chapter = {
+  /** Seconds. */
+  start: number;
+  end: number;
+  title: string;
+};
+
 export type VideoMeta = {
   id: string;
   title: string;
@@ -40,6 +47,8 @@ export type VideoMeta = {
   extractor: string;
   isLive: boolean;
   formats: VideoFormat[];
+  /** yt-dlp's chapters: the uploader's, or ones it read off timestamps in the description. */
+  chapters: Chapter[];
 };
 
 export class MetaError extends Error {
@@ -76,6 +85,17 @@ export function parseYtDlpJson(input: unknown): VideoMeta {
     rawFormats.forEach((f, i) => formats.push(parseFormat(f, `formats[${i}]`)));
   }
 
+  const chapters: Chapter[] = [];
+  if (Array.isArray(o.chapters)) {
+    o.chapters.forEach((c, i) => {
+      const ch = obj(c, `chapters[${i}]`);
+      const start = optNum(ch, "start_time");
+      const end = optNum(ch, "end_time");
+      if (start === null || end === null) return; // yt-dlp sometimes leaves one open; skip it rather than guess
+      chapters.push({ start, end, title: optStr(ch, "title") ?? `Chapter ${chapters.length + 1}` });
+    });
+  }
+
   return {
     id: str(o, "id"),
     title: str(o, "title"),
@@ -87,6 +107,7 @@ export function parseYtDlpJson(input: unknown): VideoMeta {
     extractor: (optStr(o, "extractor") ?? "unknown").toLowerCase(),
     isLive: o.is_live === true || o.live_status === "is_live",
     formats,
+    chapters,
   };
 }
 

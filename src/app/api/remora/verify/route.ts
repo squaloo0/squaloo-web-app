@@ -28,7 +28,7 @@ export async function GET(req: Request): Promise<NextResponse> {
     if (!dbWired()) return NextResponse.json({ error: "no queue wired on this deploy" }, { status: 503 });
     const rows = (await sql()`
       SELECT a.job_id, a.bytes, a.created_at, j.provider FROM remora_assets a JOIN remora_jobs j ON j.id = a.job_id
-       WHERE a.sha256 = ${sha.toLowerCase()} AND a.kind IN ('video', 'audio', 'gif', 'thumbs') ORDER BY a.created_at LIMIT 1`) as
+       WHERE a.sha256 = ${sha.toLowerCase()} AND a.kind IN ('video', 'audio', 'gif', 'thumbs', 'transcript', 'chapters') ORDER BY a.created_at LIMIT 1`) as
       { job_id: string; bytes: string | number; created_at: string | Date; provider: string }[];
     const r = rows[0];
     return NextResponse.json(
@@ -55,7 +55,7 @@ export async function POST(req: Request): Promise<NextResponse> {
   if (dbWired()) {
     const rows = (await sql()`
       SELECT a.job_id, a.bytes, a.created_at FROM remora_assets a
-       WHERE a.sha256 = ${parsed.file.sha256} AND a.kind IN ('video', 'audio', 'gif', 'thumbs') ORDER BY a.created_at LIMIT 1`) as
+       WHERE a.sha256 = ${parsed.file.sha256} AND a.kind IN ('video', 'audio', 'gif', 'thumbs', 'transcript', 'chapters') ORDER BY a.created_at LIMIT 1`) as
       { job_id: string; bytes: string | number; created_at: string | Date }[];
     if (rows[0]) vended = { at: new Date(rows[0].created_at).toISOString(), job: rows[0].job_id, bytes: Number(rows[0].bytes) };
   }

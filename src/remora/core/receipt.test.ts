@@ -146,4 +146,7 @@ test("a clipped receipt says CLIP and prints the range", () => {
   const t = buildReceipt(input({ quality: "transcript", transcript: { model: "ggml-base.bin", language: "en", segments: 42, whisper: "1.9.5" } }));
   assert.equal(t.receipt.slot, "TRANSCRIPT");
   assert.ok(printReceipt(t).some((l) => l.startsWith("heard by  ggml-base.bin · en · 42 seg")));
+  const c = buildReceipt(input({ quality: "chapters", chapters: { count: 7, first: "Intro", last: "Outro" } }));
+  assert.equal(c.receipt.slot, "CHAPTERS");
+  assert.ok(printReceipt(c).some((l) => l.startsWith("chapters  7 · Intro")));
 });

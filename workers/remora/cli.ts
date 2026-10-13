@@ -105,7 +105,7 @@ async function main(): Promise<number> {
         return 2;
       }
       console.log(BANNER);
-      console.log(`  slot      ${quality === "gif" ? `GIF ${prettyClip(clip!)}` : quality === "thumbs" ? `THUMBS${clip ? ` ${prettyClip(clip)}` : ""}` : quality === "transcript" ? `TRANSCRIPT${clip ? ` ${prettyClip(clip)}` : ""}` : clip ? `CLIP ${prettyClip(clip)}` : isAudio(quality) ? "AUDIO" : "VIDEO"} · ${quality}`);
+      console.log(`  slot      ${quality === "gif" ? `GIF ${prettyClip(clip!)}` : quality === "thumbs" ? `THUMBS${clip ? ` ${prettyClip(clip)}` : ""}` : quality === "transcript" ? `TRANSCRIPT${clip ? ` ${prettyClip(clip)}` : ""}` : quality === "chapters" ? "CHAPTERS" : clip ? `CLIP ${prettyClip(clip)}` : isAudio(quality) ? "AUDIO" : "VIDEO"} · ${quality}`);
       const needle = new Needle();
       try {
         const v = await vend({
@@ -304,7 +304,7 @@ async function main(): Promise<number> {
       console.log("  peek <url>                what the glass reads off a URL (offline)");
       console.log("  info <url>                what is behind the glass, via yt-dlp");
       console.log("  get  <url> [--quality q] [--clip 1:23-1:45]");
-      console.log("                            VIDEO: best|2160|1440|1080|720|480|360 · AUDIO: audio (mp3)|m4a|audio-raw · CLIP: --clip · GIF: gif --clip (≤15s) · THUMBS: thumbs [--clip] · TRANSCRIPT: transcript [--clip]");
+      console.log("                            VIDEO: best|2160|1440|1080|720|480|360 · AUDIO: audio (mp3)|m4a|audio-raw · CLIP: --clip · GIF: gif --clip (≤15s) · THUMBS: thumbs [--clip] · TRANSCRIPT: transcript [--clip] · CHAPTERS: chapters");
       console.log("  ls                        the ledger and the scoreboard");
       console.log("  verify <file|receipt>     re-hash a vend against its receipt");
       console.log("  receipt <file|receipt>    print a receipt again");
