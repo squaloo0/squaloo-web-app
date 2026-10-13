@@ -97,15 +97,30 @@ export function runPreamble(p: { machine: string; rung: Rung; hat: string; ticke
  * The ledger block that opens every prompt: the last runs, one line each, and the newest
  * report in full (bounded). This is the whole of the agent's memory of itself.
  */
-export function ledgerMemory(rows: RunRow[], maxReportChars = 6000, instrument: string[] = []): string {
+/** Run ids a prompt names: 8 to 36 hex-and-dash characters that start like one of ours. */
+export function runIdsIn(text: string): string[] {
+  const seen = new Set<string>();
+  for (const m of text.matchAll(/\b([0-9a-f]{8})(?:-[0-9a-f-]{1,27})?\b/g)) seen.add(m[1]);
+  return [...seen];
+}
+
+export function ledgerMemory(rows: RunRow[], maxReportChars = 6000, instrument: string[] = [], referenced: RunRow[] = []): string {
   const instrumentBlock = instrument.length ? ["The instrument (garage_hits, first-party, server-side, no addresses, no raw user agents):", ...instrument.map((l) => `- ${l}`), ""] : [];
   if (rows.length === 0) return ["## The ledger says", "", "No runs before this one. You are the first.", "", ...instrumentBlock].join("\n");
   const lines = rows.map((r) => `- ${runLine(r)}`);
   const last = rows.find((r) => r.report !== null) ?? null;
   const out = ["## The ledger says", "", ...instrumentBlock, `The last ${rows.length} run${rows.length === 1 ? "" : "s"}, newest first:`, ...lines, ""];
+  const clip = (t: string) => (t.length > maxReportChars ? t.slice(0, maxReportChars) + "\n[truncated]" : t);
   if (last) {
-    const text = last.report!.length > maxReportChars ? last.report!.slice(0, maxReportChars) + "\n[truncated]" : last.report!;
-    out.push(`The newest report, from run ${shortId(last.id)} (${last.hat}, ${last.startedAt.slice(0, 16).replace("T", " ")} UTC):`, "", text, "");
+    out.push(`The newest report, from run ${shortId(last.id)} (${last.hat}, ${last.startedAt.slice(0, 16).replace("T", " ")} UTC):`, "", clip(last.report!), "");
+  }
+  for (const r of referenced) {
+    if (last && r.id === last.id) continue;
+    if (r.report === null) {
+      out.push(`Run ${shortId(r.id)}, which the command names, left no report (${r.status}${r.haltReason ? ": " + r.haltReason : ""}).`, "");
+      continue;
+    }
+    out.push(`The report of run ${shortId(r.id)}, which the command names (${r.hat}${r.ticket ? " " + r.ticket : ""}, ${r.startedAt.slice(0, 16).replace("T", " ")} UTC):`, "", clip(r.report), "");
   }
   return out.join("\n");
 }

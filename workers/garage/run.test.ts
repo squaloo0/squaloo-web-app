@@ -68,6 +68,9 @@ function fakeDeps(over: { halt?: boolean; spent?: number; charter?: string; scri
     async instrumentLines() {
       return ["12 hits, last 7 days to now, UTC, counting since 2026-10-13 08:00Z"];
     },
+    async runByPrefix(prefix) {
+      return (over.recent ?? []).find((r) => r.id.startsWith(prefix)) ?? null;
+    },
   };
   let captured: { prompt: string; options: Options } | null = null;
   let calls = 0;
@@ -290,4 +293,37 @@ test("rung 0 never touches git", async () => {
   assert.equal(r.branch, null);
   assert.equal(r.diffHash, null);
   assert.deepEqual(f.gitCalls, []);
+});
+
+test("naming a run in the command puts its report in the prompt", async () => {
+  const prior: RunRow = {
+    id: "894a1588-0000-0000-0000-000000000000",
+    startedAt: "2026-10-13T07:15:00.000Z",
+    finishedAt: null,
+    machine: "air",
+    hat: "report",
+    rung: 0,
+    ticket: "GARAGE-3",
+    prompt: "x",
+    charterVersion: "0.2",
+    charterHash: "0983781777b6",
+    model: "m",
+    status: "done",
+    haltReason: null,
+    costUsd: 0.25,
+    turns: 14,
+    toolCalls: 13,
+    denials: 0,
+    report: "the pay-rail report, in full",
+    error: null,
+    commandId: null,
+    branch: null,
+    diffHash: null,
+    verdict: null,
+    prUrl: null,
+  };
+  const newest: RunRow = { ...prior, id: "eea55df9-0000-0000-0000-000000000000", report: "the newest report" };
+  const f = fakeDeps({ recent: [newest, prior] });
+  await runOnce(f.deps, { ...REQ, prompt: "red-team the report of run 894a1588" });
+  assert.match(f.captured()!.prompt, /The report of run 894a1588, which the command names[\s\S]*the pay-rail report, in full/);
 });

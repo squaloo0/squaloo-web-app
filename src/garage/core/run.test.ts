@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { ledgerMemory, outcomeOf, runLine, runPreamble, type RunRow } from "./run.ts";
+import { ledgerMemory, outcomeOf, runIdsIn, runLine, runPreamble, type RunRow } from "./run.ts";
 
 test("guard 2: a budget-stopped query lands as halted: budget, a turn-stopped one as halted: turns", () => {
   assert.deepEqual(outcomeOf("error_max_budget_usd"), { status: "halted", haltReason: "budget" });
@@ -82,4 +82,40 @@ test("the ledger block is the agent's whole memory of itself: lines, then the ne
   assert.match(m, /Remora is the only thing that takes money/);
   assert.match(ledgerMemory([base], 10), /\[truncated\]/);
   assert.match(ledgerMemory([], 6000, ["3 hits, last 7 days to now, UTC"]), /You are the first\.\n\nThe instrument \(garage_hits[^\n]*\n- 3 hits/);
+});
+
+test("a command that names a run gets that run's report in the block, not a summary of it", () => {
+  assert.deepEqual(runIdsIn("red-team the report of run 894a1588 and compare with 7a2a55a1-0000-0000-0000-000000000000; GARAGE-5 is not an id"), ["894a1588", "7a2a55a1"]);
+  const mk = (id: string, report: string | null): RunRow => ({
+    id: `${id}-0000-0000-0000-000000000000`,
+    startedAt: "2026-10-13T07:15:00.000Z",
+    finishedAt: null,
+    machine: "air",
+    hat: "report",
+    rung: 0,
+    ticket: "GARAGE-3",
+    prompt: "x",
+    charterVersion: "0.2",
+    charterHash: "0983781777b6",
+    model: "m",
+    status: report ? "done" : "failed",
+    haltReason: null,
+    costUsd: 0.2,
+    turns: 1,
+    toolCalls: 1,
+    denials: 0,
+    report,
+    error: null,
+    commandId: null,
+    branch: null,
+    diffHash: null,
+    verdict: null,
+    prUrl: null,
+  });
+  const newest = mk("eea55df9", "the instrument report");
+  const named = mk("894a1588", "the pay-rail report");
+  const m = ledgerMemory([newest, named], 6000, [], [named, mk("204b2ef7", null)]);
+  assert.match(m, /The newest report, from run eea55df9[\s\S]*the instrument report/);
+  assert.match(m, /The report of run 894a1588, which the command names \(report GARAGE-3, 2026-10-13 07:15 UTC\):\n\nthe pay-rail report/);
+  assert.match(m, /Run 204b2ef7, which the command names, left no report \(failed\)\./);
 });
