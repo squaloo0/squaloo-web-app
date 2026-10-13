@@ -94,7 +94,7 @@ export default async function RemoraPage({ searchParams }: { searchParams: Promi
           <Link href="/" className="group inline-flex items-center gap-1.5 text-neutral-600 text-xs tracking-widest uppercase hover:text-white transition-colors">
             ← <Wordmark className="h-3.5 opacity-60 group-hover:opacity-100 transition-opacity" />
           </Link>
-          <span className="text-neutral-700 text-xs tracking-[0.3em] uppercase">Not a downloader</span>
+          <span className="hidden sm:inline shrink-0 whitespace-nowrap text-neutral-700 text-xs tracking-[0.3em] uppercase">Not a downloader</span>
         </div>
       </nav>
 
@@ -149,7 +149,7 @@ export default async function RemoraPage({ searchParams }: { searchParams: Promi
 
           {/* Controls */}
           <div className="grid sm:grid-cols-[1fr_auto] gap-0 border-b border-neutral-800">
-            <div className="p-5 border-b sm:border-b-0 sm:border-r border-neutral-800 flex flex-col gap-5">
+            <div className="min-w-0 p-5 border-b sm:border-b-0 sm:border-r border-neutral-800 flex flex-col gap-5">
               <form action="/remora" method="get" className="flex flex-col gap-2">
                 <label htmlFor="url" className="text-[10px] tracking-[0.3em] uppercase text-neutral-500">
                   Insert URL
@@ -216,7 +216,7 @@ export default async function RemoraPage({ searchParams }: { searchParams: Promi
                     Vend{carded ? " · 1 coin" : ""}
                   </button>
                 </div>
-                <div className="flex items-center gap-2 text-[10px] tracking-[0.2em] uppercase text-neutral-500">
+                <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[10px] tracking-[0.2em] uppercase text-neutral-500">
                   <span>Clip</span>
                   <input
                     name="start"
@@ -237,7 +237,7 @@ export default async function RemoraPage({ searchParams }: { searchParams: Promi
                     disabled={!queue || !canVend}
                     className="w-16 bg-black border border-neutral-800 px-2 py-1 text-xs text-white placeholder:text-neutral-700 focus:outline-none focus:border-[#5688c7] disabled:opacity-40 normal-case tracking-normal"
                   />
-                  <span className="text-neutral-700 normal-case tracking-normal">optional · up to 10 min (gif: 15 s) · cut on the second</span>
+                  <span className="text-neutral-700 normal-case tracking-normal basis-full sm:basis-auto">optional · up to 10 min (gif: 15 s) · cut on the second</span>
                 </div>
                 {(keyed || carded) && !dbWired() ? (
                   <span className="text-[10px] tracking-[0.2em] uppercase text-neutral-700">No queue wired on this deploy (NEON_DATABASE_URL)</span>
@@ -246,7 +246,7 @@ export default async function RemoraPage({ searchParams }: { searchParams: Promi
               </form>
             </div>
 
-            <div className="p-5 flex flex-col gap-4 sm:w-60">
+            <div className="min-w-0 p-5 flex flex-col gap-4 sm:w-60">
               <CoinSlot visitor={v} cardNote={cardNote} paid={paid} />
               <KeyHole wired={keySlotWired()} keyed={keyed} denied={denied} />
             </div>
@@ -254,7 +254,7 @@ export default async function RemoraPage({ searchParams }: { searchParams: Promi
 
           {/* The flap */}
           <div className="p-5">
-            <div className="flex items-baseline justify-between mb-3">
+            <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 mb-3">
               <span className="text-[10px] tracking-[0.3em] uppercase text-neutral-500">Flap</span>
               <span className="text-[10px] tracking-[0.2em] uppercase text-neutral-700">
                 {queue ? `${jobs.length} recent · links good for ${LINK_SECONDS / 60} min` : "Push"}
@@ -492,12 +492,12 @@ function Drop({ job, assets, waiting }: { job: Job; assets: Asset[]; waiting: st
   const file = assets.find((a) => a.kind !== "receipt");
   return (
     <li className="py-3 flex flex-col gap-1.5">
-      <div className="flex items-center gap-3 min-w-0">
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 min-w-0">
         <span className={`shrink-0 px-2 py-0.5 border text-[10px] tracking-[0.2em] uppercase ${PILL_TONE[p.tone]}`}>{p.text}</span>
         <span className="text-[10px] tracking-widest text-neutral-700 shrink-0 uppercase">{job.provider}</span>
         <span className="text-[10px] tracking-widest text-neutral-700 shrink-0">{job.quality}</span>
         {job.clip ? <span className="text-[10px] tracking-widest text-[#5688c7] shrink-0">{prettyClip(job.clip)}</span> : null}
-        <span className="text-sm text-neutral-300 truncate">{job.title ?? job.canonicalUrl}</span>
+        <span className="text-sm text-neutral-300 truncate basis-full sm:basis-auto sm:flex-1 min-w-0">{job.title ?? job.canonicalUrl}</span>
       </div>
       {job.status === "processing" && job.progress !== null ? (
         <div className="h-1 bg-neutral-900">

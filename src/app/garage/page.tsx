@@ -39,7 +39,7 @@ export default async function GaragePage({ searchParams }: { searchParams: Promi
           <Link href="/" className="group inline-flex items-center gap-1.5 text-neutral-600 text-xs tracking-widest uppercase hover:text-white transition-colors">
             ← <Wordmark className="h-3.5 opacity-60 group-hover:opacity-100 transition-opacity" />
           </Link>
-          <span className="text-neutral-700 text-xs tracking-[0.3em] uppercase">The Garage</span>
+          <span className="hidden sm:inline shrink-0 whitespace-nowrap text-neutral-700 text-xs tracking-[0.3em] uppercase">The Garage</span>
         </div>
       </nav>
 
@@ -78,13 +78,13 @@ export default async function GaragePage({ searchParams }: { searchParams: Promi
 
             <Section title="Command" hint="a host running `garage work` picks it up">
               <form method="POST" action="/api/garage/command" className="space-y-3">
-                <div className="flex gap-3">
+                <div className="flex flex-wrap gap-3">
                   <label className="text-[10px] tracking-[0.3em] uppercase text-neutral-500 self-center">hat</label>
-                  <select name="hat" className="bg-black border border-neutral-800 text-sm px-2 py-1 text-neutral-200">
+                  <select name="hat" className="bg-black border border-neutral-800 text-sm px-2 py-1 text-neutral-200 min-w-0 max-w-full">
                     <option value="report">report · rung 0 · read and report</option>
                     <option value="propose">propose · rung 1 · a change on a branch, behind the gate</option>
                   </select>
-                  <input name="ticket" placeholder="ticket (optional)" className="bg-black border border-neutral-800 text-sm px-2 py-1 text-neutral-200 flex-1" />
+                  <input name="ticket" placeholder="ticket (optional)" className="bg-black border border-neutral-800 text-sm px-2 py-1 text-neutral-200 flex-1 min-w-0 basis-full sm:basis-auto" />
                 </div>
                 <textarea
                   name="prompt"
@@ -145,11 +145,11 @@ function KeyForm({ denied, wired }: { denied: string | null; wired: boolean }) {
 function Section({ title, hint, children }: { title: string; hint: string; children: React.ReactNode }) {
   return (
     <section className="mb-8">
-      <div className="flex items-baseline justify-between mb-2">
-        <h2 className="text-xs tracking-[0.3em] uppercase text-neutral-400">{title}</h2>
-        <span className="text-neutral-700 text-[10px]">{hint}</span>
+      <div className="flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-x-4 gap-y-0.5 mb-2">
+        <h2 className="text-xs tracking-[0.3em] uppercase text-neutral-400 shrink-0">{title}</h2>
+        <span className="text-neutral-700 text-[10px] sm:text-right">{hint}</span>
       </div>
-      <div className="border border-neutral-800 bg-[#0c0d0f] p-4 space-y-2">{children}</div>
+      <div className="border border-neutral-800 bg-[#0c0d0f] p-4 space-y-2 min-w-0 overflow-hidden">{children}</div>
     </section>
   );
 }
@@ -175,7 +175,7 @@ function Pill({ status, halt }: { status: RunRow["status"] | CommandRow["status"
 
 function RunLine({ r }: { r: RunRow }) {
   return (
-    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-neutral-400">
+    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-neutral-400 min-w-0">
       <Link href={`/garage/runs/${r.id}`} className="text-neutral-200 hover:text-white underline-offset-4 hover:underline">
         {shortId(r.id)}
       </Link>
@@ -202,15 +202,15 @@ function GateRow({ r }: { r: RunRow }) {
   return (
     <div className="border border-neutral-800 p-3 space-y-2">
       <RunLine r={r} />
-      <div className="text-xs text-neutral-500">
+      <div className="text-xs text-neutral-500 break-all">
         branch <span className="text-neutral-300">{r.branch ?? "?"}</span> · diff <span className="text-neutral-300">{r.diffHash?.slice(0, 12)}</span> ·{" "}
         <Link href={`/garage/runs/${r.id}`} className="underline-offset-4 hover:underline">
           read the gate comment
         </Link>
       </div>
-      <form method="POST" action="/api/garage/gate" className="flex gap-2 items-center">
+      <form method="POST" action="/api/garage/gate" className="flex flex-wrap gap-2 items-center">
         <input type="hidden" name="run" value={r.id} />
-        <input name="note" placeholder="gate note" className="flex-1 bg-black border border-neutral-800 text-xs px-2 py-1 text-neutral-200" />
+        <input name="note" placeholder="gate note" className="flex-1 min-w-0 basis-full sm:basis-auto bg-black border border-neutral-800 text-xs px-2 py-1 text-neutral-200" />
         <button name="verdict" value="approve" className="border border-[#63a375] text-[#63a375] hover:bg-[#63a375] hover:text-black px-3 py-1 text-[10px] tracking-[0.2em] uppercase">
           Approve
         </button>
@@ -236,7 +236,7 @@ function CommandLine({ c }: { c: CommandRow }) {
           run {shortId(c.runId)}
         </Link>
       )}
-      {c.prompt && <span className="text-neutral-600 truncate max-w-xs" title={c.prompt}>“{c.prompt.slice(0, 60)}{c.prompt.length > 60 ? "…" : ""}”</span>}
+      {c.prompt && <span className="text-neutral-600 truncate max-w-full sm:max-w-xs" title={c.prompt}>“{c.prompt.slice(0, 60)}{c.prompt.length > 60 ? "…" : ""}”</span>}
       {c.status === "queued" && (
         <form method="POST" action="/api/garage/command">
           <input type="hidden" name="cancel" value={c.id} />
@@ -262,19 +262,20 @@ function Instrument({ s }: { s: HitsSummary }) {
         ))}
         <span className="text-neutral-600">counting since {s.firstHitAt?.slice(0, 16).replace("T", " ")}Z</span>
       </div>
+      <div className="overflow-x-auto">
       <table className="w-full text-left">
         <thead>
           <tr className="text-[10px] tracking-[0.2em] uppercase text-neutral-600">
-            <th className="pr-3 font-normal">day</th>
+            <th className="pr-3 font-normal whitespace-nowrap">day</th>
             {kinds.map((k) => (
-              <th key={k} className="pr-3 font-normal">{k}</th>
+              <th key={k} className="pr-3 font-normal align-bottom">{k}</th>
             ))}
           </tr>
         </thead>
         <tbody>
           {days.map((d) => (
             <tr key={d} className="border-t border-neutral-900">
-              <td className="pr-3 py-1 text-neutral-500">{d}</td>
+              <td className="pr-3 py-1 text-neutral-500 whitespace-nowrap">{d}</td>
               {kinds.map((k) => (
                 <td key={k} className="pr-3 py-1">{cell(d, k) || <span className="text-neutral-800">·</span>}</td>
               ))}
@@ -282,6 +283,7 @@ function Instrument({ s }: { s: HitsSummary }) {
           ))}
         </tbody>
       </table>
+      </div>
       <div className="grid sm:grid-cols-2 gap-4">
         <div>
           <div className="text-[10px] tracking-[0.2em] uppercase text-neutral-600 mb-1">top paths</div>

@@ -239,3 +239,36 @@ the only guard. Watch `POST /api/remora/card` by kind in the instrument.
 **Machine-local facts.** Air: the merged worktree and local branch are removed; the work
 loop keeps running in the session's background until the session ends; restart it with
 `npm run garage -- work` from the repo root. Day's spend: $1.26 across nine runs.
+
+## 2026-10-13 · Air · the mini, and the edges
+
+**What landed.** The work loop under launchd: `npm run garage:install | status | uninstall`
+in Remora's shape (`workers/garage/launchd/`), a plist rendered with the Mac's absolute
+paths, KeepAlive, log at `~/Library/Logs/garage/work.log`. `status` probes what a host
+needs by existence only: `.env.local`, wrasse's token in the Keychain, `gh` signed in. On
+the Air all three read present. The HALT file still stops every run.
+
+**The edges.** Text was running past its frame on phones. Found with the browser pane at
+375 px and fixed on four pages: `/remora` (the panel's grid columns could not shrink, so the
+sleeve rows and the put-card-back button bled right; the clip row, flap header and drop rows
+now wrap), `/remora/tape` (the fourteen-day sparkline and the recent-drops header; the bytes
+column hides below sm), `/garage` (section hints stack under their titles; the instrument
+table scrolls inside its card; gate forms and the command row wrap; branch and diff text
+breaks) and `/garage/runs/<id>` (event rows and the report wrap). The right-hand nav label on
+every page hid below sm, where it ran under the wordmark. Checked again at 375 px and at the
+pane's width after the fixes: no horizontal scroll on any of the four.
+
+**To do on the mini, by the founder.** Pull main, `npm install`, mint or copy wrasse's token
+into the mini's Keychain (`claude setup-token`, then the `security add-generic-password`
+line in `garage-launchd.sh`), make sure `gh auth status` passes, then `npm run
+garage:install`. `npm run garage:status` should show state running and the token present.
+From then on a command queued from the dashboard runs on the mini within fifteen seconds and
+an approval publishes from there.
+
+**Instrument note.** `/wp-login.php` and friends appear in the top paths as `browser`: a
+scanner wearing a Chrome user agent. The classifier cannot tell a probe from a person by
+user agent alone; a path-based `probe` kind is a candidate for the next charter-health pass.
+
+**Machine-local facts.** Air: the work loop from the previous sitting is still running in
+this session's background; `garage:install` was not run on the Air, by design, so the mini is
+the only launchd host once the founder installs it. Day's spend unchanged at $1.26.
