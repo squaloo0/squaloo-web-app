@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  The Garage's work loop on a Mac, under launchd: picks up dashboard commands, runs
+  wrasse, publishes approved diffs. Rendered by garage-launchd.sh with absolute paths,
+  because launchd has no shell, no nvm and almost no PATH. KeepAlive restarts it if it
+  exits; ThrottleInterval keeps a crash loop polite. The HALT file still stops every run.
+-->
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.squaloo.garage.work</string>
+
+  <key>ProgramArguments</key>
+  <array>
+    <string>@NODE@</string>
+    <string>--experimental-strip-types</string>
+    <string>--disable-warning=ExperimentalWarning</string>
+    <string>--disable-warning=MODULE_TYPELESS_PACKAGE_JSON</string>
+    <string>workers/garage/cli.ts</string>
+    <string>work</string>
+    <string>--every</string>
+    <string>15</string>
+  </array>
+
+  <key>WorkingDirectory</key>
+  <string>@REPO@</string>
+
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>PATH</key>
+    <string>@PATH@</string>
+    <key>HOME</key>
+    <string>@HOME@</string>
+    <key>GARAGE_MACHINE_NAME</key>
+    <string>@MACHINE@</string>
+    <key>NODE_ENV</key>
+    <string>production</string>
+  </dict>
+
+  <key>RunAtLoad</key>
+  <true/>
+  <key>KeepAlive</key>
+  <true/>
+  <key>ThrottleInterval</key>
+  <integer>15</integer>
+  <key>ExitTimeOut</key>
+  <integer>120</integer>
+
+  <key>ProcessType</key>
+  <string>Standard</string>
+
+  <key>StandardOutPath</key>
+  <string>@LOG@</string>
+  <key>StandardErrorPath</key>
+  <string>@LOG@</string>
+</dict>
+</plist>

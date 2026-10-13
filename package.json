@@ -15,7 +15,10 @@
     "remora:uninstall": "sh workers/remora/launchd/remora-launchd.sh uninstall",
     "remora:status": "sh workers/remora/launchd/remora-launchd.sh status",
     "garage": "node --experimental-strip-types --disable-warning=ExperimentalWarning --disable-warning=MODULE_TYPELESS_PACKAGE_JSON workers/garage/cli.ts",
-    "garage:test": "node --experimental-strip-types --disable-warning=ExperimentalWarning --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test \"src/garage/**/*.test.ts\" \"workers/garage/*.test.ts\""
+    "garage:test": "node --experimental-strip-types --disable-warning=ExperimentalWarning --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test \"src/garage/**/*.test.ts\" \"workers/garage/*.test.ts\"",
+    "garage:install": "sh workers/garage/launchd/garage-launchd.sh install",
+    "garage:uninstall": "sh workers/garage/launchd/garage-launchd.sh uninstall",
+    "garage:status": "sh workers/garage/launchd/garage-launchd.sh status"
   },
   "dependencies": {
     "@anthropic-ai/claude-agent-sdk": "^0.3.296",
