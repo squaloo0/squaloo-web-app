@@ -11,7 +11,8 @@ import { appendFile, mkdir, readFile, rm, stat, writeFile } from "node:fs/promis
 import { homedir } from "node:os";
 import { basename, dirname, join, resolve } from "node:path";
 import { parseVideoUrl } from "./core/url.ts";
-import { estimate, type Estimate, type Quality } from "./core/format.ts";
+import { estimate, isMetadataOnly, type Estimate, type Quality } from "./core/format.ts";
+import { chaptersFileName, chaptersMarkdown, chaptersSummary } from "./core/chapters.ts";
 import type { Clip } from "./core/clip.ts";
 import type { VideoMeta } from "./core/meta.ts";
 import type { PostProcess, Progress } from "./core/progress.ts";
@@ -85,12 +86,25 @@ export async function vend(opts: VendOptions): Promise<Vend> {
   const est = estimate(meta, opts.quality);
   opts.onEstimate?.(meta, est);
 
-  opts.onStage?.("drop", dir);
   await mkdir(dir, { recursive: true });
-  // yt-dlp names each part "<title> [id].f<format>.<ext>" while it is in flight, so the
-  // ticks tell us which formats actually went into the file. The estimate is a guess.
   const used = new Set<string>();
-  const dropped = await ytDlpDownload(target, {
+  let filepath: string;
+  let chapters: { count: number; first: string | null; last: string | null } | null = null;
+
+  if (isMetadataOnly(opts.quality)) {
+    // The CHAPTERS slot: nothing is fetched; the drop is written from what yt-dlp already read.
+    if (meta.chapters.length === 0) {
+      throw new VendError("this video has no chapters (none from the uploader, none in the description)");
+    }
+    opts.onStage?.("drop", `${meta.chapters.length} chapters, no download`);
+    filepath = join(dir, chaptersFileName(meta.title, meta.id));
+    await writeFile(filepath, chaptersMarkdown({ meta, canonicalUrl: parsed.canonicalUrl, provider: parsed.provider, now: new Date() }), "utf8");
+    chapters = chaptersSummary(meta.chapters);
+  } else {
+    opts.onStage?.("drop", dir);
+    // yt-dlp names each part "<title> [id].f<format>.<ext>" while it is in flight, so the
+    // ticks tell us which formats actually went into the file. The estimate is a guess.
+    const dropped = await ytDlpDownload(target, {
     dir,
     quality: opts.quality,
     clip: opts.clip ?? null,
@@ -102,7 +116,8 @@ export async function vend(opts: VendOptions): Promise<Vend> {
       opts.onTick?.(t);
     },
   });
-  let filepath = dropped.filepath;
+    filepath = dropped.filepath;
+  }
 
   let transcript: { model: string; language: string | null; segments: number; whisper: string | null } | null = null;
   if (opts.quality === "transcript") {
@@ -160,6 +175,7 @@ export async function vend(opts: VendOptions): Promise<Vend> {
     card: opts.card ?? null,
     clip: opts.clip ?? null,
     transcript,
+    chapters,
     now: new Date(),
   });
   const key = opts.signingKey === undefined ? pemFromEnv(process.env.REMORA_RECEIPT_PRIVATE_KEY) : opts.signingKey;

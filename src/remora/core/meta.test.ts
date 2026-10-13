@@ -67,6 +67,24 @@ test("permissive: unknown keys are ignored, optional keys may be absent", () => 
   assert.equal(m.uploadDate, null);
   assert.equal(m.thumbnail, null);
   assert.deepEqual(m.formats, []);
+  assert.deepEqual(m.chapters, []);
+});
+
+test("chapters narrow to seconds and titles; an open-ended one is skipped", () => {
+  const m = parseYtDlpJson({
+    id: "x",
+    title: "t",
+    chapters: [
+      { start_time: 0, end_time: 61.5, title: "Intro" },
+      { start_time: 61.5, end_time: 300 },
+      { start_time: 300, title: "no end" },
+      "junk",
+    ].filter((c) => typeof c !== "string"),
+  });
+  assert.deepEqual(m.chapters, [
+    { start: 0, end: 61.5, title: "Intro" },
+    { start: 61.5, end: 300, title: "Chapter 2" },
+  ]);
 });
 
 test("uploader falls back to channel, then uploader_id", () => {

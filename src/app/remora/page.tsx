@@ -45,8 +45,8 @@ const SLOTS = [
   { label: "CLIP", tag: "LIVE" },
   { label: "GIF", tag: "LIVE" },
   { label: "THUMBS", tag: "LIVE" },
-  { label: "TRANSCRIPT", tag: "NEW" },
-  { label: "CHAPTERS", tag: "SOON" },
+  { label: "TRANSCRIPT", tag: "LIVE" },
+  { label: "CHAPTERS", tag: "NEW" },
 ] as const;
 
 const LINK_SECONDS = 3600;
@@ -59,6 +59,7 @@ const QUALITY_LABELS: Partial<Record<string, string>> = {
   gif: "gif · 480p 15fps · needs a clip ≤15s",
   thumbs: "thumbs · 12 frames, one sheet",
   transcript: "transcript · whisper, markdown with times",
+  chapters: "chapters · the list, with links",
 };
 
 export default async function RemoraPage({ searchParams }: { searchParams: Promise<Search> }) {
@@ -126,8 +127,8 @@ export default async function RemoraPage({ searchParams }: { searchParams: Promi
           {/* The glass */}
           <div className="p-5 border-b border-neutral-800 bg-[linear-gradient(180deg,rgba(86,136,199,0.06),transparent_60%)]">
             <div className="grid grid-cols-4 sm:grid-cols-7 gap-1.5 sm:gap-2 mb-5">
-              {SLOTS.map((s, i) => (
-                <Slot key={s.label} label={s.label} tag={s.tag} lit={i < 6} />
+              {SLOTS.map((s) => (
+                <Slot key={s.label} label={s.label} tag={s.tag} lit={true} />
               ))}
             </div>
 
