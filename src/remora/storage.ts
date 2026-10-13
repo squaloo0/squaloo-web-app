@@ -139,6 +139,9 @@ export function contentTypeFor(fileName: string): string {
       opus: "audio/ogg",
       ogg: "audio/ogg",
       gif: "image/gif",
+      jpg: "image/jpeg",
+      jpeg: "image/jpeg",
+      png: "image/png",
       json: "application/json",
     }[ext] ?? "application/octet-stream"
   );

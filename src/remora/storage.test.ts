@@ -137,6 +137,7 @@ test("content types", () => {
   assert.equal(contentTypeFor("a.m4a"), "audio/mp4");
   assert.equal(contentTypeFor("a.receipt.json"), "application/json");
   assert.equal(contentTypeFor("a.GIF"), "image/gif");
+  assert.equal(contentTypeFor("a.thumbs.jpg"), "image/jpeg");
   assert.equal(contentTypeFor("a.bin"), "application/octet-stream");
   assert.equal(EMPTY_PAYLOAD_HASH.length, 64);
 });

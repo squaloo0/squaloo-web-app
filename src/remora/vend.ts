@@ -7,7 +7,7 @@
 import { spawn } from "node:child_process";
 import { createHash } from "node:crypto";
 import { createReadStream } from "node:fs";
-import { appendFile, mkdir, readFile, stat, writeFile } from "node:fs/promises";
+import { appendFile, mkdir, readFile, rm, stat, writeFile } from "node:fs/promises";
 import { homedir } from "node:os";
 import { basename, dirname, join, resolve } from "node:path";
 import { parseVideoUrl } from "./core/url.ts";
@@ -18,6 +18,8 @@ import type { PostProcess, Progress } from "./core/progress.ts";
 import { buildReceipt, parseReceipt, pemFromEnv, receiptFileName, receiptText, signReceipt, verifyReceipt, type Receipt, type Verification } from "./core/receipt.ts";
 import { ledgerLine, ledgerRow, parseLedgerLine, type LedgerRow } from "./core/ledger.ts";
 import { ytDlpDownload, ytDlpInfo, ytDlpVersion } from "./ytdlp.ts";
+import { ffmpeg as runFfmpeg } from "./ffmpeg.ts";
+import { thumbsFileName, thumbsPlan } from "./core/thumbs.ts";
 
 export class VendError extends Error {
   constructor(message: string) {
@@ -26,7 +28,7 @@ export class VendError extends Error {
   }
 }
 
-export type Stage = "peek" | "info" | "drop" | "hash" | "receipt";
+export type Stage = "peek" | "info" | "drop" | "tile" | "hash" | "receipt";
 
 export type VendOptions = {
   input: string;
@@ -86,7 +88,7 @@ export async function vend(opts: VendOptions): Promise<Vend> {
   // yt-dlp names each part "<title> [id].f<format>.<ext>" while it is in flight, so the
   // ticks tell us which formats actually went into the file. The estimate is a guess.
   const used = new Set<string>();
-  const { filepath } = await ytDlpDownload(target, {
+  const dropped = await ytDlpDownload(target, {
     dir,
     quality: opts.quality,
     clip: opts.clip ?? null,
@@ -98,6 +100,21 @@ export async function vend(opts: VendOptions): Promise<Vend> {
       opts.onTick?.(t);
     },
   });
+  let filepath = dropped.filepath;
+
+  if (opts.quality === "thumbs") {
+    // The THUMBS slot: tile twelve frames of what dropped into one sheet, then drop the video.
+    const span = opts.clip ? opts.clip.end - opts.clip.start : meta.duration;
+    const sheet = join(dirname(filepath), thumbsFileName(basename(filepath)));
+    const plan = span === null ? null : thumbsPlan(filepath, sheet, span);
+    if (!plan) {
+      throw new VendError("thumbs need a video at least a second long with a known length");
+    }
+    opts.onStage?.("tile", `${Math.round(plan.step * 10) / 10}s apart`);
+    await runFfmpeg(plan.args);
+    await rm(filepath, { force: true });
+    filepath = sheet;
+  }
 
   opts.onStage?.("hash", filepath);
   const [sha256, size, ytDlp, ffmpeg] = await Promise.all([sha256File(filepath), stat(filepath), ytDlpVersion(), ffmpegVersion()]);

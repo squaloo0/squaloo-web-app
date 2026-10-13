@@ -43,8 +43,8 @@ const SLOTS = [
   { label: "VIDEO", tag: "LIVE" },
   { label: "AUDIO", tag: "LIVE" },
   { label: "CLIP", tag: "LIVE" },
-  { label: "GIF", tag: "NEW" },
-  { label: "THUMBS", tag: "SOON" },
+  { label: "GIF", tag: "LIVE" },
+  { label: "THUMBS", tag: "NEW" },
   { label: "TRANSCRIPT", tag: "SOON" },
   { label: "CHAPTERS", tag: "SOON" },
 ] as const;
@@ -57,6 +57,7 @@ const QUALITY_LABELS: Partial<Record<string, string>> = {
   m4a: "audio · m4a",
   "audio-raw": "audio · raw",
   gif: "gif · 480p 15fps · needs a clip ≤15s",
+  thumbs: "thumbs · 12 frames, one sheet",
 };
 
 export default async function RemoraPage({ searchParams }: { searchParams: Promise<Search> }) {
@@ -125,7 +126,7 @@ export default async function RemoraPage({ searchParams }: { searchParams: Promi
           <div className="p-5 border-b border-neutral-800 bg-[linear-gradient(180deg,rgba(86,136,199,0.06),transparent_60%)]">
             <div className="grid grid-cols-4 sm:grid-cols-7 gap-1.5 sm:gap-2 mb-5">
               {SLOTS.map((s, i) => (
-                <Slot key={s.label} label={s.label} tag={s.tag} lit={i < 4} />
+                <Slot key={s.label} label={s.label} tag={s.tag} lit={i < 5} />
               ))}
             </div>
 

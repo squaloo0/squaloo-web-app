@@ -173,7 +173,7 @@ export async function listJobs(limit = 50): Promise<Job[]> {
 export type Asset = {
   id: string;
   jobId: string;
-  kind: "video" | "audio" | "gif" | "receipt";
+  kind: "video" | "audio" | "gif" | "thumbs" | "receipt";
   objectKey: string;
   fileName: string;
   bytes: number;
