@@ -31,7 +31,7 @@ export const WRITE_TOOLS: readonly string[] = ["Write", "Edit", "MultiEdit", "No
 /** The harness's own corner: the Garage builds itself here. */
 export const HARNESS_PATHS: readonly string[] = ["src/garage/", "src/app/garage/", "src/app/api/garage/", "workers/garage/"];
 /** Where proposals may land from rung 1 up. */
-export const PROPOSAL_PATHS: readonly string[] = ["src/app/", "src/components/", "content/", "public/"];
+export const PROPOSAL_PATHS: readonly string[] = ["src/app/", "src/components/", "content/", "public/", "src/lib/llms"];
 /** Never, at any rung: money, auth, the other corner's machinery, dependencies, migrations. */
 export const NEVER_PATHS: readonly string[] = [
   "src/remora/db/",
