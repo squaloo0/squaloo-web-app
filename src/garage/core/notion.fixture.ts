@@ -17,6 +17,7 @@ export const NOTION_QUERY_FIXTURE = {
         Summary: { id: "sm", type: "rich_text", rich_text: [{ type: "text", plain_text: "Bot 65%, human 35%, Cloudflare's network, HTML responses, week to 2026-10-12." }] },
         Added: { id: "a", type: "date", date: { start: "2026-10-13" } },
         "Added by": { id: "ab", type: "rich_text", rich_text: [{ type: "text", plain_text: "founder" }] },
+        ID: { id: "idp", type: "rich_text", rich_text: [{ type: "text", plain_text: "S1-cloudflare-radar.html · sha256 0123456789ab" }] },
       },
     },
     {

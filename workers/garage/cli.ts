@@ -10,7 +10,11 @@
  *   command <hat> [--prompt "..."] [--ticket T]   queue a command from here instead of the dashboard
  *   hits [days]             the instrument: visitors by kind, day, path, family
  *   orders                  the standing orders; `orders add <hat> --every H [--ticket T] [--prompt ...]`, `orders on|off|rm <id>`
- *   library pull            regenerate src/garage/LIBRARY.md from the Notion library (token on this host only)
+ *   library pull            regenerate src/garage/LIBRARY.md from the Notion library (token on this host only),
+ *                           then check the disk mirror against the rows (rule 19) and name every disagreement
+ *   library fetch           the batch hunt: download every row's primary that is not mirrored yet, hash it,
+ *                           write the mirror tag back to the row's ID; print the URLs that refused, for the hand hunt
+ *   library sums            rewrite ~/.garage/library/SHA256SUMS from what is on disk (after a hand hunt)
  *   library file <run-id>   file a run's report as a page under the Notion report page
  *   runs [n]                the last n run rows
  *   show <id>               one run: its row, its events, its report
@@ -33,7 +37,10 @@ import { ledgerWired } from "../../src/garage/db/client.ts";
 import { addOrder, approve, claimCommand, claimOrderTick, deleteOrder, enqueueCommand, finishCommand, getRun, hitsSummary, listCommands, listEvents, listOrders, listRuns, migrate, neonLedger, noteRun, setOrderEnabled, setPrUrl, type CommandRow } from "../../src/garage/db/ledger.ts";
 import { dueOrders, ORDERABLE_HATS, orderLine, parseEveryHours } from "../../src/garage/core/orders.ts";
 import { libraryMarkdown } from "../../src/garage/core/notion.ts";
-import { fileReport, notionWired, pullLibrary } from "../../src/garage/notion.ts";
+import { fetchPrimary, fileReport, notionWired, pullLibrary, setIdent } from "../../src/garage/notion.ts";
+import { checkMirror, idWithMirror, mirrorFileName, mirrorOf, parseSums, sumsText } from "../../src/garage/core/library.ts";
+import { createHash } from "node:crypto";
+import { mkdirSync, readdirSync } from "node:fs";
 import { hitsLines } from "../../src/garage/core/hits.ts";
 import { CHARTER_FILE, HALT_FILE, runOnce } from "./run.ts";
 import { HATS, type Hat } from "./hats.ts";
@@ -137,6 +144,20 @@ async function main(): Promise<number> {
               } finally {
                 await finishCommand(c.id, r && r.status === "done" ? "done" : "failed", r?.id ?? null);
               }
+              // A finished study or report is filed in Notion by the harness, when this host can.
+              if (r && r.status === "done" && r.report && hat.rung === 0) {
+                const nw = notionWired();
+                if (nw.token && nw.reportPage) {
+                  try {
+                    const url = await fileReport(`${c.hat}${c.ticket ? ` ${c.ticket}` : ""} · run ${r.id.slice(0, 8)} · ${new Date().toISOString().slice(0, 10)}`, r.report);
+                    await noteRun(r.id, `filed in Notion: ${url}`);
+                    console.log(`  filed in Notion: ${url}`);
+                  } catch (e) {
+                    await noteRun(r.id, `Notion filing failed: ${e instanceof Error ? e.message : String(e)}`);
+                    console.log(`  Notion filing failed: ${e instanceof Error ? e.message : String(e)}`);
+                  }
+                }
+              }
             }
             if (flags.once) return 0;
             continue;
@@ -201,6 +222,49 @@ async function main(): Promise<number> {
         writeFileSync(join(REPO, "src/garage/LIBRARY.md"), md);
         console.log(`pulled ${rows.length} source${rows.length === 1 ? "" : "s"} into src/garage/LIBRARY.md`);
         for (const r of rows) console.log(`  ${r.name} · ${r.status || "unread"}${r.scrub.length ? ` · scrub: ${r.scrub.join(", ")}` : ""}`);
+        const check = checkMirror(rows, readSums(), new Map(rows.map((r) => [r.id, r.ident ?? ""])));
+        console.log(`mirror: ${check.ok.length} verified · ${check.unmirrored.length} not yet mirrored · ${check.missing.length} missing on disk · ${check.mismatch.length} hash mismatch · ${check.orphans.length} orphan file${check.orphans.length === 1 ? "" : "s"}`);
+        for (const m of check.missing) console.log(`  MISSING  ${m.file}  (${m.row}); put it under ${LIBRARY_ROOT} and run library sums`);
+        for (const m of check.mismatch) console.log(`  MISMATCH ${m.file}  row says ${m.row12}, disk says ${m.disk}  (${m.row})`);
+        for (const o of check.orphans) console.log(`  ORPHAN   ${o}  (no row names it)`);
+        return check.mismatch.length ? 1 : 0;
+      }
+      if (args[0] === "fetch") {
+        const { rows } = await pullLibrary();
+        mkdirSync(LIBRARY_ROOT, { recursive: true });
+        const sums = readSums();
+        const refused: { name: string; url: string; reason: string }[] = [];
+        let got = 0;
+        for (const [i, r] of rows.entries()) {
+          if (!r.url || mirrorOf(r.ident ?? "")) continue;
+          const res = await fetchPrimary(r.url);
+          if (!res.ok) {
+            refused.push({ name: r.name, url: r.url, reason: res.reason });
+            console.log(`  refused  ${r.name} · ${res.reason}`);
+            continue;
+          }
+          const file = mirrorFileName(i + 1, r.name, res.contentType, r.url);
+          const sha = createHash("sha256").update(res.bytes).digest("hex");
+          writeFileSync(join(LIBRARY_ROOT, file), res.bytes);
+          sums.set(file, sha);
+          await setIdent(r.id, idWithMirror(r.ident ?? "", file, sha));
+          got++;
+          console.log(`  mirrored ${file} · ${(res.bytes.length / 1024).toFixed(0)} KB · sha256 ${sha.slice(0, 12)}`);
+        }
+        writeFileSync(join(LIBRARY_ROOT, "SHA256SUMS"), sumsText([...sums].map(([file, sha256]) => ({ file, sha256 }))));
+        console.log(`fetched ${got}; ${refused.length} for the hand hunt${refused.length ? ":" : ""}`);
+        for (const r of refused) console.log(`  ${r.url}`);
+        if (refused.length) console.log(`save each under ${LIBRARY_ROOT} as S<n>-<slug>.<ext>, then run: garage library sums, then write the tag into the row's ID (library sums prints it)`);
+        return 0;
+      }
+      if (args[0] === "sums") {
+        mkdirSync(LIBRARY_ROOT, { recursive: true });
+        const entries = readdirSync(LIBRARY_ROOT)
+          .filter((f) => /^S\d+-/.test(f))
+          .map((file) => ({ file, sha256: createHash("sha256").update(readFileSync(join(LIBRARY_ROOT, file))).digest("hex") }));
+        writeFileSync(join(LIBRARY_ROOT, "SHA256SUMS"), sumsText(entries));
+        console.log(`${entries.length} file${entries.length === 1 ? "" : "s"} summed into ${join(LIBRARY_ROOT, "SHA256SUMS")}`);
+        for (const e of entries) console.log(`  ${e.file} · sha256 ${e.sha256.slice(0, 12)}   (ID tag: ${e.file} · sha256 ${e.sha256.slice(0, 12)})`);
         return 0;
       }
       if (args[0] === "file" && args[1]) {
@@ -214,7 +278,7 @@ async function main(): Promise<number> {
         console.log(`filed: ${url}`);
         return 0;
       }
-      console.error("library pull | library file <run-id>");
+      console.error("library pull | fetch | sums | file <run-id>");
       return 2;
     }
     case "runs": {
@@ -367,6 +431,14 @@ async function publishRun(idOrPrefix: string): Promise<boolean> {
   await setPrUrl(r.id, url);
   console.log(`  published ${r.branch} → ${url}`);
   return true;
+}
+
+function readSums(): Map<string, string> {
+  try {
+    return parseSums(readFileSync(join(LIBRARY_ROOT, "SHA256SUMS"), "utf8"));
+  } catch {
+    return new Map();
+  }
 }
 
 function commandLine(c: CommandRow): string {

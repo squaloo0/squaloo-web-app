@@ -16,6 +16,8 @@ export type LibraryRow = {
   summary: string;
   /** The page URL in Notion, for the founder; never for the agent's prompt. */
   notionUrl: string;
+  /** The ID column: an identifier the founder wrote, plus the mirror tag once a primary is on disk. */
+  ident?: string;
 };
 
 type Prop = Record<string, unknown> & { type?: string };
@@ -46,6 +48,7 @@ export function parseLibraryPage(page: unknown): LibraryRow | null {
   const summary = prop(props, "rich_text", "Summary");
   const added = props.Added?.type === "date" ? props.Added : null;
   const addedBy = props["Added by"]?.type === "rich_text" ? props["Added by"] : null;
+  const ident = props.ID?.type === "rich_text" ? props.ID : null;
   const sel = (p: Prop | null) => (p && typeof p.select === "object" && p.select !== null && typeof (p.select as { name?: unknown }).name === "string" ? (p.select as { name: string }).name : "");
   return {
     id: pg.id,
@@ -58,6 +61,7 @@ export function parseLibraryPage(page: unknown): LibraryRow | null {
     scrub: scrub && Array.isArray(scrub.multi_select) ? (scrub.multi_select as { name?: unknown }[]).map((m) => (typeof m.name === "string" ? m.name : "")).filter(Boolean) : [],
     summary: summary ? text(summary.rich_text) : "",
     notionUrl: typeof pg.url === "string" ? pg.url : "",
+    ident: ident ? text(ident.rich_text) : "",
   };
 }
 
@@ -81,6 +85,7 @@ export function libraryMarkdown(rows: LibraryRow[], pulledAt: string, databaseId
     out.push(`## S${i + 1} · ${r.name}`, "");
     if (r.url) out.push(`- **URL:** ${r.url}`);
     out.push(`- **Kind:** ${r.kind || "unstated"} · **Status:** ${r.status || "unread"} · **Added:** ${r.added || "?"}${r.addedBy ? ` by ${r.addedBy}` : ""}`);
+    if (r.ident) out.push(`- **ID:** ${r.ident}`);
     if (r.scrub.length) out.push(`- **Scrub before use:** ${r.scrub.join(", ")}`);
     if (r.summary) out.push(`- **What it claims, with its boundary:** ${r.summary}`);
     out.push("");

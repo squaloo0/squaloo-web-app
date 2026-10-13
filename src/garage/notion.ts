@@ -64,3 +64,21 @@ export async function fileReport(title: string, markdown: string): Promise<strin
   })) as { url?: string; id?: string };
   return json.url ?? json.id ?? "filed";
 }
+
+/** Writes the row's ID field (the identifier plus the mirror tag). */
+export async function setIdent(pageId: string, ident: string): Promise<void> {
+  await call(`/pages/${pageId}`, "PATCH", { properties: { ID: { rich_text: [{ type: "text", text: { content: ident.slice(0, 1900) } }] } } });
+}
+
+/** Downloads a primary. Follows redirects; identifies itself; gives up politely on anything but 200. */
+export async function fetchPrimary(url: string): Promise<{ ok: true; bytes: Uint8Array; contentType: string | null } | { ok: false; reason: string }> {
+  try {
+    const res = await fetch(url, { redirect: "follow", headers: { "User-Agent": "squaloo-garage/0.1 (library mirror; +https://squaloo.com/garage)", Accept: "application/pdf, text/html;q=0.9, */*;q=0.5" } });
+    if (!res.ok) return { ok: false, reason: `HTTP ${res.status}` };
+    const bytes = new Uint8Array(await res.arrayBuffer());
+    if (bytes.length === 0) return { ok: false, reason: "empty body" };
+    return { ok: true, bytes, contentType: res.headers.get("content-type") };
+  } catch (e) {
+    return { ok: false, reason: e instanceof Error ? e.message : String(e) };
+  }
+}
