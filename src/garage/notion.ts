@@ -40,7 +40,10 @@ export async function pullLibrary(): Promise<{ rows: LibraryRow[]; databaseId: s
   const rows: LibraryRow[] = [];
   let cursor: string | null = null;
   do {
-    const json = await call(`/databases/${databaseId}/query`, "POST", cursor ? { start_cursor: cursor, page_size: 100 } : { page_size: 100 });
+    // Creation order, so a row's S-number is stable between pulls: new rows join at the end.
+    const body: Record<string, unknown> = { page_size: 100, sorts: [{ timestamp: "created_time", direction: "ascending" }] };
+    if (cursor) body.start_cursor = cursor;
+    const json = await call(`/databases/${databaseId}/query`, "POST", body);
     const page = parseLibraryQuery(json);
     rows.push(...page.rows);
     cursor = page.more;
