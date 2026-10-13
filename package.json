@@ -13,9 +13,12 @@
     "remora:test": "node --experimental-strip-types --disable-warning=ExperimentalWarning --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test \"src/remora/**/*.test.ts\"",
     "remora:install": "sh workers/remora/launchd/remora-launchd.sh install",
     "remora:uninstall": "sh workers/remora/launchd/remora-launchd.sh uninstall",
-    "remora:status": "sh workers/remora/launchd/remora-launchd.sh status"
+    "remora:status": "sh workers/remora/launchd/remora-launchd.sh status",
+    "garage": "node --experimental-strip-types --disable-warning=ExperimentalWarning --disable-warning=MODULE_TYPELESS_PACKAGE_JSON workers/garage/cli.ts",
+    "garage:test": "node --experimental-strip-types --disable-warning=ExperimentalWarning --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test \"src/garage/**/*.test.ts\" \"workers/garage/*.test.ts\""
   },
   "dependencies": {
+    "@anthropic-ai/claude-agent-sdk": "^0.3.296",
     "@neondatabase/serverless": "^0.10.4",
     "@tailwindcss/typography": "^0.5.16",
     "@types/animejs": "^3.1.13",
