@@ -22,6 +22,7 @@ import * as measured from "@/data/measured";
 import * as roadmap from "@/data/roadmap";
 import * as layer from "@/data/solomon_layer";
 import type { DevlogPost } from "@/lib/devlog";
+import { QUALITIES } from "@/remora/core/format";
 
 export const SITE = "https://squaloo.com";
 
@@ -35,6 +36,31 @@ const READING_NOTE =
 
 function pct(v: number | null): string {
   return v === null ? "n/a" : `${v}%`;
+}
+
+/**
+ * What Remora offers an agent over JSON. Every fact is read from a route under
+ * src/app/api/remora/ or from src/remora/README.md; the list of qualities is the
+ * code's own (QUALITIES), so a new slot appears here in the same build. No prices
+ * and no coin counts beyond "one": sleeves live at /remora and are the founder's.
+ */
+function remoraSection(): string[] {
+  const api = `${SITE}/api/remora`;
+  return [
+    `## Remora (${SITE}/remora)`,
+    "",
+    "Remora is a video vending machine: insert a coin, pick a slot, something drops, and you keep a signed receipt. Seven slots: video, audio, clip (a start and an end on top of any quality), gif, thumbs, transcript, chapters. One coin buys one vend. Everything below is JSON over HTTP; the one step that needs a browser is buying coins.",
+    "",
+    `- Take a card: \`POST ${api}/card\`. It comes with one promo coin on the house. The card code arrives only as an httpOnly cookie and is never in the body, so keep a cookie jar and send it back on every call. The body gives you the card's public handle and its coins. A card is limited per address per day (429 when over).`,
+    `- Look before paying: \`GET ${api}/peek?url=<video url>\` returns provider, id, canonical URL, title, author and thumbnail. Needs a card; costs no coin.`,
+    `- Vend: \`POST ${api}/jobs\` with JSON \`{ "url", "quality", "start"?, "end"? }\`. Quality is one of: ${QUALITIES.join(", ")}. Start and end are seconds or m:ss, for a clip; gif requires one. Answers 201 with the job, or 402 when the card has no coins left.`,
+    `- Collect: \`GET ${api}/jobs/<id>\` until the job completes. Completed jobs carry \`drops\`: a file name, bytes, a \`sha256\`, and a presigned download link that expires (the response says how many seconds in \`linkSeconds\`). A card sees only its own jobs.`,
+    `- Balance: \`GET ${api}/card\` returns the card's coins and its ledger.`,
+    `- Verify without trusting us: \`GET ${api}/verify\` returns the machine's Ed25519 public key and key id. \`GET ${api}/verify?sha256=<hex>\` says whether the machine vended those bytes, with no title, card or URL in the answer. \`POST ${api}/verify\` with \`{ "receipt": ... }\` checks a receipt's signature. Public; no card needed.`,
+    `- Coins are bought at ${SITE}/remora through Stripe Checkout. That is a browser step: a human pays, and the coins land on the card whose cookie opened the checkout. Sleeves and prices are on that page, not here.`,
+    `- The machine's books are public at ${SITE}/remora/tape (JSON at \`GET ${api}/tape\`). They identify a drop by hash, provider, size and time, and never show titles, URLs or cards.`,
+    "",
+  ];
 }
 
 export function llmsIndex(pages: PageRef[], posts: DevlogPost[]): string {
@@ -53,6 +79,7 @@ export function llmsIndex(pages: PageRef[], posts: DevlogPost[]): string {
     "",
     ...posts.map((p) => `- [${p.title}](${SITE}/devlog/${p.slug}) (${p.date}): ${p.summary}`),
     "",
+    ...remoraSection(),
     "## Optional",
     "",
     `- [Full text](${SITE}/llms-full.txt): the measurements, the contract, the roadmap and the devlog, generated from the same data as the pages.`,
