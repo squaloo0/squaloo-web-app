@@ -215,3 +215,27 @@ reads right later.
 **Machine-local facts.** Air: `garage work --every 10` is running in this session's
 background; the worktree is at `~/Projects/squaloo-web-app-wrasse/`. Day's spend: $1.26 across
 nine runs.
+
+## 2026-10-13 · Air · wrasse's first PR
+
+**What happened, in order, from the ledger.** 07:47:42 run `21c07027` reached the gate with
+diff `f3123ad7d12c`. 07:53:45 the founder approved on the dashboard, which wrote the approval
+row and queued command #8. 07:54:01 the work loop on the Air re-hashed the branch, matched the
+row and the approval, pushed, and opened PR #66 with the run's gate comment as the body.
+07:55:08 the founder merged #66. Vercel deployed; `www.squaloo.com/llms.txt` carries the
+`## Remora` section with its seven route bullets, checked live after the merge. Charter 0.3
+(#65) merged the same minute, so the next run's row will say 0.3.
+
+**What it proves.** Guard 1 end to end on a real diff: nothing moved until the row existed,
+and the harness, not the model, did the moving. First use of the autonomy ladder's rung 1
+and of the banked-prediction flywheel: the prediction's window closes 2026-10-27 UTC, and a
+rung-0 run reads the instrument then, blind to this run's reasoning (charter section 6, step
+3).
+
+**Open from the gate comment.** The founder approved with the card bullet in; the question
+of whether to advertise "take a card" to crawlers stays open, with the per-address limit as
+the only guard. Watch `POST /api/remora/card` by kind in the instrument.
+
+**Machine-local facts.** Air: the merged worktree and local branch are removed; the work
+loop keeps running in the session's background until the session ends; restart it with
+`npm run garage -- work` from the repo root. Day's spend: $1.26 across nine runs.
