@@ -343,3 +343,49 @@ hours, prompt "lane 1 in order: Gelman and Carlin, Deng, Fabijan, Johari; then l
 
 **Machine-local facts.** Air: no Notion values, so `library pull|fetch|import` run on the
 mini only. The mirrored primaries live under the mini's `~/.garage/library/`.
+
+## 2026-10-18 · Air · the first standing order, and charter 0.5 binds
+
+**What landed.** The founder created standing order #1 on the mini (`study`, GARAGE-8, every
+24 h, "lane 1 in order: Gelman and Carlin, Deng, Fabijan, Johari; then lane 2") at 18:24Z and
+it fired at once; the Air's session, not seeing it yet, added a duplicate #2 and removed it a
+minute later. Both runs from the order (`bc9babb8`, `23115ef1`) **failed before the first
+tool call**: `Failed to authenticate: OAuth session expired and could not be refreshed`.
+Wrasse's token in the mini's Keychain has lapsed; the Air's (length 108) has not been
+exercised since the 13th and may have too. Nothing was spent. The order stays on and will
+try again at 18:24Z tomorrow; until the token is renewed every tick fails the same way.
+
+**The model stays `claude-sonnet-5-5`.** The founder ruled for opus at about 18:30Z and back
+to sonnet before 19:00Z, before any run had used it; the first cut of this branch carried the
+opus default and was reverted here. (`GARAGE_MODEL` overrides either way. For the record:
+opus bills about five times sonnet per token, and a 23-turn propose run at $0.31 on sonnet
+would land near the $2 cap.)
+
+**Charter 0.5 binds.** The founder read it end to end on 2026-10-18 and said so; the header
+and the 0.5 changelog entry now say it, and the hash moves off `b189c015` (every run row from
+here carries the new one). Binding is a text edit under rule 17: `doctor` reads the file, and
+nothing in the harness refuses a draft, so the label is the founder's word, not a lock. A
+later draft is a draft again until it is read.
+
+**From the Langfuse read, founder-approved as notes, not yet work.** The ledger already holds
+what a trace store would: the run row (cost, turns, tools, refusals, charter hash, model,
+report), one event row per step, the charter hash as prompt version, the reports page as the
+reading copy. What it lacks, and what the Garage should grow in its own style rather than
+import a five-service stack for: (1) `ended_at` and token counts on `garage_events`, so a run
+can say where its minutes and dollars went; (2) a `garage_scores` table (run, name, value,
+by, note), the honest home for a banked prediction's result on 2026-10-27 and for the
+founder's rulings on proposals; (3) a fixed set of study prompts re-run after each charter
+change, reports diffed, as `garage bench`, so a charter change is known to change behaviour
+rather than believed to; (4) the full input and output of wrasse's tool calls, which the SDK
+already streams and the harness drops, kept for the red-team sitting. Revisit the real thing
+when a second cell needs the same instrument and a dashboard over it.
+
+**Library.** 33 of 39 Notion rows now carry a mirrored file and hash (the founder's fetch on
+the mini); the six refused primaries are marked partial. The regenerated 39-row `LIBRARY.md`
+reached main in #78 from the mini.
+
+**Next, on the mini, by the founder.** Renew wrasse's token (`claude setup-token` as wrasse,
+then `security add-generic-password -U -s squaloo-garage -a wrasse -w "$(pbpaste)"`, the
+`-U` replacing the old item), `npm run garage:status`, then pull this branch once merged so the
+loop runs under the binding charter. The order's next tick should produce the first lane-1
+study under 0.5.
