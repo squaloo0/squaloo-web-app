@@ -69,8 +69,8 @@ the same Docker image. The image is the contract, so the move is an afternoon.
 
 - **Fee math decides the price.** Stripe takes 2.9% + 30¢ per charge. A $1 coin loses a
   third to fees. So coins are sold in **sleeves**: 5 for $5 (fee 8.8%), 12 for $10,
-  30 for $20. Minimum checkout $5. One coin = one vend of any slot (heavier slots can
-  cost 2 coins later).
+  30 for $20. Minimum checkout $5. One coin = one vend of any slot except a transcript,
+  which costs 2 (the machine listens at about realtime). The list is `PRICE_LIST` in `core/coins.ts`.
 - **Stripe Checkout, one-time payments**, under the Squaloo entity. Products and prices
   defined in Stripe, referenced by id in env. Stripe Tax on from day one so digital-goods
   tax is calculated per buyer; registrations stay a founder task when thresholds are met.

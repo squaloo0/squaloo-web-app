@@ -51,6 +51,7 @@ import {
 } from "../../src/remora/db/queue.ts";
 import { contentTypeFor, deleteObject, putFile, shelfWired } from "../../src/remora/storage.ts";
 import { returnCoin } from "../../src/remora/db/coins.ts";
+import { prettyCoins } from "../../src/remora/core/coins.ts";
 import { pemFromEnv } from "../../src/remora/core/receipt.ts";
 import { codeName } from "../../src/remora/core/codename.ts";
 import { ffmpegVersion, sha256File, vend } from "../../src/remora/vend.ts";
@@ -206,7 +207,10 @@ async function process_(job: Job, pulse: () => Pulse): Promise<void> {
     }
     log(`nothing dropped for ${job.id}: ${message.slice(0, 160)}${outcome}`);
     await fail(job.id, NAME, message.slice(0, 500));
-    if (job.cardId && (await returnCoin(job.id))) log(`coin returned to ${job.cardId}`);
+    if (job.cardId) {
+      const back = await returnCoin(job.id);
+      if (back) log(`${prettyCoins(back)} returned to ${job.cardId}`);
+    }
     await beat(pulse());
   } finally {
     await rm(dir, { recursive: true, force: true });

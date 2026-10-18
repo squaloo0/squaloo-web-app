@@ -9,7 +9,7 @@ import { randomBytes } from "node:crypto";
 import { sql } from "./client.ts";
 import { newId, type Coin, type JobRow, toJob } from "./queue.ts";
 import type { Job } from "../core/job.ts";
-import { cardIdFromHash, coinsFor, hashCardCode, newCardCode, PROMO_COINS, VEND_COINS, type LedgerEntry, type LedgerKind } from "../core/coins.ts";
+import { cardIdFromHash, coinsFor, hashCardCode, newCardCode, PROMO_COINS, vendCoins, type LedgerEntry, type LedgerKind } from "../core/coins.ts";
 import type { CompletedPurchase } from "../core/stripe.ts";
 
 export type Card = { id: string; email: string | null; createdAt: string };
@@ -80,6 +80,7 @@ export async function ledgerOf(cardId: string, limit = 50): Promise<LedgerEntry[
  */
 export async function enqueueWithCoin(i: Coin & { cardId: string }): Promise<Job | null> {
   const jobId = newId("j");
+  const price = vendCoins(i.quality);
   const rows = (await sql()`
     WITH locked AS (
       SELECT pg_advisory_xact_lock(hashtext(${i.cardId})) AS ok
@@ -90,12 +91,12 @@ export async function enqueueWithCoin(i: Coin & { cardId: string }): Promise<Job
     job AS (
       INSERT INTO remora_jobs (id, input, canonical_url, provider, quality, card_id, clip_start, clip_end)
       SELECT ${jobId}, ${i.input}, ${i.canonicalUrl}, ${i.provider}, ${i.quality}, ${i.cardId}, ${i.clip?.start ?? null}, ${i.clip?.end ?? null}
-        FROM bal WHERE bal.n >= ${VEND_COINS}
+        FROM bal WHERE bal.n >= ${price}
       RETURNING *
     ),
     spent AS (
       INSERT INTO remora_ledger (id, card_id, kind, coins, job_id)
-      SELECT ${ledgerId()}, ${i.cardId}, 'vend', ${coinsFor("vend", VEND_COINS)}, job.id FROM job
+      SELECT ${ledgerId()}, ${i.cardId}, 'vend', ${coinsFor("vend", price)}, job.id FROM job
       RETURNING job_id
     )
     SELECT job.* FROM job, spent`) as JobRow[];
@@ -123,14 +124,19 @@ export async function recordPurchase(p: CompletedPurchase): Promise<"credited" |
   return "credited";
 }
 
-/** A failed carded job gets its coin back, once. Safe to call for any job. */
-export async function returnCoin(jobId: string): Promise<boolean> {
+/**
+ * A failed carded job gets its coins back, once: exactly what its vend row took, read from
+ * the ledger rather than from today's price list. Returns the coins returned, 0 if none.
+ * Safe to call for any job.
+ */
+export async function returnCoin(jobId: string): Promise<number> {
   const rows = (await sql()`
     INSERT INTO remora_ledger (id, card_id, kind, coins, job_id)
-    SELECT ${ledgerId()}, card_id, 'coin_return', ${coinsFor("coin_return", VEND_COINS)}, id
-      FROM remora_jobs WHERE id = ${jobId} AND status = 'failed' AND card_id IS NOT NULL
-    ON CONFLICT DO NOTHING RETURNING id`) as { id: string }[];
-  return rows.length === 1;
+    SELECT ${ledgerId()}, j.card_id, 'coin_return', -l.coins, j.id
+      FROM remora_jobs j JOIN remora_ledger l ON l.job_id = j.id AND l.kind = 'vend'
+     WHERE j.id = ${jobId} AND j.status = 'failed' AND j.card_id IS NOT NULL
+    ON CONFLICT DO NOTHING RETURNING coins`) as { coins: number | string }[];
+  return rows[0] ? Number(rows[0].coins) : 0;
 }
 
 export async function listJobsForCard(cardId: string, limit = 20): Promise<Job[]> {

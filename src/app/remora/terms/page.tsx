@@ -26,7 +26,8 @@ export default function RemoraTermsPage() {
 
         <Section head="What a coin is">
           One coin is one vend: you paste a URL, pick a slot, and the machine fetches that video and hands you a file plus a
-          signed receipt. Coins are sold in sleeves because the card processor takes a cut per charge, and a one-dollar coin
+          signed receipt. A transcript costs two coins, because the machine listens to the whole recording at about the
+          speed it was spoken and vends nothing else meanwhile; the slot says its price before you vend. Coins are sold in sleeves because the card processor takes a cut per charge, and a one-dollar coin
           would lose a third of itself to it.
         </Section>
 
