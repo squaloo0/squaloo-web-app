@@ -49,11 +49,11 @@ function remoraSection(): string[] {
   return [
     `## Remora (${SITE}/remora)`,
     "",
-    "Remora is a video vending machine: insert a coin, pick a slot, something drops, and you keep a signed receipt. Seven slots: video, audio, clip (a start and an end on top of any quality), gif, thumbs, transcript, chapters. One coin buys one vend. Everything below is JSON over HTTP; the one step that needs a browser is buying coins.",
+    "Remora is a video vending machine: insert a coin, pick a slot, something drops, and you keep a signed receipt. Seven slots: video, audio, clip (a start and an end on top of any quality), gif, thumbs, transcript, chapters. One coin buys one vend; a transcript costs two. Everything below is JSON over HTTP; the one step that needs a browser is buying coins.",
     "",
     `- Take a card: \`POST ${api}/card\`. It comes with one promo coin on the house. The card code arrives only as an httpOnly cookie and is never in the body, so keep a cookie jar and send it back on every call. The body gives you the card's public handle and its coins. A card is limited per address per day (429 when over).`,
     `- Look before paying: \`GET ${api}/peek?url=<video url>\` returns provider, id, canonical URL, title, author and thumbnail. Needs a card; costs no coin.`,
-    `- Vend: \`POST ${api}/jobs\` with JSON \`{ "url", "quality", "start"?, "end"? }\`. Quality is one of: ${QUALITIES.join(", ")}. Start and end are seconds or m:ss, for a clip; gif requires one. Answers 201 with the job, or 402 when the card has no coins left.`,
+    `- Vend: \`POST ${api}/jobs\` with JSON \`{ "url", "quality", "start"?, "end"? }\`. Quality is one of: ${QUALITIES.join(", ")}. Start and end are seconds or m:ss, for a clip; gif requires one. Answers 201 with the job, or 402 when the card holds fewer coins than the slot costs; the 402 body says the price and the balance.`,
     `- Collect: \`GET ${api}/jobs/<id>\` until the job completes. Completed jobs carry \`drops\`: a file name, bytes, a \`sha256\`, and a presigned download link that expires (the response says how many seconds in \`linkSeconds\`). A card sees only its own jobs.`,
     `- Balance: \`GET ${api}/card\` returns the card's coins and its ledger.`,
     `- Verify without trusting us: \`GET ${api}/verify\` returns the machine's Ed25519 public key and key id. \`GET ${api}/verify?sha256=<hex>\` says whether the machine vended those bytes, with no title, card or URL in the answer. \`POST ${api}/verify\` with \`{ "receipt": ... }\` checks a receipt's signature. Public; no card needed.`,

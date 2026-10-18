@@ -19,7 +19,7 @@ import { isActive, machineLight, pill, shortError, type Job, type Machine } from
 import { machineSummary, waitingReason } from "@/remora/core/route";
 import { prettyClip } from "@/remora/core/clip";
 import { prettyBytes } from "@/remora/core/pretty";
-import { feeCents, prettyCoins, SLEEVES } from "@/remora/core/coins";
+import { BASE_COINS, feeCents, prettyCoins, PRICE_LIST, SLEEVES, vendCoins } from "@/remora/core/coins";
 import { dbWired } from "@/remora/db/client";
 import { assetsForJobs, freshestMachine, listJobs, liveMachines, type Asset } from "@/remora/db/queue";
 import { listJobsForCard } from "@/remora/db/coins";
@@ -61,6 +61,9 @@ const QUALITY_LABELS: Partial<Record<string, string>> = {
   transcript: "transcript · whisper, markdown with times",
   chapters: "chapters · the list, with links",
 };
+
+/** "1 coin · transcript 2": the price list in one breath, read from core so it cannot drift. */
+const PRICE_NOTE = [prettyCoins(BASE_COINS), ...Object.entries(PRICE_LIST).map(([q, n]) => `${q} ${n}`)].join(" · ");
 
 export default async function RemoraPage({ searchParams }: { searchParams: Promise<Search> }) {
   const sp = await searchParams;
@@ -205,6 +208,7 @@ export default async function RemoraPage({ searchParams }: { searchParams: Promi
                     {QUALITIES.map((q) => (
                       <option key={q} value={q}>
                         {QUALITY_LABELS[q] ?? `${q}p`}
+                        {vendCoins(q) !== BASE_COINS ? ` · ${prettyCoins(vendCoins(q))}` : ""}
                       </option>
                     ))}
                   </select>
@@ -213,7 +217,7 @@ export default async function RemoraPage({ searchParams }: { searchParams: Promi
                     disabled={!queue || !canVend}
                     className="px-4 py-2 text-xs tracking-[0.2em] uppercase border border-[#1400bf] bg-[#1400bf] text-white hover:bg-[#5688c7] hover:border-[#5688c7] transition-colors disabled:opacity-40 disabled:hover:bg-[#1400bf]"
                   >
-                    Vend{carded ? " · 1 coin" : ""}
+                    Vend{carded ? ` · ${PRICE_NOTE}` : ""}
                   </button>
                 </div>
                 <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[10px] tracking-[0.2em] uppercase text-neutral-500">
@@ -346,7 +350,7 @@ const COIN_NOTES: Record<string, string> = {
   "bad-quality": "pick a quality",
   "no-queue": "no queue wired",
   "no-card": "take a card first",
-  empty: "no coins on this card",
+  empty: "not enough coins on this card",
   cancelled: "checkout cancelled, nothing charged",
   "slot-closed": "the coin slot is closed on this deploy",
   "stripe-error": "could not open checkout",
@@ -508,7 +512,7 @@ function Drop({ job, assets, waiting }: { job: Job; assets: Asset[]; waiting: st
         <div className="text-[11px] text-neutral-600 break-words" title={job.error}>
           {shortError(job.error)}
           {job.status === "pending" ? (job.routeFailures > 0 ? ` · turned away ${job.routeFailures}×, another machine will try` : " · will try again") : ""}
-          {job.status === "failed" && job.cardId ? " · coin returned" : ""}
+          {job.status === "failed" && job.cardId ? " · coins returned to the card" : ""}
         </div>
       ) : null}
       {waiting ? <div className="text-[10px] tracking-[0.15em] uppercase text-amber-400/80">{waiting}</div> : null}

@@ -7,6 +7,7 @@
  * balance is a SUM, never a column.
  */
 import { createHash, randomBytes } from "node:crypto";
+import type { Quality } from "./format.ts";
 
 export type Sleeve = {
   /** Coins in the sleeve. Also the sleeve's id in env and in Stripe metadata. */
@@ -68,8 +69,22 @@ export function coinsFor(kind: LedgerKind, count: number): number {
 /** Every new card gets one on the house. */
 export const PROMO_COINS = 1;
 
-/** Cost of one vend. Heavier slots may cost more later. */
-export const VEND_COINS = 1;
+/**
+ * The price list. One coin vends any slot the machine makes in about the time the
+ * download takes. A transcript costs two: the machine listens to the whole recording
+ * at about the speed it was spoken, and vends nothing else meanwhile.
+ */
+export const BASE_COINS = 1;
+export const PRICE_LIST: Readonly<Partial<Record<Quality, number>>> = { transcript: 2 };
+
+export function vendCoins(q: Quality): number {
+  return PRICE_LIST[q] ?? BASE_COINS;
+}
+
+/** The 402 line: what the slot costs and what the card holds, in that order. */
+export function shortReason(q: Quality, have: number): string {
+  return `${prettyCoins(vendCoins(q))} for ${q === "transcript" ? "a transcript" : "this slot"} · ${prettyCoins(have)} on the card`;
+}
 
 export const CARD_COOKIE = "remora_card";
 

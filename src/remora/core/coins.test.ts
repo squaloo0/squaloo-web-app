@@ -1,6 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { balance, cardIdFromHash, coinsFor, feeCents, hashCardCode, isCardCode, newCardCode, prettyCoins, sleeve, SLEEVES } from "./coins.ts";
+import { balance, BASE_COINS, cardIdFromHash, coinsFor, feeCents, hashCardCode, isCardCode, newCardCode, prettyCoins, PRICE_LIST, shortReason, sleeve, SLEEVES, vendCoins } from "./coins.ts";
+import { QUALITIES } from "./format.ts";
 
 test("sleeves: fee math is why they exist", () => {
   assert.equal(SLEEVES.length, 3);
@@ -48,4 +49,14 @@ test("pretty coins", () => {
   assert.equal(prettyCoins(0), "no coins");
   assert.equal(prettyCoins(1), "1 coin");
   assert.equal(prettyCoins(12), "12 coins");
+});
+
+test("the price list: one coin a slot, two for a transcript, and the 402 says both numbers", () => {
+  for (const q of QUALITIES) assert.ok(vendCoins(q) >= BASE_COINS, q);
+  assert.equal(vendCoins("360"), 1);
+  assert.equal(vendCoins("chapters"), 1);
+  assert.equal(vendCoins("transcript"), 2);
+  assert.deepEqual(Object.keys(PRICE_LIST), ["transcript"], "every priced slot is named here so the panel and the 402 cannot drift");
+  assert.equal(shortReason("transcript", 1), "2 coins for a transcript · 1 coin on the card");
+  assert.equal(shortReason("720", 0), "1 coin for this slot · no coins on the card");
 });

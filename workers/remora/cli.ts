@@ -37,6 +37,8 @@ import { parseClipSpec, prettyClip } from "../../src/remora/core/clip.ts";
 import { gifClipReason } from "../../src/remora/core/gif.ts";
 import { theTape } from "../../src/remora/tape.ts";
 import { shelfWired } from "../../src/remora/storage.ts";
+import { stripeMode } from "../../src/remora/stripe.ts";
+import { countBooks, wipeBooks } from "../../src/remora/db/wipe.ts";
 
 const BANNER = String.raw`
                  ___
@@ -199,6 +201,34 @@ async function main(): Promise<number> {
       return 0;
     }
 
+    case "wipe": {
+      // The test books go to zero before the coin slot goes live. Only where Stripe is in
+      // test mode, only with --yes, and only with the shelf wired if anything is on it.
+      if (!dbWired()) {
+        console.error("  no queue: set NEON_DATABASE_URL");
+        return 3;
+      }
+      const mode = stripeMode();
+      if (mode !== "test") {
+        console.error(`  stripe is ${mode} on this box; the wipe runs only where the coin slot is in test mode`);
+        return 2;
+      }
+      const books = await countBooks();
+      console.log(BANNER);
+      console.log(`  the books · stripe ${mode} · cards ${books.cards} · ledger rows ${books.ledger} · stripe events ${books.stripeEvents} · jobs ${books.jobs} · assets ${books.assets} (${books.onShelf} on the shelf)`);
+      if (!flags.yes) {
+        console.log("  dry run. Add --yes to wipe them all. Machines, routes and migrations stay; the machines' vend tallies reset; local files stay.");
+        return 0;
+      }
+      if (books.onShelf > 0 && !shelfWired()) {
+        console.error(`  ${books.onShelf} object${books.onShelf === 1 ? "" : "s"} on the shelf and no REMORA_R2_* here; run this from a machine that has them`);
+        return 3;
+      }
+      const before = await wipeBooks((line) => console.log(`  ${line}`));
+      const after = await countBooks();
+      console.log(`  wiped · cards ${before.cards}→${after.cards} · ledger ${before.ledger}→${after.ledger} · stripe events ${before.stripeEvents}→${after.stripeEvents} · jobs ${before.jobs}→${after.jobs} · assets ${before.assets}→${after.assets} · vend tallies reset`);
+      return 0;
+    }
     case "enqueue": {
       const parsed = args[0] ? parseVideoUrl(args[0]) : null;
       if (!parsed || !parsed.canonicalUrl) {
@@ -310,6 +340,7 @@ async function main(): Promise<number> {
       console.log("  receipt <file|receipt>    print a receipt again");
       console.log("  doctor                    binaries, folders, what is wired");
       console.log("  migrate                   apply db/migrations to Neon");
+      console.log("  wipe [--yes]              the test books to zero (test mode only; dry run without --yes)");
       console.log("  enqueue <url> [--quality] [--clip]  put a coin in the slot; the worker vends it");
       console.log("  jobs                      the queue");
       console.log("  machine                   the pulse: READY or OUT OF ORDER");

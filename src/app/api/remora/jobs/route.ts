@@ -2,8 +2,9 @@
  * GET  /api/remora/jobs     the queue (all of it for the service key; this card's for a card) + the machines
  * POST /api/remora/jobs     put a coin in: { url, quality, start?, end? } as JSON or a form
  *
- * A card spends one coin per vend, atomically with the enqueue. The service key vends
- * free. Nobody else vends. 503 when this deploy has no queue wired.
+ * A card spends the slot's price per vend (core/coins.ts PRICE_LIST), atomically with the
+ * enqueue; the 402 says the price and the balance. The service key vends free. Nobody else
+ * vends. 503 when this deploy has no queue wired.
  */
 import { NextResponse } from "next/server";
 import { parseVideoUrl } from "@/remora/core/url";
@@ -16,6 +17,7 @@ import { waitingReason } from "@/remora/core/route";
 import { dbWired } from "@/remora/db/client";
 import { enqueue, freshestMachine, listJobs, liveMachines } from "@/remora/db/queue";
 import { enqueueWithCoin, listJobsForCard } from "@/remora/db/coins";
+import { shortReason, vendCoins } from "@/remora/core/coins";
 import { visitor } from "@/remora/card";
 
 export async function GET(): Promise<NextResponse> {
@@ -74,6 +76,10 @@ export async function POST(req: Request): Promise<NextResponse> {
 
   const coin = { input: url as string, canonicalUrl: parsed.canonicalUrl, provider: parsed.provider, quality: q, clip: clipParse?.clip ?? null };
   const job = v.kind === "keyed" ? await enqueue(coin) : await enqueueWithCoin({ ...coin, cardId: v.card.id });
-  if (!job) return fail("?coin=empty", "no coins on this card", 402);
+  if (!job) {
+    const have = v.kind === "card" ? v.coins : 0;
+    const why = shortReason(q, have);
+    return isForm ? back(`?coin=empty&why=${encodeURIComponent(why)}`) : NextResponse.json({ error: why, needs: vendCoins(q), have }, { status: 402 });
+  }
   return isForm ? back(`?coin=${job.id}`) : NextResponse.json(job, { status: 201 });
 }
