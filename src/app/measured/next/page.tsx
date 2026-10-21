@@ -2,18 +2,24 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import AppFooter from "@/components/AppFooter";
 import Wordmark from "@/components/Wordmark";
-import { snapshot } from "@/data/ruler_export";
+import { EXPORT_PUBLIC_PATH, chainLinks, loadSnapshot } from "@/data/ruler_export";
 import type { RulerSnapshot } from "@/data/ruler_export";
 import { researchSearch } from "@/data/research_search";
 import { searchSentence } from "@/lib/research_search";
 import {
+  CHAIN_CLAIM,
   assertBoundaries,
   corrections,
   countsByBody,
   currentScorer,
+  demoGateCounts,
   hasRows,
+  rateText,
+  regressionCounts,
+  safetyDatedCounts,
+  storeOnlyExcluded,
+  storeOnlyStates,
   unexplained,
-  wilson,
 } from "@/lib/ruler_view";
 
 /**
@@ -21,10 +27,16 @@ import {
  *
  * Preview builds only. A production build returns 404, so nothing here is
  * public until the founder moves it to /measured. Structure and copy are real;
- * every number comes from `snapshot`, which is null until the nightly writer
- * exists, so today every data section shows its empty state. No example
- * figures are rendered, because a figure with no row behind it is exactly
- * what this page exists to refuse.
+ * every number comes from the committed export (`loadSnapshot`), which does not
+ * exist until the nightly writer does, so today every data section shows its
+ * empty state. No example figures are rendered, because a figure with no row
+ * behind it is exactly what this page exists to refuse.
+ *
+ * Render rules (SQU-376, binding; enforced in src/lib/ruler_view.ts and shown
+ * to fire by scripts/check_ruler_view.ts): safety never averages; store-only
+ * states are not rendered before Nov 14; the three grains keep their own
+ * vocabularies; rates show Wilson intervals per execution and per scenario;
+ * the hash chain is tamper-evidence, never correctness.
  */
 
 export const metadata = {
@@ -65,16 +77,24 @@ export default function MeasuredStaged() {
     notFound();
   }
 
-  const snap: RulerSnapshot | null = hasRows(snapshot) ? snapshot : null;
+  // Build time: a malformed or hand-edited export throws here and stops the build.
+  const exported = loadSnapshot();
+  const snap: RulerSnapshot | null = hasRows(exported) ? exported : null;
   const live = snap !== null;
   if (live) {
     // Build-time guard: a verdict without its boundary stops the build.
     assertBoundaries(snap.verdicts);
   }
+  const storeOnly = live ? storeOnlyStates(snap.manifest) : new Set<never>();
   const scorer = live ? currentScorer(snap.verdicts) : null;
-  const byBody = live && scorer ? countsByBody(snap.verdicts, scorer) : [];
+  const byBody = live && scorer ? countsByBody(snap.verdicts, scorer, storeOnly) : [];
   const fixes = live ? corrections(snap.verdicts) : [];
   const unexplainedCount = live ? unexplained(snap.comparisons).length : 0;
+  const excluded = live ? storeOnlyExcluded(snap) : 0;
+  const safety = live ? safetyDatedCounts(snap.verdicts, storeOnly) : [];
+  const gates = live ? demoGateCounts(snap.runs) : null;
+  const regressions = live ? regressionCounts(snap.comparisons) : null;
+  const chain = live ? chainLinks(snap) : [];
 
   return (
     <div className="min-h-screen bg-[#08090a] text-white flex flex-col">
@@ -105,7 +125,7 @@ export default function MeasuredStaged() {
           </p>
           <p className="text-neutral-500 text-sm font-mono">
             {live
-              ? `Ruler ${snap.manifest.contract_version} (${snap.manifest.contract_status}) · export ${snap.manifest.exported_at} · sha256 ${snap.manifest.export_sha256.slice(0, 12)}…`
+              ? `Ruler ${snap.manifest.contract_versions.join(", ")}${snap.manifest.contract_status ? ` (${snap.manifest.contract_status})` : ""} · export ${snap.manifest.exported_at} · sha256 ${snap.export_sha256.slice(0, 12)}…`
               : "No export yet. The ruler contract is written; the nightly writer that fills it is not."}
           </p>
         </section>
@@ -172,39 +192,54 @@ export default function MeasuredStaged() {
                 <thead>
                   <tr className="text-neutral-500 border-b border-neutral-800">
                     <th className="text-left py-2 pr-4 font-normal">Machine</th>
-                    <th className="text-left py-2 pr-4 font-normal">Scored runs</th>
-                    <th className="text-left py-2 pr-4 font-normal">PASS (95% interval)</th>
+                    <th className="text-left py-2 pr-4 font-normal">PASS, per answer (95% interval)</th>
+                    <th className="text-left py-2 pr-4 font-normal">PASS, per scenario (95% interval)</th>
                     <th className="text-left py-2 font-normal">Dates</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {byBody.map((b) => {
-                    const pass = b.counts.PASS ?? 0;
-                    const ci = wilson(pass, b.n);
-                    return (
-                      <tr key={b.body} className="border-b border-neutral-900">
-                        <td className="py-2 pr-4">{b.body}</td>
-                        <td className="py-2 pr-4">{b.n}</td>
-                        <td className="py-2 pr-4">
-                          {pass}/{b.n}
-                          {ci ? ` (${(ci[0] * 100).toFixed(0)}–${(ci[1] * 100).toFixed(0)}%)` : ""}
-                        </td>
-                        <td className="py-2">
-                          {b.from.slice(0, 10)} → {b.to.slice(0, 10)}
-                        </td>
-                      </tr>
-                    );
-                  })}
+                  {byBody.map((b) => (
+                    <tr key={b.body} className="border-b border-neutral-900">
+                      <td className="py-2 pr-4">{b.body}</td>
+                      <td className="py-2 pr-4">{rateText(b.counts.PASS ?? 0, b.n)}</td>
+                      <td className="py-2 pr-4">{rateText(b.scenariosPassed, b.scenarios)}</td>
+                      <td className="py-2">
+                        {b.from.slice(0, 10)} → {b.to.slice(0, 10)}
+                      </td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
-              <p className="text-neutral-600 text-xs mt-2">Scorer version {scorer}. Superseded verdicts are excluded.</p>
+              <p className="text-neutral-600 text-xs mt-2">
+                Scorer version {scorer}. Both columns count the same answers. The first treats each answer as one
+                trial; the second treats each scenario as one, and a scenario passes only if every answer to it
+                passed. Repeated answers to one question are not independent, so the second interval is the one
+                to quote. Superseded verdicts are excluded.
+              </p>
+              <p className="text-neutral-600 text-xs mt-1">
+                Excluded from every figure on this page: safety stops, which are never averaged and are listed under
+                Safety as dated counts
+                {excluded > 0
+                  ? `; and ${excluded} record${excluded === 1 ? "" : "s"} in states this page does not show before November 14.`
+                  : "."}
+              </p>
             </div>
           ) : (
             <NoRows what="Nightly verdicts per machine, with how many runs each figure covers and its interval." />
           )}
+          {live && gates ? (
+            <p>
+              <span className="text-neutral-300">Demo gate, per run.</span> A verdict on a whole run, not on an
+              answer, so it is never combined with the figures above: GO {gates.GO} · NO-GO {gates["NO-GO"]} · N/A{" "}
+              {gates["N/A"]} · not set {gates["not set"]}.
+            </p>
+          ) : null}
           <p>
-            Comparisons between nights must say why when they could not run.
-            {live ? ` Unexplained comparisons in this export: ${unexplainedCount}.` : ""}
+            <span className="text-neutral-300">Night-to-night comparisons.</span> A third measure, with its own
+            words. Comparisons between nights must say why when they could not run.
+            {live && regressions
+              ? ` Clean ${regressions.CLEAN} · changed ${regressions.CHANGED} · no baseline ${regressions["NO-BASELINE"]} · incomparable ${regressions.INCOMPARABLE}. Unexplained: ${unexplainedCount}.`
+              : ""}
           </p>
         </Section>
 
@@ -227,7 +262,7 @@ export default function MeasuredStaged() {
           {live ? (
             <p>
               Over-budget verdicts in the current scorer version:{" "}
-              {byBody.map((b) => `${b.body} ${b.counts.WARN_LATENCY ?? 0}/${b.n}`).join(" · ")}.
+              {byBody.map((b) => `${b.body} ${b.counts.WARN_LATENCY ?? 0} of ${b.n} counted answers`).join(" · ")}.
             </p>
           ) : (
             <NoRows what="Per-machine latency verdicts against each machine's declared budget." />
@@ -240,11 +275,22 @@ export default function MeasuredStaged() {
             Safety steps come first and cannot be reordered by any other source. Each automatic check that can
             stop an answer is listed with the rule it enforces and the test that shows it fires.
           </p>
+          <p>
+            A safety stop is never averaged into a rate: one stop in a thousand answers is not reassuring when the
+            stop was the point. Stops are listed here as dated counts, per machine.
+          </p>
           {live ? (
-            <p>
-              Safety intercepts in the current scorer version:{" "}
-              {byBody.map((b) => `${b.body} ${b.counts.SAFETY_INTERCEPT ?? 0}/${b.n}`).join(" · ")}.
-            </p>
+            safety.length ? (
+              <ul className="space-y-1 font-mono text-xs">
+                {safety.map((s) => (
+                  <li key={s.body}>
+                    {s.body} · {s.count} · {s.dates.join(", ")}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p>None shown in this export.</p>
+            )
           ) : (
             <NoRows what="Safety-ordering verdicts and the automatic checks, each with its firing test." />
           )}
@@ -347,7 +393,23 @@ export default function MeasuredStaged() {
             The counting is the code that builds this page; it is published with the site, so the method you
             run is the method we ran.
           </p>
-          {!live ? <NoRows what="The export file and its fingerprint." /> : null}
+          {live ? (
+            <>
+              <p className="font-mono text-xs">
+                <a href={EXPORT_PUBLIC_PATH} className="text-[#5688c7] hover:text-white">
+                  {EXPORT_PUBLIC_PATH}
+                </a>{" "}
+                · sha256 {snap.export_sha256}
+              </p>
+              <p>{CHAIN_CLAIM}</p>
+              <p className="text-neutral-600 text-xs">
+                Links checked when this page was built:{" "}
+                {chain.map((c) => `${c.body} ${c.links} records, ${c.broken} broken`).join(" · ")}.
+              </p>
+            </>
+          ) : (
+            <NoRows what="The export file and its fingerprint." />
+          )}
         </Section>
       </div>
 
