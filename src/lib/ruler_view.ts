@@ -41,10 +41,14 @@ import type {
  *    edit that leaves the stored row_hash alone keeps every link intact, and
  *    only recomputing that row's hash (the writer's recipe, SQU-374/375)
  *    catches it. The build does not recompute yet, so the sentence says so.
+ *  - the recipe has no key, so someone who rewrites every hash after a change
+ *    keeps every link intact; that shows only against an earlier copy of the
+ *    export (founder ruling, SQU-376, 2026-10-21: the clause ships).
  */
 export const CHAIN_CLAIM =
   "Each machine's verdicts are hash-chained in the order they were written. This page checks the links, so a " +
-  "verdict removed or reordered afterwards shows up as a broken link. It does not yet recompute each verdict's " +
+  "verdict removed or reordered afterwards shows up as a broken link, unless every later hash was rewritten as " +
+  "well, which shows only against an earlier copy of the export. It does not yet recompute each verdict's " +
   "own hash, so an edit that leaves the stored hash unchanged would pass. Run and comparison records are not " +
   "chained. The chain says nothing about whether any verdict is correct.";
 

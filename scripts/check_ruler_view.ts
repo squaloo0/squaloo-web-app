@@ -93,7 +93,26 @@ check("the chain sentence names verdicts, not all records",
   /verdicts are hash-chained/.test(CHAIN_CLAIM) && !/records are hash-chained/.test(CHAIN_CLAIM) &&
   CHAIN_CLAIM.includes("Run and comparison records are not chained"));
 check("the chain sentence claims no edit detection the build does not perform",
-  !/rewritten|edited[^.]*shows up/i.test(CHAIN_CLAIM) && CHAIN_CLAIM.includes("does not yet recompute"));
+  !/record[^.]*rewritten[^.]*shows up|edited[^.]*shows up/i.test(CHAIN_CLAIM) && CHAIN_CLAIM.includes("does not yet recompute"));
+check("the chain sentence says a full rewrite shows only against an earlier copy",
+  CHAIN_CLAIM.includes("unless every later hash was rewritten as well") &&
+  CHAIN_CLAIM.includes("shows only against an earlier copy of the export"));
+// Control for the clause: the remove-then-rehash-the-rest shape passes the link check.
+const vRows = withholdText.trim().split("\n").map((l) => JSON.parse(l));
+const vBody = vRows.filter((r) => r.kind === "verdict");
+const target = vBody[1];
+const rehashed = vRows.filter((r) => r !== target).map((r) => ({ ...r }));
+const m0 = rehashed[0];
+m0.counts = { ...m0.counts, verdict: m0.counts.verdict - 1 };
+const chainRows = [...rehashed.filter((r) => r.kind === "verdict"), ...m0.withheld.map((w: object) => ({ ...w }))]
+  .sort((a, b) => a.body_local_seq - b.body_local_seq);
+let prevH: string | null = null;
+for (const r of chainRows) { r.prev_row_hash = prevH; r.row_hash = createHash("sha256").update(`${r.verdict_uuid}|${prevH}`).digest("hex"); prevH = r.row_hash; }
+const byUuid = new Map(chainRows.map((r) => [r.verdict_uuid, r]));
+m0.withheld = m0.withheld.map((w: { verdict_uuid: string }) => byUuid.get(w.verdict_uuid));
+const rewritten = rehashed.map((r) => (r.kind === "verdict" ? byUuid.get(r.verdict_uuid) : r)).map((r) => JSON.stringify(r)).join("\n");
+check("control: a verdict removed and every later hash rewritten passes the link check (so the clause must stay)",
+  chainLinks(parseExport(rewritten)).every((c) => c.broken === 0));
 const keptHash = edit((m) => m).split("\n").map((l) => {
   const r = JSON.parse(l);
   if (r.kind === "verdict" && r.body_local_seq === W.verdicts[0].body_local_seq) r.latency_ms += 1; // edited, hash kept
