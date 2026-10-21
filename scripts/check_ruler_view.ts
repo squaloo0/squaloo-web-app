@@ -87,6 +87,20 @@ check("a removed row breaks the chain and stops the build", throws(() => parseEx
 check("a rewritten withheld link stops the build",
   throws(() => parseExport(edit((m) => ((m.withheld as { row_hash: string }[])[0].row_hash = "22".repeat(32)))), ExportFormatError));
 check("the chain sentence disclaims correctness", CHAIN_CLAIM.includes("says nothing about whether any verdict is correct"));
+// The claim may not outrun the check: only verdicts are chained (the DDL), and the
+// build checks links only, so an edit that keeps the stored hash passes it.
+check("the chain sentence names verdicts, not all records",
+  /verdicts are hash-chained/.test(CHAIN_CLAIM) && !/records are hash-chained/.test(CHAIN_CLAIM) &&
+  CHAIN_CLAIM.includes("Run and comparison records are not chained"));
+check("the chain sentence claims no edit detection the build does not perform",
+  !/rewritten|edited[^.]*shows up/i.test(CHAIN_CLAIM) && CHAIN_CLAIM.includes("does not yet recompute"));
+const keptHash = edit((m) => m).split("\n").map((l) => {
+  const r = JSON.parse(l);
+  if (r.kind === "verdict" && r.body_local_seq === W.verdicts[0].body_local_seq) r.latency_ms += 1; // edited, hash kept
+  return JSON.stringify(r);
+}).join("\n");
+check("control: an edit that keeps the stored hash passes the link check (so the sentence must not claim it)",
+  chainLinks(parseExport(keptHash)).every((c) => c.broken === 0));
 check("the page renders the chain sentence, not its own wording",
   PAGE.includes("{CHAIN_CLAIM}") && !/chain (proves|verifies|guarantees)|verified correct/i.test(PAGE));
 

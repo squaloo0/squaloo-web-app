@@ -32,10 +32,21 @@ import type {
   RulerVerdict,
 } from "@/data/ruler_export";
 
-/** The only sentence the page uses about the chain. */
+/**
+ * The only sentence the page uses about the chain. It claims exactly what the
+ * build checks (chainLinks: linkage, in body_local_seq order), and no more:
+ *  - only ruler_verdict carries prev_row_hash/row_hash (the DDL), so it says
+ *    "verdicts", never "records";
+ *  - linkage catches a row removed, reordered, or rehashed after an edit; an
+ *    edit that leaves the stored row_hash alone keeps every link intact, and
+ *    only recomputing that row's hash (the writer's recipe, SQU-374/375)
+ *    catches it. The build does not recompute yet, so the sentence says so.
+ */
 export const CHAIN_CLAIM =
-  "Each machine's records are hash-chained in the order they were written, so a record removed, reordered or " +
-  "rewritten afterwards shows up as a broken link. The chain says nothing about whether any verdict is correct.";
+  "Each machine's verdicts are hash-chained in the order they were written. This page checks the links, so a " +
+  "verdict removed or reordered afterwards shows up as a broken link. It does not yet recompute each verdict's " +
+  "own hash, so an edit that leaves the stored hash unchanged would pass. Run and comparison records are not " +
+  "chained. The chain says nothing about whether any verdict is correct.";
 
 /** Fields that make a verdict a number with a boundary (rule 16). */
 export const BOUNDARY_FIELDS = [
