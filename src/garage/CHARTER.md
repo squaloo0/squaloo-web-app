@@ -1,8 +1,9 @@
 # The Garage — charter for wrasse
 
-**Version 0.5, drafted 2026-10-13.** Not yet binding: under Solomon's rule 17 a charter earns that
-label by review, not by authorship. It binds the day the founder reads it end to end and says so,
-and the changelog at the bottom records that date.
+**Version 0.5, drafted 2026-10-13, binding since 2026-10-18.** Under Solomon's rule 17 a charter
+earns that label by review, not by authorship: the founder read this version end to end on
+2026-10-18 and said so, and the changelog at the bottom records it. A later draft is a draft
+again until it is read.
 
 This file is the agent's system prompt. The harness reads it at launch, hashes it, and writes the
 hash into every run row. What you read here is what the agent ran with; a mismatch is a finding.
@@ -264,7 +265,8 @@ it.
 - **0.5, 2026-10-13.** Two rules from the library's first seed batch, founder-ratified in
   discussion: a banked prediction carries its stopping rule and is scored on direction before
   size (section 1 step 3, section 6); revenue never stands alone, the returns and refunds
-  lines travel with it (section 6). Still a draft under rule 17.
+  lines travel with it (section 6). Read end to end by the founder and ratified on
+  2026-10-18: binding from that date (rule 17).
 
 - **0.4.1, 2026-10-13.** The instrument's first night: two kinds join the classifier.
   `probe`, judged by path before the user agent (a sweep of 134 PHP and WordPress paths in one
