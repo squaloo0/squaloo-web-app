@@ -176,7 +176,7 @@ The filter is the stack's own vocabulary, kept in one file the founder edits: te
 
 One file, `terms.ts`, in the private repo. Every entry carries the panel it feeds and a one-line *why*, so a feed item's `matched_terms` always answers "why is this here". The founder edits it; nothing else writes it.
 
-**The desk.** Twelve names in four groups. Most of the stack is private (Vercel, Fly, Neon, Stripe, Mattermost, Hugging Face, Anthropic), so public exposure is thinner than the vendor list suggests. This panel is context beside spend and news, never a signal; the console offers no trade or recommendation.
+**The desk.** Thirteen names in four groups (first written as twelve; corrected 2026-10-21). Most of the stack is private (Vercel, Fly, Neon, Stripe, Mattermost, Hugging Face, Anthropic), so public exposure is thinner than the vendor list suggests. This panel is context beside spend and news, never a signal; the console offers no trade or recommendation.
 
 | Group | Tickers | Why |
 |---|---|---|
