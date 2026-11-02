@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@600&family=Hanken+Grotesk:wght@400&display=swap">
+<link rel="stylesheet" href="../tokens.css">
+<style>
+  html, body { margin: 0; background: var(--ground); }
+  .cover { position: relative; width: 960px; height: 288px; overflow: hidden; }
+  .cover svg { position: absolute; left: 0; top: 0; }
+  .inkslab { fill: var(--ink); }
+  .sun { fill: var(--sun); }
+  .sky { fill: var(--sky); }
+  .blue { fill: var(--solomon-blue); }
+  .green { fill: var(--green); }
+  .tile { rx: var(--radius-sm); }
+  .ring { fill: none; stroke: var(--ground); stroke-width: var(--stroke-pattern); }
+  .dot { fill: var(--ground); }
+  .name { position: absolute; left: 32px; bottom: 24px; width: 440px; font-family: "EB Garamond", Georgia, serif; font-weight: 600; font-size: 120px; line-height: 0.92; letter-spacing: -0.02em; color: var(--ink); margin: 0; }
+  .tag { position: absolute; left: 34px; bottom: 8px; width: 440px; font-family: "Hanken Grotesk", Arial, sans-serif; font-size: 13px; line-height: 1.2; color: var(--label); margin: 0; }
+</style>
+</head>
+<body>
+<div class="cover">
+<!--
+  blocks: ink slab 280×288 (space-8 + space-7 + space-6 wide, full height, bleeding top and bottom), sun 208×128 (space-8 + space-7 - space-3 wide), sky 104×160, solomon-blue 104×88 and green 104×72 stacked beside it; corners radius-sm
+  arrangement: one tall ink slab at x=480 with a stacked column of four satellites to its right bleeding off the right edge; the house as a wall of tiles beside a door, the blue tile the one that is the product
+  pattern: the literal-motif row, chosen because the README's second idea is "the pattern is the proof": the jali lattice, circles with a diamond at each center, 30 cells on a space-6 (48px) pitch, drawn as paper lines on the ink slab, like light through a carved screen
+  scales: pitch space-6 48px, ring radius 18px (0.38 × pitch), diamond half-diagonal 5px, stroke stroke-pattern 2.5px, corners radius-sm 8px, name in display at 120px bottom-left, tagline in label at 13px
+-->
+<svg width="960" height="288" viewBox="0 0 960 288" aria-hidden="true">
+  <defs>
+    <g id="cell"><circle class="ring" cx="0" cy="0" r="18"/><path class="dot" d="M0 -5 L5 0 L0 5 L-5 0 Z"/></g>
+  </defs>
+  <rect class="inkslab" x="480" y="-8" width="280" height="304"/>
+  <rect class="sun tile" x="760" y="-8" width="208" height="136"/>
+  <rect class="sky tile" x="760" y="128" width="104" height="168"/>
+  <rect class="blue tile" x="864" y="128" width="104" height="88"/>
+  <rect class="green tile" x="864" y="216" width="104" height="80"/>
+  <use href="#cell" x="504" y="24"/><use href="#cell" x="552" y="24"/><use href="#cell" x="600" y="24"/><use href="#cell" x="648" y="24"/><use href="#cell" x="696" y="24"/>
+  <use href="#cell" x="504" y="72"/><use href="#cell" x="552" y="72"/><use href="#cell" x="600" y="72"/><use href="#cell" x="648" y="72"/><use href="#cell" x="696" y="72"/>
+  <use href="#cell" x="504" y="120"/><use href="#cell" x="552" y="120"/><use href="#cell" x="600" y="120"/><use href="#cell" x="648" y="120"/><use href="#cell" x="696" y="120"/>
+  <use href="#cell" x="504" y="168"/><use href="#cell" x="552" y="168"/><use href="#cell" x="600" y="168"/><use href="#cell" x="648" y="168"/><use href="#cell" x="696" y="168"/>
+  <use href="#cell" x="504" y="216"/><use href="#cell" x="552" y="216"/><use href="#cell" x="600" y="216"/><use href="#cell" x="648" y="216"/><use href="#cell" x="696" y="216"/>
+  <use href="#cell" x="504" y="264"/><use href="#cell" x="552" y="264"/><use href="#cell" x="600" y="264"/><use href="#cell" x="648" y="264"/><use href="#cell" x="696" y="264"/>
+</svg>
+<h1 class="name">Squaloo</h1>
+<p class="tag">Intelligence you own, and can verify.</p>
+</div>
+</body>
+</html>
