@@ -1,0 +1,39 @@
+/* Squaloo brand kit v0.1 for Tailwind v4: `@import "../../brand/kit/tokens.tailwind.css";` after `@import "tailwindcss";` */
+/* Utilities it yields: bg-sq-ground, text-sq-ink, border-sq-rule, bg-solomon-blue, font-display, font-mono, rounded-sq-arch, ... */
+@theme {
+  --color-sq-ground: #f7f3e8;
+  --color-sq-card: #fdfbf5;
+  --color-sq-ink: #191308;
+  --color-sq-ink-muted: #3d382f;
+  --color-sq-label: #5a544a;
+  --color-sq-rule: #d9d2c2;
+  --color-solomon-blue: #0a369d;
+  --color-on-solomon-blue: #f7f3e8;
+  --color-sq-sun: #edcd1d;
+  --color-sq-sky: #01baef;
+  --color-sq-green: #0c7c59;
+  --color-spiral-red: #d23c1e;
+  --color-sq-on-sun: #191308;
+  --color-state-ok: #0c7c59;
+  --color-state-warn: #191308;
+  --color-state-refused: #0a369d;
+  --color-state-unknown: #5a544a;
+  --color-sq-ground-ink: #191308; --color-sq-card-ink: #231c13; --color-sq-ink-paper: #f7f3e8; --color-sq-ink-muted-paper: #d9d2c2; --color-sq-label-paper: #c9c1ad; --color-sq-rule-ink: #3d382f;
+  --font-display: "EB Garamond", Georgia, "Times New Roman", serif;
+  --font-sans: "Hanken Grotesk", Arial, system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", "Courier New", monospace;
+  --radius-sq-0: 0px;
+  --radius-sq-sm: 8px;
+  --radius-sq-md: 16px;
+  --radius-sq-lg: 24px;
+  --radius-sq-arch: 999px 999px 0 0;
+  --radius-sq-pill: 999px;
+  --spacing-sq-1: 4px;
+  --spacing-sq-2: 8px;
+  --spacing-sq-3: 16px;
+  --spacing-sq-4: 24px;
+  --spacing-sq-5: 32px;
+  --spacing-sq-6: 48px;
+  --spacing-sq-7: 96px;
+  --spacing-sq-8: 128px;
+}

@@ -28,7 +28,9 @@ A multi-route portfolio and venture site built around the **Squaloo** umbrella a
 
 ## Design System
 
-All color decisions follow a consistent token set:
+The house's brand kit v0.1 lives in [`brand/`](brand/README.md): tokens for two registers (Squaloo on paper, Solomon on ink), three typefaces, generated pattern linework, and two static mockups of the relaunch. The table below is the pre-relaunch palette the site renders today; the relaunch adopts the kit.
+
+All color decisions today follow a consistent token set:
 
 | Token | Value | Usage |
 |-------|-------|-------|
