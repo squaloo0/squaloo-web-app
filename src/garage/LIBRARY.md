@@ -1,6 +1,6 @@
 # The library — sources wrasse may lean on, with their boundaries
 
-Generated from the Garage Research Library in Notion (database `f6f7feef…`) by `garage library pull` at 2026-11-03 23:19 UTC. Do not hand-edit; add or change a source in Notion and pull again. Wrasse's notes live on each row's page in Notion, under its own heading, and come back here as the summary when the founder folds them in.
+Generated from the Garage Research Library in Notion (database `f6f7feef…`) by `garage library pull` at 2026-11-03 23:24 UTC. Do not hand-edit; add or change a source in Notion and pull again. Wrasse's notes live on each row's page in Notion, under its own heading, and come back here as the summary when the founder folds them in.
 
 S-numbers are this file's row order, oldest row first. A mirrored file's name carries the number its row had when it was fetched, so a prefix and a heading can disagree; match a file to a row by the ID line, the title, the DOI or the hash, never by the prefix. A row marked wrasse ✓ has been studied and its report filed; do not study it again unless the order says so.
 
@@ -156,7 +156,7 @@ A number lifted from here into a report carries its row's boundary with it, or i
 ## S20 · OpenAI & Stripe (Founding Maintainers) 2025-2026, Agentic Commerce Protocol (ACP) specification repository
 
 - **URL:** https://github.com/agentic-commerce-protocol/agentic-commerce-protocol
-- **Kind:** doc · **Status:** Unclaimed · **Added:** 2026-10-13 by CoWork deep research (Claude), 2026-10-13; primaries opened by fetch, not by a person
+- **Kind:** doc · **Status:** In review · **Added:** 2026-10-13 by CoWork deep research (Claude), 2026-10-13; primaries opened by fetch, not by a person · wrasse ✓ (studied, report filed)
 - **ID:** spec versions 2025-09-29, 2025-12-12, 2026-01-16, 2026-01-30, 2026-04-17 (latest stable); Apache-2.0 · S20-openai-stripe-founding-maintainers-2025-2026-age.html · sha256 376a844093a2
 - **Scrub before use:** preview not shipped at volume
 - **What it claims, with its boundary:** "An interaction model and open standard" for an AI agent completing purchases with a merchant: OpenAPI documents for agentic checkout and delegated payment, JSON schemas, examples and an RFC directory. Status on 2026-10-13: README says the protocol "is currently in beta"; latest stable version dated 2026-04-17 with an unreleased directory; "jointly governed by OpenAI and Stripe as Founding Maintainers". No adoption or volume figure on the page. Stripe's own seller docs now list "UCP or ACP" as the two seller-side protocols, so ACP is one of two.
