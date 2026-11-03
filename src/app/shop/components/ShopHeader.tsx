@@ -16,9 +16,7 @@ export default function ShopHeader() {
             <Link href="/" className="text-gray-600 hover:text-gray-900">
               Home
             </Link>
-            <Link href="/nhp" className="text-gray-600 hover:text-gray-900">
-              Projects
-            </Link>
+            {/* "Projects" linked /nhp, which no route serves; removed 2026-11-02. */}
           </nav>
 
           {/* Cart */}

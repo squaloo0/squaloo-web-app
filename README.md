@@ -28,7 +28,7 @@ A multi-route portfolio and venture site built around the **Squaloo** umbrella a
 
 ## Design System
 
-The house's brand kit v0.1 lives in [`brand/`](brand/README.md): tokens for two registers (Squaloo on paper, Solomon on ink), three typefaces, generated pattern linework, and two static mockups of the relaunch. The table below is the pre-relaunch palette the site renders today; the relaunch adopts the kit.
+The house's brand kit v0.1 lives in [`brand/`](brand/README.md): tokens for two registers (Squaloo on paper, Solomon on ink), three typefaces, generated pattern linework, and two static mockups of the relaunch. Since the one-page relaunch (2026-11-02), `/` and `/solomon` are built on the kit, and its tokens, Tailwind theme and three faces are loaded app-wide (`src/app/globals.css`, `src/app/layout.tsx`). The table below is the pre-relaunch palette that the older pages, kept at their URLs, still render.
 
 All color decisions today follow a consistent token set:
 

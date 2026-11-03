@@ -1,21 +1,51 @@
-import Link from "next/link";
+/**
+ * The footer attribution: the Squaloo GitHub organization, the founder's
+ * GitHub, and LinkedIn. Since the 2026-11-02 relaunch it carries no site
+ * navigation; the pages it used to link (roadmap, devlog, measured) still
+ * resolve at their URLs.
+ *
+ * `register` picks the surface: "legacy" is the pre-relaunch dark look the
+ * archived pages still use; "squaloo" (paper) and "solomon" (ink) are the
+ * brand kit's two registers.
+ */
+type Register = "legacy" | "squaloo" | "solomon";
 
-export default function AppFooter() {
+const REGISTERS: Record<Register, { footer: string; link: string; icon: string }> = {
+  legacy: {
+    footer: "border-t border-neutral-900 bg-[#08090a]",
+    link: "text-neutral-600 hover:text-white",
+    icon: "group-hover:text-[#0a369d]",
+  },
+  squaloo: {
+    footer: "border-t border-sq-rule bg-sq-ground",
+    link: "text-sq-label hover:text-solomon-blue",
+    icon: "",
+  },
+  solomon: {
+    footer: "border-t border-sq-rule-ink bg-sq-ground-ink",
+    link: "text-sq-label-paper hover:text-sq-ink-paper",
+    icon: "",
+  },
+};
+
+export default function AppFooter({ register = "legacy" }: { register?: Register }) {
+  const r = REGISTERS[register];
+  const width = register === "legacy" ? "max-w-5xl px-8" : "max-w-[1180px] px-5 sm:px-8 lg:px-12";
   return (
-    <footer className="border-t border-neutral-900 bg-[#08090a]">
-      <div className="max-w-5xl mx-auto px-8 py-6 flex flex-wrap items-center justify-between gap-4">
+    <footer className={r.footer}>
+      <div className={`${width} mx-auto py-6 flex flex-wrap items-center justify-between gap-4`}>
 
         {/* GitHub handles */}
-        <div className="flex items-center gap-6">
+        <div className="flex flex-wrap items-center gap-6">
           {/* Squaloo Org */}
           <a
             href="https://github.com/squaloo0"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-2 text-neutral-600 hover:text-white transition-colors group"
+            className={`flex items-center gap-2 ${r.link} transition-colors group`}
             aria-label="Squaloo GitHub organization"
           >
-            <GitHubIcon className="w-4 h-4 group-hover:text-[#1400bf] transition-colors" />
+            <GitHubIcon className={`w-4 h-4 ${r.icon} transition-colors`} />
             <span className="text-xs font-mono tracking-widest uppercase">
               Squaloo
             </span>
@@ -26,10 +56,10 @@ export default function AppFooter() {
             href="https://github.com/marshal2093"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-2 text-neutral-600 hover:text-white transition-colors group"
+            className={`flex items-center gap-2 ${r.link} transition-colors group`}
             aria-label="Marshal Aldoph personal GitHub"
           >
-            <GitHubIcon className="w-4 h-4 group-hover:text-[#1400bf] transition-colors" />
+            <GitHubIcon className={`w-4 h-4 ${r.icon} transition-colors`} />
             <span className="text-xs font-mono tracking-widest uppercase">
               marshal2093
             </span>
@@ -41,37 +71,14 @@ export default function AppFooter() {
           href="https://www.linkedin.com/in/marshalaldoph/"
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center gap-2 text-neutral-600 hover:text-white transition-colors group"
+          className={`flex items-center gap-2 ${r.link} transition-colors group`}
           aria-label="Marshal Aldoph LinkedIn"
         >
-          <LinkedInIcon className="w-4 h-4 group-hover:text-[#5688c7] transition-colors" />
+          <LinkedInIcon className={`w-4 h-4 ${r.icon} transition-colors`} />
           <span className="text-xs font-mono tracking-widest uppercase">
             LinkedIn
           </span>
         </a>
-
-        {/* Site sections. The devlog and the Measured page are the two places
-            claims on this site are backed up, so they belong everywhere. */}
-        <div className="flex items-center gap-6">
-          <Link
-            href="/roadmap"
-            className="text-neutral-600 hover:text-white transition-colors text-xs font-mono tracking-widest uppercase"
-          >
-            Roadmap
-          </Link>
-          <Link
-            href="/devlog"
-            className="text-neutral-600 hover:text-white transition-colors text-xs font-mono tracking-widest uppercase"
-          >
-            Devlog
-          </Link>
-          <Link
-            href="/measured"
-            className="text-neutral-600 hover:text-white transition-colors text-xs font-mono tracking-widest uppercase"
-          >
-            Measured
-          </Link>
-        </div>
 
       </div>
     </footer>
