@@ -1,7 +1,7 @@
 import Link from "next/link";
 import AppFooter from "@/components/AppFooter";
-import { queryRows, latency, overall, run, gaps, contract, recompute } from "@/data/measured";
-import { nights, streak, asOf as ledgerAsOf, latest } from "@/data/ledger";
+import { queryRows, overall, run, contract, recompute } from "@/data/measured";
+import PausedSection, { PausedNote } from "@/components/Paused";
 import { getPostsByTag } from "@/lib/devlog";
 import Wordmark from "@/components/Wordmark";
 
@@ -67,49 +67,17 @@ export default function MeasuredPage() {
             An eval harness runs scripted maintenance questions against the real corpus, scores the
             answers, and gates every model change. This page publishes what it found, unedited.
           </p>
-          <p className="text-neutral-500 text-sm leading-relaxed max-w-2xl">
-            Current as of <span className="text-neutral-300 font-mono">{ledgerAsOf}</span>. Latest nightly:{" "}
-            <span className="text-neutral-300 font-mono">{latest.date}</span> on{" "}
-            <span className="text-neutral-300 font-mono">{latest.body ?? "an unrecorded machine"}</span>
-            {latest.verdict ? <> — <span className="text-neutral-300 font-mono">{latest.verdict}</span> against the night before.</> : "."}
-          </p>
+          <PausedNote
+            why="This page stopped updating on 2026-10-05. The sections that described the present (what is under test, speed, what is failing, the nightly table) are paused until the relaunch rather than left to read as current. The nightly has kept running since; the relaunched page is rebuilt from its committed export. Dated records below (the 2026-09-28 comparison, the 2026-09-05 scorecard) stand as dated."
+            archiveHref="/measured/2026-10-05"
+          />
         </section>
 
-        {/* ── WHAT IS UNDER TEST (consolidates the old run-metadata, speed and
-             per-question sections, so results can be swapped in as they land) ── */}
-        <section className="mb-10">
-          <div className="flex items-baseline gap-4 mb-6 border-b border-neutral-800 pb-4">
-            <h2 className="text-xs font-mono tracking-widest uppercase text-neutral-400">What is under test</h2>
-            <div className="h-px flex-1 bg-neutral-800" />
-            <span className="text-neutral-600 text-xs font-mono">as of {ledgerAsOf}</span>
-          </div>
-          <p className="text-neutral-400 text-sm leading-relaxed max-w-3xl mb-8">
-            The ruler does not belong to a model: every model runs through the same harness,
-            unmodified, against the same contract. Each
-            machine is measured against its own budget, not a fleet-wide one: a laptop and a
-            credit-card-sized computer are not the same promise (amended 2026-09-27).
-          </p>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
-            <div className="border border-neutral-800 p-6">
-              <div className="text-xs font-mono tracking-widest uppercase text-neutral-500 mb-2">Currently shipping</div>
-              <div className="text-white text-base mb-2">{run.model}</div>
-              <p className="text-neutral-400 text-sm leading-relaxed">
-                The model behind every number on this page. Scored question by question below, from a
-                single dated deep run.
-              </p>
-            </div>
-            <div className="border border-neutral-800 p-6" style={{ borderColor: "#d98c5f55" }}>
-              <div className="text-xs font-mono tracking-widest uppercase mb-2" style={{ color: "#d98c5f" }}>In testing now</div>
-              <div className="text-white text-base mb-2">A second, unrelated open model</div>
-              <p className="text-neutral-400 text-sm leading-relaxed">
-                Going through this harness with <span className="text-white">zero engine changes</span>.
-                Scored on truth checks only; speed is reported but does not gate, because today&apos;s
-                budgets were measured against today&apos;s model.{" "}
-                <span className="text-white">Results below, 2026-09-28: the binding held, and it showed exactly where the coupling is.</span>
-              </p>
-            </div>
-          </div>
-        </section>
+        <PausedSection
+          title="What is under test"
+          why="It described the shipping model and the model in testing in the present tense, as of 2026-10-05."
+          archiveHref="/measured/2026-10-05"
+        />
 
         {/* ── GD-2 · the pre-registered comparison, published pass and fail ── */}
         <section className="mb-32">
@@ -265,7 +233,7 @@ export default function MeasuredPage() {
             { value: `${overall.correctness}%`, label: "answers fully correct", tone: AMBER },
             { value: `${overall.citationCompliance}%`, label: "citations placed inline", tone: null },
             { value: `${overall.fullRecall}%`, label: "runs retrieving both sources", tone: AMBER },
-            { value: secs(latency.warmMedianMs), label: "median warm response", tone: GREEN },
+            { value: "paused", label: "speed: the warm median was measured in-process, with no machine recorded, and is not what a visitor waits (see below)", tone: AMBER },
           ].map((m) => (
             <div key={m.label} className="border border-neutral-800 p-6">
               <div className="text-3xl font-bold font-mono mb-2 tabular-nums" style={{ color: m.tone ?? "#ffffff" }}>
@@ -276,57 +244,15 @@ export default function MeasuredPage() {
           ))}
         </section>
         <p className="text-neutral-600 text-xs leading-relaxed max-w-2xl mb-32">
-          Two of these four are bad numbers. They are the first thing on the page on purpose.
+          Two of these numbers are bad. They are the first thing on the page on purpose.
         </p>
 
-        {/* Latency */}
-        <section className="mb-32">
-          <div className="flex items-baseline gap-4 mb-10 border-b border-neutral-800 pb-4">
-            <h2 className="text-xs font-mono tracking-widest uppercase text-neutral-400">The scorecard — speed</h2>
-            <div className="h-px flex-1 bg-neutral-800" />
-          </div>
-          <p className="text-neutral-400 text-sm leading-relaxed max-w-2xl mb-10">
-            Each question&apos;s first run pays a cold-start cost: loading a multi-gigabyte model off
-            disk. Every run after it is warm. Refusals are fastest, because when retrieval comes back
-            empty the engine answers &ldquo;I don&apos;t have documentation for that&rdquo; without
-            loading the model.
-          </p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            {[
-              {
-                v: secs(latency.warmMedianMs),
-                l: "Warm median",
-                s: `${latency.warmN} runs — the number that matters in normal use`,
-                tone: GREEN,
-              },
-              {
-                v: secs(latency.coldFirstRunMeanMs),
-                l: "Cold first run, mean",
-                s: `${latency.coldFirstRunN} runs — one per question, model loading from disk`,
-                tone: AMBER,
-              },
-              {
-                v: secs(latency.overallMeanMs),
-                l: "All runs, mean",
-                s: `${overall.totalRuns} runs — inflated by the cold starts beside it`,
-                tone: null,
-              },
-            ].map((x) => (
-              <div key={x.l} className="border border-neutral-800 p-6">
-                <div className="text-2xl font-bold font-mono mb-2 tabular-nums" style={{ color: x.tone ?? "#ffffff" }}>
-                  {x.v}
-                </div>
-                <div className="text-white text-sm mb-2">{x.l}</div>
-                <p className="text-neutral-500 text-xs leading-relaxed">{x.s}</p>
-              </div>
-            ))}
-          </div>
-          <p className="text-neutral-500 text-xs leading-relaxed max-w-2xl">
-            The fastest run in the set was a refusal at {secs(latency.fastestRefusalMs)}; the slowest was
-            a cold start at {secs(latency.slowestMs)}. We warm the engine before a demo: an operational
-            caveat, not a number to quote as typical.
-          </p>
-        </section>
+        {/* Latency: paused (SQU-412) */}
+        <PausedSection
+          title="The scorecard — speed"
+          why="Its headline was the 2026-09-05 warm median, measured with the eval harness calling the engine in-process and no machine recorded, and it called that figure “the number that matters in normal use.” It is not: it is not what someone asking through the ask page or chat waits. The relaunched page reports speed per machine and names the path each figure was measured on."
+          archiveHref="/measured/2026-10-05"
+        />
 
         {/* Per-question results */}
         <section className="mb-32">
@@ -379,86 +305,19 @@ export default function MeasuredPage() {
           </p>
         </section>
 
-        {/* Open gaps */}
-        <section className="mb-32">
-          <div className="flex items-baseline gap-4 mb-10 border-b border-neutral-800 pb-4">
-            <h2 className="text-xs font-mono tracking-widest uppercase text-neutral-400">What is failing, and who owns it</h2>
-            <div className="h-px flex-1 bg-neutral-800" />
-          </div>
-          <div className="space-y-0">
-            {gaps.map((g) => (
-              <div key={g.title} className="border-t border-neutral-800 py-8 grid grid-cols-1 md:grid-cols-[220px_1fr] gap-6">
-                <div>
-                  <div className="text-white text-sm mb-2">{g.title}</div>
-                  <div className="font-mono text-xs mb-3" style={{ color: AMBER }}>{g.measured}</div>
-                  <div className="text-neutral-600 text-xs font-mono tracking-wider uppercase">{g.owner}</div>
-                </div>
-                <p className="text-neutral-400 text-sm leading-relaxed max-w-2xl">{g.what}</p>
-              </div>
-            ))}
-            <div className="border-t border-neutral-800" />
-          </div>
-          <p className="text-neutral-600 text-xs leading-relaxed max-w-2xl mt-6">
-            Ticket identifiers are the durable reference for each fix. Our tracker is private, so these
-            are labels, not links. Ask, and we will walk you through any of them.
-          </p>
-        </section>
+        {/* Open gaps: paused (SQU-412) */}
+        <PausedSection
+          title="What is failing, and who owns it"
+          why="It listed open failures and their owners as of 2026-10-05, in the present tense."
+          archiveHref="/measured/2026-10-05"
+        />
 
-        {/* ── THE RUN LEDGER (§2.2) ── */}
-        <section className="mb-32">
-          <div className="flex items-baseline gap-4 mb-6 border-b border-neutral-800 pb-4">
-            <h2 className="text-xs font-mono tracking-widest uppercase text-neutral-400">The nightly run, night after night</h2>
-            <div className="h-px flex-1 bg-neutral-800" />
-            <span className="text-neutral-600 text-xs font-mono">as of {ledgerAsOf}</span>
-          </div>
-          <p className="text-neutral-400 text-sm leading-relaxed max-w-3xl mb-3">
-            Every committed nightly artifact, its machine, and the verdict of comparing it against the
-            night before.
-          </p>
-          <p className="text-neutral-300 text-sm leading-relaxed max-w-3xl mb-3">
-            <span className="text-white">{streak.count} consecutive clean runs</span>, {streak.from} → {streak.to}.
-            Two boundaries travel with that number: the run before the streak could not be compared at
-            all (a changed composition, not a regression), and one calendar night in the window has no
-            artifact, so these are consecutive <em>runs</em>, not consecutive nights.
-          </p>
-          <p className="text-neutral-300 text-sm leading-relaxed max-w-3xl mb-8">
-            <span className="text-white">The streak ended on {streak.endedOn}.</span> No night since has been
-            comparable, and none of them is a regression. Two of the breaks were our choice: a second-model
-            experiment on 2026-09-28, which the next night&apos;s comparison wrongly took as its baseline, and a
-            deliberate enlargement of the corpus on 2026-10-02, which correctly makes earlier runs incomparable.
-            The rest is our comparator: since 2026-09-30 it has reported &ldquo;no previous run&rdquo; instead
-            of finding the last run with the same configuration. Until that is fixed, the streak cannot restart.
-          </p>
-          <div className="overflow-x-auto overflow-y-auto max-h-[28rem] border border-neutral-900">
-            <table className="w-full text-sm border-collapse">
-              <thead>
-                <tr className="border-b border-neutral-800 text-neutral-500 font-mono text-xs uppercase tracking-widest sticky top-0 bg-[#08090a]">
-                  <th className="text-left py-3 pr-4 font-normal">Night</th>
-                  <th className="text-left py-3 pr-4 font-normal">Machine</th>
-                  <th className="text-left py-3 pr-4 font-normal">Vs. previous</th>
-                  <th className="text-left py-3 font-normal">Same corpus</th>
-                </tr>
-              </thead>
-              <tbody>
-                {[...nights].reverse().map((n) => (
-                  <tr key={n.date} className="border-b border-neutral-900">
-                    <td className="py-3 pr-4 font-mono text-neutral-300 tabular-nums whitespace-nowrap">{n.date}</td>
-                    <td className="py-3 pr-4 text-neutral-400 font-mono text-xs">{n.body ?? "not recorded"}</td>
-                    <td className="py-3 pr-4 font-mono text-xs" style={{ color: n.verdict === "CLEAN" ? "#63a375" : n.verdict ? "#d98c5f" : "#737373" }}>
-                      {n.verdict ?? "no comparison"}
-                    </td>
-                    <td className="py-3 text-neutral-500 font-mono text-xs">{n.corpus ? n.corpus.slice(0, 8) : "—"}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <p className="text-neutral-500 text-xs leading-relaxed max-w-3xl mt-5">
-            &ldquo;Machine not recorded&rdquo; on the earliest rows is not missing data: artifacts did not
-            carry a machine identity until 2026-09-17. A blank corpus digest means the same: the field
-            did not exist yet. Those rows stay in.
-          </p>
-        </section>
+        {/* ── THE RUN LEDGER: paused (SQU-412) ── */}
+        <PausedSection
+          title="The nightly run, night after night"
+          why="It stops at 2026-10-05 and says no night since has been comparable. The nightly has kept running since, so the table no longer describes the record. The relaunched page rebuilds it from the committed export: every row dated and named by machine, and no headline rate until the count supports one."
+          archiveHref="/measured/2026-10-05"
+        />
 
         {/* ── WRITTEN UP (pulls devlog posts tagged "measured") ── */}
         <section className="mb-32">

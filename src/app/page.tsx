@@ -1,7 +1,8 @@
 import Link from "next/link";
 import AppFooter from "@/components/AppFooter";
 import SolomonLayerDiagram from "@/components/SolomonLayerDiagram";
-import { streak, latest, asOf } from "@/data/ledger";
+import { latest, asOf } from "@/data/ledger";
+import { PAUSED_ON } from "@/components/Paused";
 import Wordmark from "@/components/Wordmark";
 
 export const metadata = {
@@ -77,14 +78,16 @@ export default function Home() {
             <span className="text-neutral-600 text-xs font-mono">as of {asOf}</span>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="border border-neutral-800 p-6">
+            {/* Paused until the relaunch (SQU-412): this count ended at 2026-10-05 and said nothing
+                since had been comparable; the nightly kept running, so it no longer describes the record. */}
+            <div className="border p-6" style={{ borderColor: "#d98c5f55" }} data-paused={PAUSED_ON}>
               <div className="text-xs font-mono tracking-widest uppercase text-neutral-500 mb-3">Measured nightly</div>
-              <div className="text-2xl font-bold font-mono text-white mb-3 tabular-nums">{streak.count} clean runs</div>
+              <div className="text-2xl font-bold font-mono mb-3" style={{ color: "#d98c5f" }}>Paused</div>
               <p className="text-neutral-400 text-sm leading-relaxed">
-                Consecutive clean nightly comparisons, {streak.from} → {streak.to}, counted from the
-                committed artifacts. Consecutive <em>runs</em>, not nights: one calendar night in that
-                window has no artifact. Ended {streak.endedOn}: nothing since has been comparable, through
-                two changes we chose and a comparator defect. None is a regression.
+                This count stopped at 2026-10-05, and said nothing since had been comparable. The nightly
+                has kept running, so it no longer describes the record. Paused {PAUSED_ON} until the
+                relaunch, which rebuilds it from the committed export.{" "}
+                <Link href="/measured/2026-10-05" className="text-[#5688c7] hover:text-white transition-colors">As of 2026-10-05 →</Link>
               </p>
             </div>
             <div className="border border-neutral-800 p-6">

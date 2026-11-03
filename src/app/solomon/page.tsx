@@ -37,7 +37,7 @@ const metrics = [
 
 const guarantees = [
   "Citations enforced by architecture — every answer carries its sources; traceability isn't left to the model's discretion.",
-  "Honest refusals — no documentation, no answer. Solomon never bluffs a repair procedure.",
+  "Honest refusals — no documentation, no answer.",
   "Compliance by design — data never leaves the facility, built for environments where that's non-negotiable.",
   "Vendor-independent — open model weights we run ourselves. When one API vendor repriced overnight, we deleted the dependency in an afternoon.",
 ];
@@ -160,6 +160,11 @@ export default function SolomonPage() {
               </div>
             ))}
           </div>
+          <p className="text-neutral-600 text-xs leading-relaxed max-w-3xl mt-6">
+            Corrected 2026-11-02: the refusal line used to end &ldquo;Solomon never bluffs a repair
+            procedure.&rdquo; That absolute rested on seven scored questions, so it is withdrawn until
+            the record supports it.
+          </p>
         </section>
 
         {/* ── THE THREE QUESTIONS (moved here from the homepage — product-level) ── */}
