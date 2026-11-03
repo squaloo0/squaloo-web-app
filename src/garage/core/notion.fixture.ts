@@ -18,6 +18,7 @@ export const NOTION_QUERY_FIXTURE = {
         Added: { id: "a", type: "date", date: { start: "2026-10-13" } },
         "Added by": { id: "ab", type: "rich_text", rich_text: [{ type: "text", plain_text: "founder" }] },
         ID: { id: "idp", type: "rich_text", rich_text: [{ type: "text", plain_text: "S1-cloudflare-radar.html · sha256 0123456789ab" }] },
+        "wrasse ✓": { id: "w", type: "checkbox", checkbox: true },
       },
     },
     {

@@ -389,3 +389,57 @@ then `security add-generic-password -U -s squaloo-garage -a wrasse -w "$(pbpaste
 `-U` replacing the old item), `npm run garage:status`, then pull this branch once merged so the
 loop runs under the binding charter. The order's next tick should produce the first lane-1
 study under 0.5.
+
+## 2026-11-03 · mini · the harvest: two predictions scored, seven rows read, the loop re-pointed
+
+**What was found.** Standing order #1 ran 14 times from 2026-10-18 (two failures on the lapsed
+token, then 12 reports at $0.25–0.45 each, all filed under the Notion "Garage Reports" page).
+It read lane 1 twice (Gelman & Carlin, Deng, Fabijan, Johari: 10-18 → 10-21 and again 10-25 →
+10-28) and lane 2 twice (Astra vs Fable, Andon Café, Project Vend 2: 10-22 → 10-24 and again
+11-01 → 11-03). The cause was structural, and wrasse named it itself in run `acad796a`: the
+mirror was the 10-18 pull with every row Unclaimed, no report ever folded back into
+`REGISTER.md` or the Notion row, and a run can only see its last ten siblings. About $2 of
+the $4 spent bought the same reading twice. The duplicate reads agreed on every number.
+
+**What landed.**
+- **Two banked predictions scored** from `garage_hits`, recorded on a new Notion page
+  ("Predictions · wrasse's banked predictions · scored 2026-11-03") and as supported rows in
+  the register. Run `3ab57ff5`'s week (2026-10-14 → 10-20): the banked metric (ai-crawler +
+  tool) came in at 12%, so the letter held; but the classifier grew from three kinds to eight
+  on 10-13 before the window opened, and the declared non-browser share under the instrument
+  as it stood was 68% of 4,178 hits (52% to 72% by day), above Cloudflare's worldwide 65%.
+  Held on the metric, failed on the claim: S1's figure transferred. PR #66's llms.txt
+  prediction (window closed 10-27): falsified, flat at zero; `/llms.txt` was fetched 14 times
+  in the window by browsers, curl and one crawler, and by no ai-crawler or agent at all.
+- **Seven library rows marked read in Notion** (wrasse ✓, Status In review, the run ids in
+  Verification) and the mirror pulled: 39 rows, 33 verified, 6 not yet mirrored. The pull now
+  prints `wrasse ✓ (studied, report filed)` on a studied row's status line, and the header
+  tells the agent that a mirrored file's prefix is the number its row had when fetched and to
+  match on the ID line, title, DOI or hash (`core/notion.ts`, with tests). The
+  `garage/fix/stable-s-numbers` ordering had already merged; the prefixes on disk are the
+  only drift left and they are now documented rather than renamed.
+- **Ten proposed register rows** under "The study harvest, 2026-11-03", one per source plus
+  the two scored predictions and a proposed replacement for row 15 (a bot majority, not an
+  agent majority: agent kind is 2%). All needs review until the founder ratifies. Two candidate
+  lessons and five converging founder questions are listed under the table.
+- **Order #1 is off.** Order #3 (`study`, GARAGE-8, every 24 h) is created: lane 3 in order,
+  then 4 to 8, one row per run, skipping any row whose status line carries wrasse ✓. The
+  worker ticked the moment it was added and ran `5f2416f4` ($0.40, 13 turns) before this
+  sitting could turn it off: it read the regenerated mirror from this checkout, saw lanes 1
+  and 2 marked, and took lane 3's first row (S20, the ACP repository). The fix works. That row
+  is now marked in Notion too; its proposed register row waits for the next harvest. Order #3
+  is **off** until this branch is on main and pulled on the mini. (An `orders off 2` in this
+  sitting was a no-op: #2 was the Air's removed duplicate from 10-18; ids are not reused.)
+- **Four Deep Blue chores filed in Linear** (SQU-416, SQU-417, SQU-418, SQU-419), from the
+  Phase 2 plan's 2026-10-25 drift read, each with its rule-11 proof, priority low, not before
+  Nov 14.
+
+**Not done, by design.** `LESSONS.md` is untouched; the two candidate lessons wait for the
+founder. Charter §6's "fewest refunds" sentence is a founder reword at the next charter pass.
+The Johari v3 PDF and the vending-bench-2 page are not mirrored. No tape or Stripe figure was
+read; lane 2's "coins returned" question is open.
+
+**Next, on the mini, by the founder.** Merge this PR, `git pull` on main, then
+`npm run garage -- orders on 3`. Ratify or strike the harvest rows in `REGISTER.md` (and tick
+`founder ✓` on the seven Notion rows as each is folded). Answer the five questions under the
+table when convenient; none blocks the loop.

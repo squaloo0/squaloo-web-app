@@ -18,6 +18,8 @@ export type LibraryRow = {
   notionUrl: string;
   /** The ID column: an identifier the founder wrote, plus the mirror tag once a primary is on disk. */
   ident?: string;
+  /** The "wrasse ✓" box: wrasse studied this row and filed a report. */
+  wrasse?: boolean;
 };
 
 type Prop = Record<string, unknown> & { type?: string };
@@ -49,6 +51,7 @@ export function parseLibraryPage(page: unknown): LibraryRow | null {
   const added = props.Added?.type === "date" ? props.Added : null;
   const addedBy = props["Added by"]?.type === "rich_text" ? props["Added by"] : null;
   const ident = props.ID?.type === "rich_text" ? props.ID : null;
+  const wrasse = props["wrasse ✓"]?.type === "checkbox" ? props["wrasse ✓"].checkbox === true : false;
   const sel = (p: Prop | null) => (p && typeof p.select === "object" && p.select !== null && typeof (p.select as { name?: unknown }).name === "string" ? (p.select as { name: string }).name : "");
   return {
     id: pg.id,
@@ -62,6 +65,7 @@ export function parseLibraryPage(page: unknown): LibraryRow | null {
     summary: summary ? text(summary.rich_text) : "",
     notionUrl: typeof pg.url === "string" ? pg.url : "",
     ident: ident ? text(ident.rich_text) : "",
+    wrasse,
   };
 }
 
@@ -78,13 +82,15 @@ export function libraryMarkdown(rows: LibraryRow[], pulledAt: string, databaseId
     "",
     `Generated from the Garage Research Library in Notion (database \`${databaseId.slice(0, 8)}…\`) by \`garage library pull\` at ${pulledAt}. Do not hand-edit; add or change a source in Notion and pull again. Wrasse's notes live on each row's page in Notion, under its own heading, and come back here as the summary when the founder folds them in.`,
     "",
+    "S-numbers are this file's row order, oldest row first. A mirrored file's name carries the number its row had when it was fetched, so a prefix and a heading can disagree; match a file to a row by the ID line, the title, the DOI or the hash, never by the prefix. A row marked wrasse ✓ has been studied and its report filed; do not study it again unless the order says so.",
+    "",
     "A number lifted from here into a report carries its row's boundary with it, or it is not a number. `[note-estimate]` until the primary is read; `[sourced]` with a page reference after.",
     "",
   ];
   rows.forEach((r, i) => {
     out.push(`## S${i + 1} · ${r.name}`, "");
     if (r.url) out.push(`- **URL:** ${r.url}`);
-    out.push(`- **Kind:** ${r.kind || "unstated"} · **Status:** ${r.status || "unread"} · **Added:** ${r.added || "?"}${r.addedBy ? ` by ${r.addedBy}` : ""}`);
+    out.push(`- **Kind:** ${r.kind || "unstated"} · **Status:** ${r.status || "unread"} · **Added:** ${r.added || "?"}${r.addedBy ? ` by ${r.addedBy}` : ""}${r.wrasse ? " · wrasse ✓ (studied, report filed)" : ""}`);
     if (r.ident) out.push(`- **ID:** ${r.ident}`);
     if (r.scrub.length) out.push(`- **Scrub before use:** ${r.scrub.join(", ")}`);
     if (r.summary) out.push(`- **What it claims, with its boundary:** ${r.summary}`);
