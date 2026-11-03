@@ -29,7 +29,7 @@ export const SITE = "https://squaloo.com";
 export type PageRef = { path: string; title: string; description: string };
 
 const SUMMARY =
-  "Squaloo builds sovereign, verifiable AI: intelligence you own, and can verify. Its first product is Solomon, an answer layer for maintenance technicians: answers at the machine, offline, showing who said it, which page agrees, and what the machine read.";
+  "Squaloo builds sovereign, verifiable AI: intelligence you own, and can verify. Its first product is Solomon, an answer layer for maintenance technicians: answers at the machine, offline, showing who said it and which page agrees.";
 
 const READING_NOTE =
   "Every figure here carries what it covers: how many runs, which machine, which configuration, and the date it was true. A figure without those is not a claim we make. Where we corrected ourselves, the correction is stated with its date.";

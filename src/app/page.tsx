@@ -16,7 +16,7 @@ import { brand } from "@/lib/brand";
 export const metadata = {
   title: "Squaloo — Intelligence you own, and can verify.",
   description:
-    "Squaloo builds sovereign, verifiable AI for the people who keep the world running, and the people building what comes next. Model-agnostic by rule. Your data in your custody, always.",
+    "Squaloo builds sovereign, verifiable AI for the people who keep the world running, and the people building what comes next. Model-agnostic by rule. Your data in your custody, by design.",
 };
 
 const WRAP = "mx-auto w-full max-w-[1180px] px-5 sm:px-8 lg:px-12";
@@ -46,7 +46,7 @@ const lineage = [
   },
   {
     k: "Withered technology",
-    t: "Mature, cheap, well-understood parts, used laterally: a $100 computer, a small open model, the export the controller already makes. Nothing exotic has to be true for Solomon to work.",
+    t: "Mature, cheap, well-understood parts, used laterally: a credit-card-sized computer, a small open model, the export a controller already makes. Nothing exotic has to be true for Solomon to work.",
   },
   {
     k: "Dumb model theory",
@@ -106,7 +106,7 @@ export default function Home() {
           </h1>
           <p className="m-0 max-w-[760px] font-display text-xl leading-[1.45] text-sq-ink-muted sm:text-2xl">
             Squaloo builds sovereign, verifiable AI for the people who keep the world running, and the
-            people building what comes next. Model-agnostic by rule. Your data in your custody, always.
+            people building what comes next. Model-agnostic by rule. Your data in your custody, by design.
           </p>
           <div className="flex flex-wrap items-center gap-3">
             <Link
@@ -166,7 +166,7 @@ export default function Home() {
                 <span className="rounded-lg bg-sq-ground px-3.5 py-0.5 text-solomon-blue">Offline.</span>
               </div>
               <div className="text-base leading-normal">
-                Every answer shows who said it, which page agrees, and what the machine read.
+                Every answer shows who said it and which page agrees. What the machine read is next.
               </div>
               <div className="self-start rounded-lg bg-sq-ground px-[18px] py-3 text-sm font-semibold text-solomon-blue">
                 Step through the doorway →
@@ -187,7 +187,7 @@ export default function Home() {
               Make a small model behave offline, on hardware a plant owns, and the same discipline carries up
               to large models in the cloud. Compute, models and hardware are someone else’s race; the data
               from AI deployed where it matters, in its owner’s custody, is nobody’s yet. Solomon is the
-              middleware that makes it collectable. Squaloo orchestrates the measurement across sites, models
+              middleware that makes it collectable. Squaloo will orchestrate the measurement across sites, models
               and regulators, with every customer’s content stripped.
             </p>
             <div className="grid grid-cols-1 gap-3 md:grid-cols-3 md:gap-0">
@@ -195,7 +195,7 @@ export default function Home() {
                 <div className={CARD_EYEBROW}>Today · Ask</div>
                 <div className="text-xl font-extrabold leading-[1.25]">A verified answer at the machine.</div>
                 <div className="text-sm leading-normal text-sq-ink-muted-paper">
-                  Who said it, which page agrees, what the machine read.
+                  Who said it, which page agrees. What the machine read is next.
                 </div>
               </div>
               <div className="flex flex-col gap-2 rounded-xl border-2 border-solomon-blue p-[26px] md:rounded-none">
@@ -250,7 +250,7 @@ export default function Home() {
               from them is the method, not the ornament. Keep the rules few, keep them exact, apply them
               without exception, and the result is correct; correct things tend to be beautiful, and beautiful
               things tend to feel safe, because they are. Solomon is built the same way: a short list of rules
-              the engine never breaks, measured every night, published with the misses.
+              the engine enforces, measured every night, published with the misses.
             </p>
             <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
               {[
@@ -273,7 +273,7 @@ export default function Home() {
             <div className={EYEBROW}>Measured</div>
             <h2 className="m-0 font-display text-[32px] font-medium leading-[1.1] sm:text-[40px]">Don’t take our word for it.</h2>
             <p className="m-0 text-lg leading-[1.55] text-sq-ink-muted">
-              The ruler runs every night and the numbers land here, dated and scoped. Anyone can re-run them.
+              The ruler runs every night. The numbers will land here, dated and scoped, with the method to re-run them.
             </p>
             <a
               href="#measured"
@@ -317,7 +317,7 @@ export default function Home() {
               <div className="flex flex-col gap-2 rounded-lg border-2 border-solomon-blue bg-sq-ground p-[22px]">
                 <div className={`${CARD_EYEBROW} text-solomon-blue`}>Now · Solomon</div>
                 <div className="text-base font-extrabold leading-[1.3]">
-                  The floor, where owning it and verifying it are already the rule. Any surface, any machine, and
+                  The floor, where owning it and verifying it are already the rule. Two surfaces today, more next, and
                   a ruler that travels with the model.
                 </div>
               </div>
