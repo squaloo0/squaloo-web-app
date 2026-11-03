@@ -4,11 +4,12 @@ import { queryRows, latency, overall, run, gaps, contract, recompute } from "@/d
 import { nights, streak, asOf as ledgerAsOf, latest } from "@/data/ledger";
 import { getPostsByTag } from "@/lib/devlog";
 import Wordmark from "@/components/Wordmark";
+import { Withdrawn } from "@/components/ArchiveNotes";
 
 export const metadata = {
   title: "Measured — Squaloo",
   description:
-    "Solomon's eval numbers, published as measured — including the ones that don't flatter us. Dated artifacts from the same harness that gates every model change.",
+    "Solomon's eval record as it stood on 2026-10-05, kept as published: dated artifacts from the harness that gates every model change. Not updated since; its present-tense headline was withdrawn on 2026-11-02.",
 };
 
 const GREEN = "#63a375";
@@ -54,21 +55,38 @@ export default function MeasuredPage() {
             Measured
           </div>
           <h1 className="text-4xl sm:text-5xl font-bold tracking-tight leading-tight mb-6 max-w-3xl">
-            Our numbers, including the ones that don&apos;t flatter us.
+            The record as of <span className="font-mono">{ledgerAsOf}</span>.
           </h1>
+          {/* Withdrawn 2026-11-02 at the one-page relaunch: the hero spoke in the
+              present tense about a page that stopped updating on 2026-10-05. The
+              words stay readable, struck, with the date and the reason. */}
+          <div className="max-w-2xl mb-6 text-lg leading-relaxed">
+            <Withdrawn
+              date="2026-11-02"
+              why={
+                <>
+                  This page stopped updating on {ledgerAsOf} while the nightly runs kept going, so its
+                  headline and its &ldquo;today&rdquo; read as current when they were not. Everything below
+                  is the page as it stood on that date, unedited. No newer figure has been published here.
+                </>
+              }
+            >
+              Our numbers, including the ones that don&apos;t flatter us. Today its answer arrives surfacing
+              the veteran&apos;s logged fix alongside the manual&apos;s procedure, with both cited.
+            </Withdrawn>
+          </div>
           <p className="text-neutral-400 text-lg leading-relaxed max-w-2xl mb-6">
             When this page first went up, our flagship demo question scored{" "}
             <span style={{ color: AMBER }} className="font-mono">0% correctness</span>, three times out
-            of three, and we published the artifact anyway. Today its answer arrives surfacing the
-            veteran&apos;s logged fix alongside the manual&apos;s procedure, with both cited. The original
-            row is still below with its date on it.
+            of three, and we published the artifact anyway. The original row is still below with its
+            date on it.
           </p>
           <p className="text-neutral-400 text-lg leading-relaxed max-w-2xl mb-6">
             An eval harness runs scripted maintenance questions against the real corpus, scores the
             answers, and gates every model change. This page publishes what it found, unedited.
           </p>
           <p className="text-neutral-500 text-sm leading-relaxed max-w-2xl">
-            Current as of <span className="text-neutral-300 font-mono">{ledgerAsOf}</span>. Latest nightly:{" "}
+            Last updated <span className="text-neutral-300 font-mono">{ledgerAsOf}</span>. The latest nightly on this page:{" "}
             <span className="text-neutral-300 font-mono">{latest.date}</span> on{" "}
             <span className="text-neutral-300 font-mono">{latest.body ?? "an unrecorded machine"}</span>
             {latest.verdict ? <> — <span className="text-neutral-300 font-mono">{latest.verdict}</span> against the night before.</> : "."}

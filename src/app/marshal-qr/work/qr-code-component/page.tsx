@@ -108,7 +108,7 @@ export default async function QRCodeComponentPage() {
                   This component was built to visualize the progressive phases of QR code encoding on a 25x25 matrix. It fetches encoding data from a Neon PostgreSQL database using Drizzle ORM and renders an interactive grid that users can navigate through.
                 </p>
                 <p className="text-gray-300">
-                  <Link href="/marshal-qr-code/work/qr-code-overview" className="text-blue-400 hover:underline">
+                  <Link href="/marshal-qr/work/qr-code-overview" className="text-blue-400 hover:underline">
                     View the complete project overview →
                   </Link>
                 </p>

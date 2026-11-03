@@ -1,28 +1,33 @@
 @import "tailwindcss";
+/* Brand kit v0.1 (brand/README.md): the Tailwind theme and the plain CSS
+   variables, both generated from brand/kit/tokens.json. Edit the JSON there,
+   never these imports' targets. */
+@import "../../brand/kit/tokens.tailwind.css";
+@import "../../brand/kit/tokens.css";
 @plugin "@tailwindcss/typography";
 
+/* The kit names the three families; next/font serves them from this origin
+   (no request to Google at view time), so the family names in the kit files
+   are re-pointed at the self-hosted faces. The variables are set on <html>
+   in layout.tsx, which is :root, so they resolve here. */
 :root {
-  --background: #08090a;
-  --foreground: #f6f7eb;
-  --accent-primary: #1400bf;
-  --accent-secondary: #5688c7;
-  --accent-green: #63a375;
+  --font-display: var(--font-eb-garamond), Georgia, "Times New Roman", serif;
+  --font-sans: var(--font-hanken-grotesk), Arial, system-ui, sans-serif;
+  --font-mono: var(--font-ibm-plex-mono), "Courier New", monospace;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-accent: var(--accent-primary);
-  --color-accent-secondary: var(--accent-secondary);
-  --color-accent-green: var(--accent-green);
-  --font-sans: var(--font-mulish);
-  --font-mono: var(--font-roboto-mono);
-}
-
+/* Paper and ink, never white and black (kit rule 2). Pages that predate the
+   relaunch paint their own ground. */
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-mulish), system-ui, sans-serif;
+  background: var(--ground);
+  color: var(--ink);
+  font-family: var(--font-sans);
+}
+
+/* Italics are always set at weight 600 so they read at distance (kit §4). */
+.font-display i,
+.font-display em {
+  font-weight: 600;
 }
 
 /* Scrollbar for code blocks */
@@ -34,6 +39,6 @@ body {
   background: #0d0d0d;
 }
 .code-scrollbar::-webkit-scrollbar-thumb {
-  background: #1400bf;
+  background: #0a369d;
   border-radius: 2px;
 }

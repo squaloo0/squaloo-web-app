@@ -32,11 +32,19 @@ const entries = [
     href: "/shop",
     text: "A commerce experiment.",
   },
+  // #005, YT-Scraper, was listed here with a link to /yt-scraper, which no route
+  // serves; removed 2026-11-02 so the archive holds no broken link.
   {
-    n: "#005",
-    title: "YT-Scraper",
-    href: "/yt-scraper",
-    text: "A scraping sandbox.",
+    n: "#006",
+    title: "Squaloo home, before the relaunch",
+    href: "/archive/home-2026-11-02",
+    text: "squaloo.com as last published, archived 2026-11-02 when the site became one page. Not maintained.",
+  },
+  {
+    n: "#007",
+    title: "Solomon page, before the relaunch",
+    href: "/archive/solomon-2026-11-02",
+    text: "/solomon as last published, archived 2026-11-02. One claim on it is withdrawn, with its date and reason.",
   },
 ];
 
