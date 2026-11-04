@@ -283,7 +283,7 @@ export default function MeasuredPage() {
             { value: `${overall.correctness}%`, label: "answers fully correct", tone: AMBER },
             { value: `${overall.citationCompliance}%`, label: "citations placed inline", tone: null },
             { value: `${overall.fullRecall}%`, label: "runs retrieving both sources", tone: AMBER },
-            { value: secs(latency.warmMedianMs), label: "median warm response", tone: GREEN },
+            { value: secs(latency.warmMedianMs), label: "median warm response, in-process, machine not recorded", tone: GREEN },
           ].map((m) => (
             <div key={m.label} className="border border-neutral-800 p-6">
               <div className="text-3xl font-bold font-mono mb-2 tabular-nums" style={{ color: m.tone ?? "#ffffff" }}>
@@ -316,18 +316,21 @@ export default function MeasuredPage() {
                 l: "Warm median",
                 s: `${latency.warmN} runs — the number that matters in normal use`,
                 tone: GREEN,
+                withdrawn: true,
               },
               {
                 v: secs(latency.coldFirstRunMeanMs),
                 l: "Cold first run, mean",
                 s: `${latency.coldFirstRunN} runs — one per question, model loading from disk`,
                 tone: AMBER,
+                withdrawn: false,
               },
               {
                 v: secs(latency.overallMeanMs),
                 l: "All runs, mean",
                 s: `${overall.totalRuns} runs — inflated by the cold starts beside it`,
                 tone: null,
+                withdrawn: false,
               },
             ].map((x) => (
               <div key={x.l} className="border border-neutral-800 p-6">
@@ -335,7 +338,27 @@ export default function MeasuredPage() {
                   {x.v}
                 </div>
                 <div className="text-white text-sm mb-2">{x.l}</div>
-                <p className="text-neutral-500 text-xs leading-relaxed">{x.s}</p>
+                {/* Withdrawn 2026-11-03 (SQU-412, the claims pass): the warm median's
+                    subtitle called it the number that matters in normal use. Struck,
+                    with the date and the reason, never silently edited. */}
+                {x.withdrawn ? (
+                  <div className="text-xs leading-relaxed">
+                    <Withdrawn
+                      date="2026-11-03"
+                      why={
+                        <>
+                          It was measured with the eval harness calling the engine in-process, with no machine
+                          recorded (the boundary ruled on 2026-10-05). That is not what someone asking through
+                          the page or chat waits, so it is not the number that matters in normal use.
+                        </>
+                      }
+                    >
+                      {x.s}
+                    </Withdrawn>
+                  </div>
+                ) : (
+                  <p className="text-neutral-500 text-xs leading-relaxed">{x.s}</p>
+                )}
               </div>
             ))}
           </div>

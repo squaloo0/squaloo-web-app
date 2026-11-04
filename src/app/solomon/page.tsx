@@ -16,7 +16,7 @@ import { brand, HOUSE_URL } from "@/lib/brand";
 export const metadata = {
   title: "Solomon — by Squaloo",
   description:
-    "Answers at the machine, offline. Solomon keeps what the veteran knows and answers with it on hardware the plant owns. Every answer shows who said it, which page agrees, and what the machine read.",
+    "Answers at the machine, offline. Solomon keeps what the veteran knows and answers with it on hardware the plant owns. Every answer shows who said it and which page agrees; what the machine read is next.",
 };
 
 const WRAP = "mx-auto w-full max-w-[1180px] px-5 sm:px-8 lg:px-12";
@@ -39,7 +39,7 @@ function Marker({ children }: { children: React.ReactNode }) {
 const surfaces: { name: string; text: string; next?: boolean }[] = [
   { name: "Chat", text: "Stock Mattermost, a bot in the channel the crew already uses. Today." },
   { name: "Phone", text: "A visitor’s phone on the body’s own Wi-Fi, zero internet. Today." },
-  { name: "Touchscreen", text: "The 7-inch screen at the machine. Today." },
+  { name: "Touchscreen", text: "The 7-inch screen at the machine. Next: on the bench now.", next: true },
   { name: "Voice", text: "Hands busy. Next, gated by the ruler.", next: true },
   { name: "Command line", text: "The same call from a terminal. Next.", next: true },
   { name: "Library", text: "The same call from inside your own code, receipts and refusal included. Next.", next: true },
@@ -96,8 +96,8 @@ function CustodyDiagram() {
       <rect x="160" y="306" width="234" height="88" rx="6" fill="none" stroke="#f7f3e8" strokeWidth="1.2" />
       <text x="174" y="328" fill="#f7f3e8" fontSize="12" fontWeight="600">THE ANSWER + RECEIPTS</text>
       <text x="174" y="346" fill="#c9c1ad" fontSize="11">who said it · which page agrees</text>
-      <text x="174" y="363" fill="#c9c1ad" fontSize="11">what the machine read</text>
-      <text x="174" y="381" fill="#c9c1ad" fontSize="11">chat · phone · touchscreen</text>
+      <text x="174" y="363" fill="#c9c1ad" fontSize="11">what the machine read (next)</text>
+      <text x="174" y="381" fill="#c9c1ad" fontSize="11">chat · phone (touchscreen next)</text>
       <path d="M348 187 L 470 187" stroke="#c9c1ad" strokeWidth="1.2" fill="none" markerEnd="url(#arr)" />
       <text x="378" y="178" fill="#c9c1ad" fontSize="10" letterSpacing="1">SYNC ONCE</text>
       <rect x="476" y="130" width="250" height="114" rx="6" fill="none" stroke="#f7f3e8" strokeWidth="1.2" />
@@ -105,7 +105,7 @@ function CustodyDiagram() {
       <text x="492" y="178" fill="#d9d2c2" fontSize="11">every word, every reading</text>
       <text x="492" y="196" fill="#d9d2c2" fontSize="11">the record the auditor asks for</text>
       <text x="492" y="214" fill="#d9d2c2" fontSize="11">your tenant, your keys</text>
-      <text x="492" y="232" fill="#c9c1ad" fontSize="10">Squaloo never holds a copy</text>
+      <text x="492" y="232" fill="#c9c1ad" fontSize="10">by design, Squaloo holds no copy</text>
       <path d="M726 187 L 840 187" stroke="#c9c1ad" strokeWidth="1.2" fill="none" markerEnd="url(#arr)" strokeDasharray="6 4" />
       <text x="728" y="176" fill="#c9c1ad" fontSize="9.5" letterSpacing="1">MEASUREMENT ONLY</text>
       <rect x="846" y="130" width="222" height="114" rx="6" fill="none" stroke="#c9c1ad" strokeWidth="1" />
@@ -113,7 +113,7 @@ function CustodyDiagram() {
       <text x="862" y="178" fill="#d9d2c2" fontSize="11">pass · fail · latency</text>
       <text x="862" y="196" fill="#d9d2c2" fontSize="11">refusal class, nothing else</text>
       <text x="862" y="214" fill="#d9d2c2" fontSize="11">no words, readings or names</text>
-      <text x="862" y="232" fill="#c9c1ad" fontSize="10">published nightly, re-runnable</text>
+      <text x="862" y="232" fill="#c9c1ad" fontSize="10">to be published, re-runnable</text>
     </svg>
   );
 }
@@ -191,7 +191,7 @@ export default function SolomonPage() {
             </h1>
             <p className="m-0 max-w-[560px] text-[19px] leading-[1.55] text-sq-ink-muted-paper">
               Solomon keeps what the veteran knows and answers with it on hardware the plant owns. Every
-              answer shows who said it, which page agrees, and what the machine read. When the record doesn’t
+              answer shows who said it and which page agrees; what the machine read is next. When the record doesn’t
               settle it, it says so. Any model that passes the ruler. Your data, in your custody.
             </p>
             <div className="flex flex-wrap items-center gap-2.5">
@@ -240,10 +240,10 @@ export default function SolomonPage() {
           <div className="flex flex-wrap items-start gap-8">
             <p className="m-0 min-w-0 flex-[1_1_520px] text-[17px] leading-[1.6] text-sq-ink-muted-paper">
               The engine runs on a body at the site edge, offline, on hardware the customer owns: it captures
-              what the veteran says, reads the export the controller already produces, and answers with the
+              what the veteran says, will read the export the controller already produces, and answers with the
               receipts attached. The customer’s tenant holds the Brain, where every word and every reading
               lives under the customer’s keys. Squaloo keeps only the measurement, content stripped. Any model
-              that passes the ruler on the body, unmodified, is admissible; two already have.
+              that passes the ruler on the body, unmodified, is admissible; two models have been measured through it unmodified (2026-09-28).
             </p>
             <div className="flex min-w-0 flex-[0_1_300px] flex-col gap-2.5 font-mono text-[13px]">
               {["The full architecture →", "Bodies and budgets →", "The custody line →"].map((t) => (
@@ -252,7 +252,7 @@ export default function SolomonPage() {
                 </a>
               ))}
               <span className="text-[11px] text-sq-label-paper">
-                Drawn from the architecture board, revised 2026-10-21. Detail lives on its own page.
+                Drawn from the architecture board, revised 2026-10-21. The detail pages return after the relaunch.
               </span>
             </div>
           </div>
@@ -278,7 +278,7 @@ export default function SolomonPage() {
             <p className="m-0 max-w-[820px] text-lg leading-[1.55]">
               A verified answer today. A verified action next, with the same receipts. The layer that makes an
               answer verifiable is the layer that lets an agent act on the floor, and nothing about that layer
-              depends on which model is behind it. Make a small model behave offline on a $100 body and the
+              depends on which model is behind it. Make a small model behave offline on a single-board computer and the
               discipline carries up to large models in the cloud.
             </p>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
@@ -286,7 +286,7 @@ export default function SolomonPage() {
                 <div className={`${EYEBROW} text-solomon-blue`}>Today · Ask</div>
                 <div className="text-xl font-extrabold leading-[1.25]">A verified answer at the machine.</div>
                 <div className="text-sm leading-normal text-sq-ink-muted">
-                  Who said it, which page agrees, what the machine read. Refuses when the record doesn’t settle it.
+                  Who said it, which page agrees. Refuses when the record doesn’t settle it. What the machine read is next.
                 </div>
               </div>
               <div className="flex flex-col gap-2 rounded-lg border border-sq-ink-paper p-6">
@@ -317,7 +317,7 @@ export default function SolomonPage() {
                 },
                 {
                   k: "The data nobody has",
-                  t: "Compute, models and hardware are someone else’s race. The data from AI deployed where it matters, in its owner’s custody, is nobody’s yet. Solomon is the middleware that collects it.",
+                  t: "Compute, models and hardware are someone else’s race. The data from AI deployed where it matters, in its owner’s custody, is nobody’s yet. Solomon is built to be the middleware that collects it.",
                 },
               ].map((c) => (
                 <div key={c.k} className="flex flex-col gap-1 border-t border-sq-ink-paper pt-3.5">
@@ -358,7 +358,7 @@ export default function SolomonPage() {
               <span>#equipment-line-1 · solomon</span>
               <span className="flex items-center gap-1.5">
                 <span className="inline-block h-2 w-2 rounded-full bg-[#3fb68b]" aria-hidden="true" />
-                offline · body solomon-pi
+                offline · body solomon-pi · illustrative
               </span>
             </div>
             <div className="rounded-md bg-sq-ground-ink p-3.5 text-sm leading-normal text-sq-ink-muted-paper">
