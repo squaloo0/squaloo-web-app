@@ -19,12 +19,14 @@ test("a Notion query becomes library rows; untitled pages are skipped; columns m
     summary: "Bot 65%, human 35%, Cloudflare's network, HTML responses, week to 2026-10-12.",
     notionUrl: "https://www.notion.so/Cloudflare-Radar-1b2c3d4e",
     ident: "S1-cloudflare-radar.html · sha256 0123456789ab",
+    wrasse: true,
   });
   assert.equal(rows[1].name, "Semrush: bot traffic now exceeds human");
   assert.equal(rows[1].url, "https://www.semrush.com/blog/ai-agent-bot-traffic/", "any url property is the URL");
   assert.equal(rows[1].status, "", "no Status column, no status");
   assert.equal(rows[1].added, "2026-10-14", "falls back to the page's creation day");
   assert.equal(rows[1].ident, "", "no ID column, no identifier");
+  assert.equal(rows[1].wrasse, false, "no wrasse box, not studied");
   assert.deepEqual(parseLibraryQuery({}), { rows: [], more: null });
 });
 
@@ -37,6 +39,9 @@ test("the mirror is generated, numbered, and says where it came from", () => {
   assert.match(md, /\*\*Scrub before use:\*\* one network only, bot is not agent/);
   assert.match(md, /\*\*ID:\*\* S1-cloudflare-radar\.html · sha256 0123456789ab/, "the mirror tag tells the agent which file under the library root is this source");
   assert.match(md, /## S2 · Semrush/);
+  assert.match(md, /\*\*Status:\*\* reviewed · \*\*Added:\*\* 2026-10-13 by founder · wrasse ✓ \(studied, report filed\)/, "a studied row says so on its status line");
+  assert.ok(!/## S2 · Semrush[^\n]*\n\n(- [^\n]*\n)*- [^\n]*wrasse ✓/.test(md), "an unstudied row does not");
+  assert.match(md, /S-numbers are this file's row order, oldest row first\. A mirrored file's name carries the number its row had when it was fetched/, "the header tells the agent not to match on the file prefix");
   assert.ok(!md.includes("notion.so"), "the agent never sees Notion page urls");
   assert.match(libraryMarkdown([], "x", "y"), /No sources yet/);
 });

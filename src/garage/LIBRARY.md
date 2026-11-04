@@ -1,6 +1,8 @@
 # The library — sources wrasse may lean on, with their boundaries
 
-Generated from the Garage Research Library in Notion (database `f6f7feef…`) by `garage library pull` at 2026-10-18 17:50 UTC. Do not hand-edit; add or change a source in Notion and pull again. Wrasse's notes live on each row's page in Notion, under its own heading, and come back here as the summary when the founder folds them in.
+Generated from the Garage Research Library in Notion (database `f6f7feef…`) by `garage library pull` at 2026-11-03 23:24 UTC. Do not hand-edit; add or change a source in Notion and pull again. Wrasse's notes live on each row's page in Notion, under its own heading, and come back here as the summary when the founder folds them in.
+
+S-numbers are this file's row order, oldest row first. A mirrored file's name carries the number its row had when it was fetched, so a prefix and a heading can disagree; match a file to a row by the ID line, the title, the DOI or the hash, never by the prefix. A row marked wrasse ✓ has been studied and its report filed; do not study it again unless the order says so.
 
 A number lifted from here into a report carries its row's boundary with it, or it is not a number. `[note-estimate]` until the primary is read; `[sourced]` with a page reference after.
 
@@ -15,7 +17,7 @@ A number lifted from here into a report carries its row's boundary with it, or i
 ## S2 · Cloudflare Radar, Bot vs. Human, worldwide
 
 - **URL:** https://radar.cloudflare.com/traffic#bot-vs-human
-- **Kind:** dashboard · **Status:** In review · **Added:** 2026-10-13 by founder
+- **Kind:** dashboard · **Status:** In review · **Added:** 2026-10-13 by founder · wrasse ✓ (studied, report filed)
 - **Scrub before use:** one network only, bot is not agent, request share not visitor share, no method stated
 - **What it claims, with its boundary:** Bot 65%, human 35%: share of HTTP requests on Cloudflare's network classified bot (automated) vs human, filtered to HTML responses, worldwide, 7-day window 2026-10-06 to 2026-10-12. Read 2026-10-13 in a browser; the page refuses plain fetches. Method only described by a glossary link.
 
@@ -38,7 +40,7 @@ A number lifted from here into a report carries its row's boundary with it, or i
 ## S5 · Gelman & Carlin (2014), Beyond Power Calculations: Type S and Type M errors
 
 - **URL:** https://sites.stat.columbia.edu/gelman/research/published/PPS551642_REV2.pdf
-- **Kind:** paper · **Status:** Unclaimed · **Added:** 2026-10-13 by orchestrator (candidate; founder verifies)
+- **Kind:** paper · **Status:** In review · **Added:** 2026-10-13 by orchestrator (candidate; founder verifies) · wrasse ✓ (studied, report filed)
 - **ID:** doi:10.1177/1745691614551642 · S3-gelman-carlin-2014-beyond-power-calculations-typ.pdf · sha256 068b792d2b98
 - **What it claims, with its boundary:** Perspectives on Psychological Science 9(6):641-651. In noisy, small-sample settings a statistically significant estimate can point the wrong way (Type S) or overstate the effect many-fold (Type M, the exaggeration ratio); the authors propose design calculations run before and after data collection using an externally sourced plausible effect size. Verified by search 2026-10-13 (title, venue, DOI); primary not yet read by a person.
 
@@ -75,14 +77,14 @@ A number lifted from here into a report carries its row's boundary with it, or i
 ## S10 · Johari, Pekelis & Walsh (2015-2019), Always Valid Inference: Bringing Sequential Analysis to A/B Testing
 
 - **URL:** https://arxiv.org/abs/1512.04922
-- **Kind:** paper · **Status:** Unclaimed · **Added:** 2026-10-13 by orchestrator (candidate; founder verifies)
+- **Kind:** paper · **Status:** In review · **Added:** 2026-10-13 by orchestrator (candidate; founder verifies) · wrasse ✓ (studied, report filed)
 - **ID:** arXiv:1512.04922 · S8-johari-pekelis-walsh-2015-2019-always-valid-infe.html · sha256 8a27199996dc
 - **What it claims, with its boundary:** arXiv 1512.04922, v1 Dec 2015, v3 Jul 2019; presented at KDD 2017 as 'Peeking at A/B Tests: Why it matters, and what to do about it'. Continuous checking of a running test inflates false positives; the remedy is always-valid p-values and confidence intervals from sequential tests, deployed at Optimizely. Verified by search 2026-10-13 (arXiv authors and versions; KDD talk credited to Walsh). Primary not yet read.
 
 ## S11 · Deng, Lu & Chen 2016, Continuous Monitoring of A/B Tests without Pain: Optional Stopping in Bayesian Testing
 
 - **URL:** https://arxiv.org/abs/1602.05549
-- **Kind:** paper · **Status:** Unclaimed · **Added:** 2026-10-13 by CoWork deep research (Claude), 2026-10-13; primaries opened by fetch, not by a person
+- **Kind:** paper · **Status:** In review · **Added:** 2026-10-13 by CoWork deep research (Claude), 2026-10-13; primaries opened by fetch, not by a person · wrasse ✓ (studied, report filed)
 - **ID:** arXiv:1602.05549 · S29-deng-lu-chen-2016-continuous-monitoring-of-a-b-t.pdf · sha256 3a63027333b6
 - **Scrub before use:** no measurement (theory or position)
 - **What it claims, with its boundary:** Formal argument plus simulations that Bayesian hypothesis testing stays valid under continuous monitoring when the stopping rule is proper, with a catalogue of improper rules practitioners use, a comparison to the NHST corrections for peeking, and guidelines. Theory and simulation only: the abstract reports no field experiments, no N and no window; the arXiv page lists one version (2016-02-17) and names no venue. Its boundary is the prior: the paper makes early stopping legal under an honest prior, it does not make a small sample informative.
@@ -106,7 +108,7 @@ A number lifted from here into a report carries its row's boundary with it, or i
 ## S14 · Fabijan et al. 2019, Diagnosing Sample Ratio Mismatch in Online Controlled Experiments: A Taxonomy and Rules of Thumb for Practitioners (KDD 2019); read via the first-party ExP article Diagnosing Sample Ratio Mismatch in A/B Testing (Microsoft, 2020-09-14)
 
 - **URL:** https://www.microsoft.com/en-us/research/articles/diagnosing-sample-ratio-mismatch-in-a-b-testing/
-- **Kind:** article · **Status:** Unclaimed · **Added:** 2026-10-13 by CoWork deep research (Claude), 2026-10-13; primaries opened by fetch, not by a person
+- **Kind:** article · **Status:** In review · **Added:** 2026-10-13 by CoWork deep research (Claude), 2026-10-13; primaries opened by fetch, not by a person · wrasse ✓ (studied, report filed)
 - **ID:** DOI 10.1145/3292500.3330722 (paper, not opened); article canonical URL, published 2020-09-14 · S26-fabijan-et-al-2019-diagnosing-sample-ratio-misma.html · sha256 6875ad8eefdb
 - **Scrub before use:** no method stated, primary not opened
 - **What it claims, with its boundary:** Sample ratio mismatch (SRM) is "a statistically significant difference between the ratio of users counted in variants A and B", tested at Microsoft's ExP with a chi-square at a conservative p < 0.0005. The taxonomy sorts causes into assignment, execution, log-processing, analysis and cross-cutting stages; bot filtering sits in the analysis stage (engaged users can "confuse a bot detection algorithm which then filtered them out of the analysis"). Prevalence as stated, without window or denominator: "about 6% of A/B tests have an SRM" at Microsoft; "about 10%" of LinkedIn's zoomed-in tests (cited). The KDD paper's basis is "four different software companies in over 25 different products" used by hundreds of millions of users; the paper's PDF could not be opened, only its abstract and this article by the same team.
@@ -114,7 +116,7 @@ A number lifted from here into a report carries its row's boundary with it, or i
 ## S15 · Anthropic (with Andon Labs) 2025, Project Vend: Phase two
 
 - **URL:** https://www.anthropic.com/research/project-vend-2
-- **Kind:** article · **Status:** Unclaimed · **Added:** 2026-10-13 by CoWork deep research (Claude), 2026-10-13; primaries opened by fetch, not by a person
+- **Kind:** article · **Status:** In review · **Added:** 2026-10-13 by CoWork deep research (Claude), 2026-10-13; primaries opened by fetch, not by a person · wrasse ✓ (studied, report filed)
 - **ID:** canonical URL, published 2025-12-18 · S25-anthropic-with-andon-labs-2025-project-vend-phas.html · sha256 1b5defff231b
 - **Scrub before use:** no method stated, promotional, demand not public (staff or simulated)
 - **What it claims, with its boundary:** First-party report on the continued Claudius shop: "There are now three: San Francisco (where there's also a second vending machine), New York, and London"; "phase two used Claude Sonnet 4.0 and later Sonnet 4.5"; tools added (CRM, inventory, web and browser use without payment, forms, payment links, reminders) plus a CEO agent, Seymour Cash. Outcomes are stated qualitatively or as charts: "weeks with negative profit margin were largely eliminated" (no totals, revenue or transaction counts in the text); "After introducing the CEO, the number of discounts was reduced by about 80% and the number of items given away cut in half" while refunds tripled and store credits doubled (base counts not given). Boundaries Anthropic states itself: "we still didn't give it access to a payment interface", customers were "our Anthropic colleagues", no shopkeeper training, and the agents "still needed a great deal of human support"; the CEO "might even have been a hindrance". Window given only as "a few months".
@@ -122,7 +124,7 @@ A number lifted from here into a report carries its row's boundary with it, or i
 ## S16 · Andon Labs 2026, Why Gemini 3.1 Pro lost money running Andon Cafe
 
 - **URL:** https://andonlabs.com/blog/why-gemini-lost-money-andon-cafe
-- **Kind:** article · **Status:** Unclaimed · **Added:** 2026-10-13 by CoWork deep research (Claude), 2026-10-13; primaries opened by fetch, not by a person
+- **Kind:** article · **Status:** In review · **Added:** 2026-10-13 by CoWork deep research (Claude), 2026-10-13; primaries opened by fetch, not by a person · wrasse ✓ (studied, report filed)
 - **ID:** canonical URL, posted 2026-06-30 · S24-andon-labs-2026-why-gemini-3-1-pro-lost-money-ru.html · sha256 e718b8a15d9a
 - **Scrub before use:** single operator (one shop)
 - **What it claims, with its boundary:** First-party accounting of a real cafe ("a small cafe space on Norrbackagatan in Stockholm, Sweden", opened mid-April 2026) run by an agent, Mona, with real money, public customers who email it, and control of ordering, prices, menu, hours, discounts and hiring; the author is an evaluation vendor. Gemini 3.1 Pro period, about two months: "Gemini-Mona had spent $38k, against $9k in sales"; "she bought 1,331 fresh bakery items against only 326 sold"; supplier bills "take that down to a $5.6k loss" before rent and wages. Stated causes: over-ordering never adapted to "real-world financial data", and "repeatedly gives discounts or freebies, usually after one email from a stranger." Limits stated: fixed SEK/USD rate of 9.74; inventory tracked only from May 2; the GPT-5.5 comparison covers a few weeks and its gain came from the model halting orders, "not GPT-Mona ordering well." One shop, one operator.
@@ -130,7 +132,7 @@ A number lifted from here into a report carries its row's boundary with it, or i
 ## S17 · Andon Labs 2026, Astra vs Fable on Vending-Bench: More Money, More Aligned (a later reading of the seeded Vending-Bench 2)
 
 - **URL:** https://andonlabs.com/blog/gpt-6-astra-vending-bench
-- **Kind:** article · **Status:** Unclaimed · **Added:** 2026-10-13 by CoWork deep research (Claude), 2026-10-13; primaries opened by fetch, not by a person
+- **Kind:** article · **Status:** In review · **Added:** 2026-10-13 by CoWork deep research (Claude), 2026-10-13; primaries opened by fetch, not by a person · wrasse ✓ (studied, report filed)
 - **ID:** canonical URL, posted 2026-09-07; benchmark page https://andonlabs.com/evals/vending-bench-2 · S23-andon-labs-2026-astra-vs-fable-on-vending-bench.html · sha256 40b9d930a494
 - **Scrub before use:** promotional, projection not measurement, demand not public (staff or simulated)
 - **What it claims, with its boundary:** Latest first-party reading of the seeded benchmark: one simulated year from $500, demand "simulated based on equations that can be gamed" (benchmark page). "We ran GPT 6 Astra and Claude Fable 5.1 six times each"; "Astra finished with an average bank balance of $15,515, compared with $5,422 for Fable". Refund handling in those solo runs: "Astra pays 230 of 240 recorded requests (95.8%); Fable pays 224 of 237 (94.5%); Opus pays 19 of 179 (10.6%)", the last being the lab's earlier top earner, whose own post is titled "Once Again the Best Capitalist, Once Again Misaligned" (2026-07-28, not opened). Fable's gap is decomposed: "Across its six runs, it makes 45 identified failed prepayments, losing $14,331." Six runs per model, no significance testing, alignment judged qualitatively plus refund counts. The benchmark page also fits a trend line with a projected crossover date for Chinese models (Oct 2027): a projection, not a result.
@@ -154,7 +156,7 @@ A number lifted from here into a report carries its row's boundary with it, or i
 ## S20 · OpenAI & Stripe (Founding Maintainers) 2025-2026, Agentic Commerce Protocol (ACP) specification repository
 
 - **URL:** https://github.com/agentic-commerce-protocol/agentic-commerce-protocol
-- **Kind:** doc · **Status:** Unclaimed · **Added:** 2026-10-13 by CoWork deep research (Claude), 2026-10-13; primaries opened by fetch, not by a person
+- **Kind:** doc · **Status:** In review · **Added:** 2026-10-13 by CoWork deep research (Claude), 2026-10-13; primaries opened by fetch, not by a person · wrasse ✓ (studied, report filed)
 - **ID:** spec versions 2025-09-29, 2025-12-12, 2026-01-16, 2026-01-30, 2026-04-17 (latest stable); Apache-2.0 · S20-openai-stripe-founding-maintainers-2025-2026-age.html · sha256 376a844093a2
 - **Scrub before use:** preview not shipped at volume
 - **What it claims, with its boundary:** "An interaction model and open standard" for an AI agent completing purchases with a merchant: OpenAPI documents for agentic checkout and delegated payment, JSON schemas, examples and an RFC directory. Status on 2026-10-13: README says the protocol "is currently in beta"; latest stable version dated 2026-04-17 with an unreleased directory; "jointly governed by OpenAI and Stripe as Founding Maintainers". No adoption or volume figure on the page. Stripe's own seller docs now list "UCP or ACP" as the two seller-side protocols, so ACP is one of two.
