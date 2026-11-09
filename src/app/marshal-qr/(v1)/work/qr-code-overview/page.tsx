@@ -1,11 +1,11 @@
-import Header from '../../components/Header';
-import Footer from '../../components/Footer';
+import Header from '../../../components/Header';
+import Footer from '../../../components/Footer';
 import Link from 'next/link';
 import { Suspense } from 'react';
-import GoQRMatrix from '../../components/GoQRMatrix';
-import Timeline from '../../components/Timeline';
-import { getQREncodingPhases } from '../../db/qrData';
-import { TimelineEvent } from '../../components/Timeline';
+import GoQRMatrix from '../../../components/GoQRMatrix';
+import Timeline from '../../../components/Timeline';
+import { getQREncodingPhases } from '../../../db/qrData';
+import { TimelineEvent } from '../../../components/Timeline';
 
 // Define a local type for the phases to avoid importing from DB schema
 type Phase = {

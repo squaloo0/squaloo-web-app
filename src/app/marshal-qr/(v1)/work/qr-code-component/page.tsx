@@ -1,10 +1,10 @@
-import Header from '../../components/Header';
-import Footer from '../../components/Footer';
-import { getQREncodingPhases } from '../../db/qrData';
-import { QREncodingPhase } from '../../db/schema';
-import CodeBlock from '../../components/CodeBlock';
+import Header from '../../../components/Header';
+import Footer from '../../../components/Footer';
+import { getQREncodingPhases } from '../../../db/qrData';
+import { QREncodingPhase } from '../../../db/schema';
+import CodeBlock from '../../../components/CodeBlock';
 import Link from 'next/link';
-import GoQRMatrix from '../../components/GoQRMatrix';
+import GoQRMatrix from '../../../components/GoQRMatrix';
 import { Suspense } from 'react';
 
 // Fallback mock data in case database fetch fails

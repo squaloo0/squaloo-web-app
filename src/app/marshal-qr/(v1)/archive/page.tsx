@@ -1,7 +1,7 @@
-import Header from './components/Header';
-import HeroSection from './components/HeroSection';
-import ProjectCard from './components/ProjectCard';
-import Footer from './components/Footer';
+import Header from '../../components/Header';
+import HeroSection from '../../components/HeroSection';
+import ProjectCard from '../../components/ProjectCard';
+import Footer from '../../components/Footer';
 
 const projects = [
   {
@@ -34,9 +34,21 @@ const projects = [
   }
 ];
 
+export const metadata = {
+  title: "Marshal-QR v1.0 (archived) | Squaloo",
+  description: "The v1.0 Marshal-QR portfolio, archived November 2026.",
+};
+
 export default function PortfolioPage() {
   return (
     <>
+      {/* SQU-427: the v1.0 front page, moved here unchanged when /marshal-qr became the Meridian landing page. */}
+      <p className="mb-6 rounded border border-gray-700 px-4 py-2 font-mono text-xs text-gray-300">
+        Marshal-QR v1.0, archived November 2026.{" "}
+        <a href="/marshal-qr" className="underline hover:text-white">
+          The current page is here.
+        </a>
+      </p>
       <Header />
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         <HeroSection />

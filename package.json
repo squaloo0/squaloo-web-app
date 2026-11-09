@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "seed": "ts-node --project tsconfig.scripts.json src/app/marshal-qr/db/seed.ts",
+    "meridian:test": "node --experimental-strip-types --disable-warning=ExperimentalWarning --test src/app/marshal-qr/_lib/meridian.test.ts",
     "remora": "node --experimental-strip-types --disable-warning=ExperimentalWarning --disable-warning=MODULE_TYPELESS_PACKAGE_JSON workers/remora/cli.ts",
     "remora:worker": "node --experimental-strip-types --disable-warning=ExperimentalWarning --disable-warning=MODULE_TYPELESS_PACKAGE_JSON workers/remora/worker.ts",
     "remora:test": "node --experimental-strip-types --disable-warning=ExperimentalWarning --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test \"src/remora/**/*.test.ts\"",

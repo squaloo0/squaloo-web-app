@@ -1,6 +1,6 @@
-import Header from '../../components/Header';
-import Footer from '../../components/Footer';
-import CodeBlock from '../../components/CodeBlock';
+import Header from '../../../components/Header';
+import Footer from '../../../components/Footer';
+import CodeBlock from '../../../components/CodeBlock';
 import Link from 'next/link';
 
 export default function PythonUtilitiesPage() {
