@@ -9,8 +9,8 @@
  * existing server-side instrument (src/middleware.ts), by path; see
  * ../_lib/meridian.ts for why each source is a path.
  *
- * Not linked from here, deliberately: /measured. Per the 11-03 rule it is
- * linked only once the ruler-DB page is prepped (SQU-376).
+ * Not linked from here, deliberately: /measured. No /measured link anywhere
+ * for Meridian (founder, 2026-11-09, SQU-376); that work resumes after 11-14.
  */
 import type { Metadata } from "next";
 import Hero from "../_sections/Hero";
