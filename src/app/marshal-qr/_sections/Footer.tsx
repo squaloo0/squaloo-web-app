@@ -1,6 +1,6 @@
 import Link from "next/link";
 import AppFooter from "@/components/AppFooter";
-import { WRAP } from "./ui";
+import { WRAP } from "@/components/house/ui";
 
 /**
  * The privacy line says exactly what the site records: the existing

@@ -1,8 +1,8 @@
 import { Suspense } from "react";
 import SubscribeForm from "./SubscribeForm";
-import { WRAP, H2, Eyebrow } from "./ui";
+import { WRAP, H2, Eyebrow } from "@/components/house/ui";
 
-export default function Subscribe() {
+export default function Subscribe({ page }: { page: "marshal-qr" | "now" }) {
   return (
     <section id="subscribe" className="border-y border-sq-rule bg-sq-card">
       <div className={`${WRAP} grid grid-cols-1 gap-8 py-16 md:grid-cols-2`}>
@@ -15,7 +15,7 @@ export default function Subscribe() {
         </div>
         {/* Suspense: the form reads ?src= on the client, so the rest of the page stays static. */}
         <Suspense fallback={<div className="min-h-[360px]" aria-busy="true" />}>
-          <SubscribeForm />
+          <SubscribeForm page={page} />
         </Suspense>
       </div>
     </section>

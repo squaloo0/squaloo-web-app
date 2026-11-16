@@ -1,4 +1,4 @@
-import { WRAP, EYEBROW, H2 } from "./ui";
+import { WRAP, EYEBROW, H2 } from "@/components/house/ui";
 
 const THINGS = [
   { k: "Ask it something", t: "Ask Solomon a question with the Wi‑Fi off, and see what it checked before it answered." },

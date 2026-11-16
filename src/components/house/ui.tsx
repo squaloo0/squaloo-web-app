@@ -1,5 +1,5 @@
 /* eslint-disable @next/next/no-img-element -- the kit's linework is static SVG; there is nothing to optimise */
-/** Shared pieces of the Meridian front door, in the house register (brand kit v0.1, as `/` uses it). */
+/** Shared pieces of the house register (brand kit v0.1, as `/` uses it): the Meridian front door and /now both build from these. */
 import { brand } from "@/lib/brand";
 
 export const WRAP = "mx-auto w-full max-w-[1180px] px-5 sm:px-8 lg:px-12";

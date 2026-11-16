@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { WRAP, H2, Eyebrow } from "./ui";
+import { WRAP, H2, Eyebrow } from "@/components/house/ui";
 
 /**
  * The board's story, in three sentences, from the 2024 post it links

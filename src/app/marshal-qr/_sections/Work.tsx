@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { WORK } from "../_data/work";
-import { WRAP, H2, Eyebrow } from "./ui";
+import { WRAP, H2, Eyebrow } from "@/components/house/ui";
 
 export default function Work() {
   return (

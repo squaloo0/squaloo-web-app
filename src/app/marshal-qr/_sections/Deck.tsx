@@ -2,7 +2,7 @@ import { existsSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { DECK_FILE } from "../_data/meridian";
 import { humanSize } from "../_lib/meridian";
-import { WRAP, H2, ACTION, Eyebrow } from "./ui";
+import { WRAP, H2, ACTION, Eyebrow } from "@/components/house/ui";
 
 /**
  * Read at BUILD time (the page is static), so the size shown is the size of
