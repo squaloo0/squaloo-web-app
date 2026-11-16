@@ -1,18 +1,19 @@
 "use client";
 import { useActionState } from "react";
 import { useSearchParams } from "next/navigation";
-import { subscribe, type SubscribeState } from "../actions";
-import { normalizeSource } from "../_lib/meridian";
-import { ACTION } from "./ui";
+import { subscribeMarshalQr, subscribeNow, type SubscribeState } from "./actions";
+import { normalizeNowSource, normalizeSource } from "@/lib/newsletter";
+import { ACTION } from "@/components/house/ui";
 
 const INITIAL: SubscribeState = { status: "idle" };
 const FIELD =
   "min-h-11 w-full rounded-xl border border-sq-rule bg-sq-ground px-4 py-3 text-base text-sq-ink placeholder:text-sq-label focus-visible:outline focus-visible:outline-2 focus-visible:outline-solomon-blue";
 
-export default function SubscribeForm() {
-  const [state, action, pending] = useActionState(subscribe, INITIAL);
+export default function SubscribeForm({ page }: { page: "marshal-qr" | "now" }) {
+  const [state, action, pending] = useActionState(page === "now" ? subscribeNow : subscribeMarshalQr, INITIAL);
   // The page is static; the source rides in from /qr/<src> as ?src= and is read here, on the client.
-  const src = normalizeSource(useSearchParams().get("src"));
+  const raw = useSearchParams().get("src");
+  const src = page === "now" ? normalizeNowSource(raw) : normalizeSource(raw);
 
   if (state.status === "ok") {
     return (

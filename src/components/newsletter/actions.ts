@@ -1,13 +1,13 @@
 "use server";
 /**
- * The newsletter signup (SQU-427): a server action, one table, nothing else
+ * The newsletter signup (SQU-427, shared by /marshal-qr and /now in SQU-436): a server action, one table, nothing else
  * stored. The caller's address keys an in-memory limiter for ten minutes and
  * is never written anywhere. A script that fills the honeypot gets the same
  * "you're on the list" a person gets, and nothing is saved.
  */
 import { headers } from "next/headers";
 import { neon } from "@neondatabase/serverless";
-import { checkSignup, makeRateLimiter } from "./_lib/meridian";
+import { checkSignupWith, makeRateLimiter, normalizeNowSource, normalizeSource } from "@/lib/newsletter";
 
 export type SubscribeState =
   | { status: "idle" }
@@ -22,16 +22,22 @@ const MESSAGES = {
   name: "That name is too long. Leave it shorter, or leave it out.",
 } as const;
 
-export async function subscribe(_prev: SubscribeState, form: FormData): Promise<SubscribeState> {
+async function save(
+  form: FormData,
+  normalize: (raw: string | undefined) => string,
+): Promise<SubscribeState> {
   const email = String(form.get("email") ?? "");
   const name = String(form.get("name") ?? "");
-  const check = checkSignup({
-    email,
-    name,
-    consent: form.get("consent"),
-    website: form.get("website"),
-    src: form.get("src"),
-  });
+  const check = checkSignupWith(
+    {
+      email,
+      name,
+      consent: form.get("consent"),
+      website: form.get("website"),
+      src: form.get("src"),
+    },
+    normalize,
+  );
   if (!check.ok) {
     if (check.reason === "honeypot") return { status: "ok" };
     return { status: "error", message: MESSAGES[check.reason], email, name };
@@ -60,4 +66,12 @@ export async function subscribe(_prev: SubscribeState, form: FormData): Promise<
       name,
     };
   }
+}
+
+export async function subscribeMarshalQr(_prev: SubscribeState, form: FormData): Promise<SubscribeState> {
+  return save(form, normalizeSource);
+}
+
+export async function subscribeNow(_prev: SubscribeState, form: FormData): Promise<SubscribeState> {
+  return save(form, normalizeNowSource);
 }

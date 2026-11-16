@@ -18,7 +18,7 @@ import Video from "../_sections/Video";
 import AtTheTable from "../_sections/AtTheTable";
 import Asks from "../_sections/Asks";
 import Deck from "../_sections/Deck";
-import Subscribe from "../_sections/Subscribe";
+import Subscribe from "@/components/newsletter/Subscribe";
 import Board from "../_sections/Board";
 import Work from "../_sections/Work";
 import Footer from "../_sections/Footer";
@@ -46,7 +46,7 @@ export default function MeridianFrontDoor() {
         <AtTheTable />
         <Asks />
         <Deck />
-        <Subscribe />
+        <Subscribe page="marshal-qr" />
         <Board />
         <Work />
       </main>

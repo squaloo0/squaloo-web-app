@@ -1,6 +1,6 @@
 import VideoEmbed from "@/components/VideoEmbed";
 import { VIDEO } from "../_data/meridian";
-import { WRAP, Eyebrow } from "./ui";
+import { WRAP, Eyebrow } from "@/components/house/ui";
 
 /** Not rendered until the founder sets VIDEO. The embed is the site's click-to-play facade. */
 export default function Video() {
