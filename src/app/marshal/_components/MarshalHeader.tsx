@@ -25,8 +25,8 @@ export default function MarshalHeader({ variant }: { variant: "home" | "entry" }
         <div className="flex items-center gap-5">
           {variant === "home" ? (
             <>
-              <a href="#work" className={`${NAV_LINK} hidden sm:inline-flex`}>Work</a>
-              <a href="#capabilities" className={`${NAV_LINK} hidden sm:inline-flex`}>Capabilities</a>
+              <a href="#work" className={NAV_LINK}>Work</a>
+              <a href="#capabilities" className={NAV_LINK}>Capabilities</a>
             </>
           ) : (
             <Link href="/marshal#work" className={NAV_LINK}>
