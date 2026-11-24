@@ -4,9 +4,9 @@
  * in one place.
  *
  * Draft copy, drawn from the team's deck (the IDSN 599 Birds of a Feather
- * presentation, Fall 2026) and the founder's working notes. Section 10,
- * "What I took from it", is his to write: `reflection` stays empty until the
- * interview, and an empty section renders nothing.
+ * presentation, Fall 2026) and the founder's working notes. The closing
+ * section, "What I took from it", is his own: `reflection` holds his answers,
+ * and an empty list renders nothing.
  *
  * Publishing rules that shape this file: classmates are credited by name
  * only; deck slides 1, 5, 9 and 10 carry stock and reference photography the
@@ -46,7 +46,7 @@ export type TakePhone = {
   glance: { label: string; value: string }[];
   team: string[];
   sections: Section[];
-  /** TODO(marshal): in the founder's words; empty renders nothing. */
+  /** In the founder's words; empty renders nothing. */
   reflection: string[];
   links: { label: string; href: string }[];
 };
@@ -223,10 +223,14 @@ export const TAKE_PHONE: TakePhone = {
       ],
     },
   ],
-  // TODO(marshal): three short paragraphs from the interview — what re-verifying the
-  // competitors taught you, what you would test first if this were real, and what you
-  // would change about the plan. Empty renders nothing.
-  reflection: [],
+  // The founder's answers (2026-11-23) to three questions: what re-verifying the
+  // competitors taught him, what he would test first if this were real, and what he
+  // would change. His words, lightly cleaned up. Empty renders nothing.
+  reflection: [
+    "Re-verifying the competitors showed me that true differentiation here would come from the underlying system that powers the Take Phone: the protocols that let its features work seamlessly alongside the smartphone you already have.",
+    "If this were real, the first thing I would do is spec and design the hardware, to understand whether the bill of materials could translate into a cost of goods that lets the Take Phone be a profitable product and company.",
+    "I would not have jumped straight to a solution, a device that sits between a user and their smartphone. Some data suggested the existing methods weren’t effective, but we never really stress-tested that theory.",
+  ],
   links: [
     { label: "Full deck (PDF, 17 slides)", href: "/marshal/docs/take-phone-deck.pdf" },
     { label: "← Back to all work", href: "/marshal#work" },

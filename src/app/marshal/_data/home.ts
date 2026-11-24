@@ -16,7 +16,7 @@ export const HOME = {
   },
   eyebrow: "Portfolio · 2025–2026",
   name: "Marshal Aldoph",
-  claim: "I design the product, write the firmware, and run the numbers.",
+  claim: "Seven years of enterprise systems, now building agentic and edge AI systems and hardware.",
   bio: "I’m the founder of Squaloo and an MS candidate at the USC Iovine and Young Academy. Before that, seven years of enterprise systems. This is the work from the degree so far, numbered in the order I made it, next to the company I’m building alongside it.",
   links: [
     { label: "Resume", href: "https://rxresu.me/marshal2093/vr1" },
