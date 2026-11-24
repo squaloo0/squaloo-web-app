@@ -14,7 +14,8 @@ This repo is public. Nothing sensitive goes in commits, PRs, or pages (`CLAUDE.m
 | `/measured/next` | Staged rebuild of `/measured` over the ruler export; returns 404 on production builds | `src/data/ruler_export.ts`, `src/lib/ruler_view.ts` |
 | `/roadmap` | Current and past gates, criteria in plain language | `src/data/roadmap.ts` |
 | `/build` | How the product is built | `src/app/build/page.tsx` |
-| `/founder` | Founder page. `/marshal` redirects here permanently | `next.config.ts` |
+| `/founder` | Founder page (the pre-relaunch profile; overlaps with `/marshal` since SQU-461) | `src/app/founder/page.tsx` |
+| `/marshal`, `/marshal/[slug]` | The founder's portfolio (IDSN 599): numbered work entries from one data file, and the Take Phone long-scroll at `/marshal/take-phone` | `src/app/marshal/` |
 | `/devlog`, `/devlog/[slug]` | Devlog; posts with `status: "published"` only | `content/devlog/*.md`, `src/lib/devlog.ts` |
 | `/archive`, `/archive/home-2026-11-02`, `/archive/solomon-2026-11-02` | Index of prior-era pages, plus the pre-relaunch home and Solomon pages with dated banners | `src/components/ArchiveNotes.tsx` |
 | `/amak`, `/amak/ob2b`, `/amak/blog`, `/amak/blog/amak` | Prior venture-era pages, preserved as history and reached from `/archive` | `src/app/amak/` |
@@ -63,7 +64,7 @@ There is no CI in this repo (no `.github/`). Checks that exist and are run by ha
 
 ## Deploys
 
-The site deploys on Vercel: the code reads `VERCEL_ENV` and `VERCEL_GIT_COMMIT_SHA`, and the Remora notes place the front panel and API there. The Remora worker runs as one always-on Fly.io machine built from `workers/remora/Dockerfile` with `workers/remora/fly.toml` (build context is the repo root); the Garage worker runs under launchd from `workers/garage/launchd/`. `next.config.ts` holds the one redirect (`/marshal` to `/founder`) and the `solomon-os.ai` rewrite.
+The site deploys on Vercel: the code reads `VERCEL_ENV` and `VERCEL_GIT_COMMIT_SHA`, and the Remora notes place the front panel and API there. The Remora worker runs as one always-on Fly.io machine built from `workers/remora/Dockerfile` with `workers/remora/fly.toml` (build context is the repo root); the Garage worker runs under launchd from `workers/garage/launchd/`. `next.config.ts` holds the `solomon-os.ai` rewrite and the Cloudinary image host; `/marshal` no longer redirects to `/founder` (SQU-461).
 
 ## Relation to the engine repo
 

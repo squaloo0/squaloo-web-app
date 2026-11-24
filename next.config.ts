@@ -5,11 +5,12 @@ import type { NextConfig } from "next";
 const SOLOMON_HOSTS = ["solomon-os.ai", "www.solomon-os.ai"];
 
 const nextConfig: NextConfig = {
-  async redirects() {
-    return [
-      // Founder page moved; keep old links working.
-      { source: "/marshal", destination: "/founder", permanent: true },
-    ];
+  // /marshal is the founder's portfolio (SQU-461). It used to redirect to
+  // /founder; that page is untouched and still serves the founder profile.
+  images: {
+    // Portfolio media is on Cloudinary; src/app/marshal/_lib/cloudinary.ts
+    // builds the URLs, so Cloudinary resizes and picks the format.
+    remotePatterns: [{ protocol: "https", hostname: "res.cloudinary.com", pathname: "/**" }],
   },
   async rewrites() {
     return {

@@ -1,0 +1,67 @@
+/*
+ * /marshal only. The first-load intro: the full dragonfly figure fills the
+ * viewport's short side, then lands in the header slot. An inline script in
+ * page.tsx sets `data-marshal-intro` on the page's own `.mk-root` wrapper
+ * before first paint; without it (no JS, reduced motion, or a repeat visit
+ * this session) none of this shows. If the client component never hydrates,
+ * the overlay removes itself after four seconds.
+ */
+.mk-intro {
+  display: none;
+}
+
+.mk-root[data-marshal-intro] .mk-intro {
+  display: block;
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  pointer-events: none;
+  animation: mk-bail 0.01s linear 4s forwards;
+}
+
+.mk-root[data-marshal-intro] [data-mark-slot] {
+  visibility: hidden;
+  animation: mk-unbail 0.01s linear 4s forwards;
+}
+
+.mk-intro-veil {
+  position: absolute;
+  inset: 0;
+  background: var(--color-sq-ground);
+  opacity: 0.82;
+}
+
+.mk-intro-fig {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 90vmin;
+  height: 90vmin;
+  margin: -45vmin 0 0 -45vmin;
+  transform-origin: center;
+  will-change: transform;
+}
+
+.mk-intro-fig svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+@keyframes mk-bail {
+  to {
+    visibility: hidden;
+    opacity: 0;
+  }
+}
+
+@keyframes mk-unbail {
+  to {
+    visibility: visible;
+  }
+}
+
+/* Portrait in an arch frame: the kit's doorway motif. */
+.mk-arch {
+  border-radius: var(--radius-sq-arch);
+}

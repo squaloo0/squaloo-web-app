@@ -9,6 +9,8 @@ import { metadata as measured } from "@/app/measured/page";
 import { metadata as roadmap } from "@/app/roadmap/page";
 import { metadata as build } from "@/app/build/page";
 import { metadata as founder } from "@/app/founder/page";
+import { HOME } from "@/app/marshal/_data/home";
+import { TAKE_PHONE } from "@/app/marshal/_data/take-phone";
 import { metadata as devlog } from "@/app/devlog/page";
 import type { PageRef } from "@/lib/llms";
 
@@ -24,5 +26,10 @@ export const pages: PageRef[] = [
   ref("/roadmap", roadmap),
   ref("/build", build),
   ref("/founder", founder),
+  ref("/marshal", HOME.meta),
+  ref("/marshal/take-phone", {
+    title: `${TAKE_PHONE.title} · Marshal Aldoph`,
+    description: TAKE_PHONE.description,
+  }),
   ref("/devlog", devlog),
 ];

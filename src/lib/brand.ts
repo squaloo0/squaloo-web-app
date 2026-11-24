@@ -26,6 +26,8 @@ export const brand = {
   radialArcsPaper: src(radialArcsPaper),
   tileInk: src(tileInk),
   tilePaper: src(tilePaper),
+  /** Marshal's personal mark (SQU-461): the compact dragonfly, served from public/. */
+  dragonfly: "/brand/marshal/dragonfly.svg",
 } as const;
 
 /** Where the house lives. Absolute, because on solomon-os.ai "/" is the product. */
